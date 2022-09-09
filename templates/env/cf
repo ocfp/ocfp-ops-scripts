@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+[[ -n ${OCFP_IAAS:-} ]]     || fail "OCFP_IAAS must be set and exported."
+[[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION must be set and exported."
+[[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
+
+usage() {
+  echo -e "$(cat <<EOT
+
+USAGE
+
+  $ export OCFP_IAAS="..." OCFP_REGION="..." OCFP_ENV_NAME="..." 
+  $ ${0}
+
+EOT
+)" >&2
+exit 1
+}
+
+fail() { echo -e "$*" >&2 ; exit 1 ; }
+
+shift || usage
+
+cat <<-YAML
+---
+kit:
+  name: cf
+  version: 2.2.1-rc.5
+  features:
+  - (( append ))
+  - external-db-vault
+YAML
+
+case ${OCFP_IAAS} in
+  (aws) echo "  - aws-blobstore" ;;
+  (gcp) echo "  - gcp-blobstore" ;;
+  (azure) echo "  - azure-blobstore" ;;
+  (*) fail "OCFP_IAAS '${OCFP_IAAS}' unknown, expecting aws|gcp|azure" ;;
+esac
+
+cat <<-YAML
+  #- app-autoscaler-integration
+  #- app-scheduler-integration
+
+genesis:
+  env: ${OCFP_ENV_NAME}
+  min_version: 2.8.5
+YAML
+
+case ${OCFP_VAULT_PREFIX:-} in
+  (secret/*) echo "  secrets_mount: \"${OCFP_VAULT_PREFIX}\"" ;;
+  (*) true ;;
+esac
+
+cat <<-YAML
+
+meta:
+  vault_tf: (( concat meta.vault_aws "/${OCFP_REGION//-/\/}" ))
+
+params:
+  base_domain: (( vault meta.vault_tf "/ocfp/ocf/dns:base_domain" ))
+  system_domain: (( vault meta.vault_tf "/ocfp/ocf/dns:system_domain" ))
+  apps_domains:
+  - (( vault meta.vault_tf "/ocfp/ocf/dns:apps_domain" ))
+
+  blobstore_s3_region: ${OCFP_REGION}
+  blobstore_app_packages_directory: (( vault meta.vault "blobstore/app_packages:name" ))
+  blobstore_buildpacks_directory: (( vault meta.vault "blobstore/buildpacks:name" ))
+  blobstore_droplets_directory: (( vault meta.vault "blobstore/droplets:name" ))
+  blobstore_resources_directory: (( vault meta.vault "blobstore/resources:name" ))
+
+  skip_ssl_validation: true # Using self-signed certs
+
+  # Instance Scaling
+  api_instances: 3
+  cc_worker_instances: 3
+  credhub_instances: 3
+  diego_api_instances: 3
+  diego_cell_instances: 1
+  doppler_instances: 3
+  log_api_instances: 3
+  nats_instances: 3
+  router_instances: 3
+  scheduler_instances: 3
+  tcp_router_instances: 3
+  uaa_instances: 3
+
+  # Cloud Config Mappings
+  api_vm_type: "api"
+  cc_worker_vm_type: "cc-worker"
+  credhub_vm_type: "credhub"
+  diego_api_vm_type: "diego-api"
+  diego_cell_vm_type: "diego-cell"
+  doppler_vm_type: "doppler"
+  log_api_vm_type: "log-api"
+  nats_vm_type: "nats"
+  router_vm_type: "router"
+  errand_vm_type: "errand"
+  scheduler_vm_type: "scheduler"
+  tcp_router_vm_type: "tcp-router"
+  uaa_vm_type: "uaa"
+
+instance_groups
+- name: router
+  vm_extensions:
+  - ((replace)
+  - cf-system-apps-alb
+- name: diego-cell
+  update:
+    max_in_flight: 3
+
+YAML
+

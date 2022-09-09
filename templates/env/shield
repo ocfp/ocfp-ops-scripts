@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+[[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION   must be set and exported."
+[[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
+
+usage() {
+  echo -e "$(cat <<EOT
+
+USAGE
+
+  $ export OCFP_REGION="..." OCFP_ENV_NAME="..." 
+  $ ${0}
+
+EOT
+)" >&2
+exit 1
+}
+
+fail() { echo -e "$*" >&2 ; exit 1 ; }
+
+shift || usage
+
+cat <<-YAML
+---
+kit:
+  name: shield
+  version: 1.12.0
+  features:
+  - (( append ))
+  - external-db-vault
+
+genesis:
+  env: ${OCFP_ENV_NAME}
+  bosh_env: ${OCFP_ENV_NAME}
+  min_version: 2.8.5
+YAML
+
+case ${OCFP_VAULT_PREFIX} in
+  (secret/*) echo "  secrets_mount: \"${OCFP_VAULT_PREFIX}\"" ;;
+  (*) true ;;
+esac
+
+cat <<-YAML
+
+meta:
+  vault_tf: (( concat meta.vault_aws "/${OCFP_REGION//-/\/}" ))
+
+YAML
+
