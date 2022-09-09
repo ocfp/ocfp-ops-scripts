@@ -102,8 +102,9 @@ case ${cmd} in
     then
       fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
     else
-    echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
-    bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
+      echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
+      bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
+      exit $?
     fi
     ;;
   (*)
