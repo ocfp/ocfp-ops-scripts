@@ -63,12 +63,12 @@ esac
 cat <<-YAML
 
 meta:
-  vault_tf: (( concat meta.vault_aws "/${OCFP_REGION//-/\/}" ))
+  vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
 
 params:
   trusted_certs:
-  - (( vault meta.vault_aws "/certs/rds:ca" )) # RDS Global CA
-  - (( vault meta.vault_aws "/certs/org:ca" )) # Organizaion CA
+  - (( vault meta.vault "/certs/rds:ca" )) # RDS Global CA
+  - (( vault meta.vault "/certs/org:ca" )) # Organizaion CA
 
   subnet_addr: (( vault meta.vault_tf "/aws/subnets/ocfp/1:cidr_block" ))
   default_gateway: (( vault meta.vault_tf "/aws/ocfp/mgmt/bosh:gateway" )) # tf: cidrhost(ocfp/1, 1)

@@ -42,7 +42,7 @@ esac
 cat <<-YAML
 
 meta:
-  vault_tf: (( concat meta.vault_aws "/${OCFP_REGION//-/\/}" ))
+  vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
 
 params:
   cf_deployment_env: ${OCFP_ENV_NAME}

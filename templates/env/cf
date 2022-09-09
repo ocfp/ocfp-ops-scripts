@@ -55,7 +55,7 @@ esac
 cat <<-YAML
 
 meta:
-  vault_tf: (( concat meta.vault_aws "/${OCFP_REGION//-/\/}" ))
+  vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
 
 params:
   base_domain: (( vault meta.vault_tf "/ocfp/ocf/dns:base_domain" ))
