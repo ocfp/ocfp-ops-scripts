@@ -77,7 +77,7 @@ case ${cmd} in
         (iaas)
           export OCFP_IAAS=$1
           shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
-          case ${OCFP_KIT} in
+          case ${OCFP_IAAS} in
             #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
             (aws|azure|gcp|openstack|vsphere|warden) true ;;
             (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
@@ -90,6 +90,11 @@ case ${cmd} in
     done
     [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
     [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' must be given"
+    case $OCFP_KIT in
+      (bosh)
+        [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
+        ;;
+    esac
 
     if [[ -s ${OCFP_ENV_NAME}.yml ]] 
     then
