@@ -70,11 +70,11 @@ params:
   - (( vault meta.vault_aws "/certs/rds:ca" )) # RDS Global CA
   - (( vault meta.vault_aws "/certs/org:ca" )) # Organizaion CA
 
-  subnet_addr: (( vault meta.vault_tf "/aws/subnets/ocfp/1:cidr_block" )) # First OCFP Network
+  subnet_addr: (( vault meta.vault_tf "/aws/subnets/ocfp/1:cidr_block" ))
   default_gateway: (( vault meta.vault_tf "/aws/ocfp/mgmt/bosh:gateway" )) # tf: cidrhost(ocfp/1, 1)
   dns: 
     - (( vault meta.vault_tf "ocfp/mgmt/bosh:dns" )) #cidrhost(ocfp/1, 2)
-  static_ip: (( vault meta.vault_tf "ocfp/mgmt/bosh:ip" )) #cidrhost(ocfp/1, 4) -> should be `.4` - validate, this might need to be ,5 if it computes from 0
+  static_ip: (( vault meta.vault_tf "ocfp/mgmt/bosh:ip" )) #cidrhost(ocfp/1, 4)
   
   aws_region: "${OCFP_REGION}"
   
