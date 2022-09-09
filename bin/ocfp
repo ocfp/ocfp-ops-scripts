@@ -68,7 +68,7 @@ case ${cmd} in
         (type)
           export OCFP_ENV_TYPE=$1
           shift || fail "${0//*/} ... type <env-type> # mgmt | ocf"
-          case ${ocfp_env_type} in
+          case ${OCFP_ENV_TYPE} in
             (mgmt|ocf) true ;;
             (*) fail "Unsupported env-type '${OCFP_ENV_TYPE}'\n${0//*/} env type <env-type> # mgmt | ocf"
               ;;
@@ -93,6 +93,8 @@ case ${cmd} in
     case $OCFP_KIT in
       (bosh)
         [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
+        [[ -n ${OCFP_REGION} ]] || fail "'region <region>' must be given"
+        [[ -n ${OCFP_ENV_TYPE} ]] || fail "'region <region>' must be given"
         ;;
     esac
 
