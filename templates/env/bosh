@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+fail() { echo -e "$*" >&2 ; exit 1 ; }
+
 [[ -n ${OCFP_IAAS:-} ]]     || fail "OCFP_IAAS     must be set and exported."
 [[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION   must be set and exported."
 [[ -n ${OCFP_ENV_TYPE:-} ]] || fail "OCFP_ENV_TYPE must be set and exported."

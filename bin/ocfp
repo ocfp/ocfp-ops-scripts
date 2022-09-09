@@ -23,7 +23,7 @@ WHERE init-env <args> IN
 
   vault-prefix "secret/...." # optional - only to override the default 'secret/'
 
-  NOTE: Kit env template are expected at: '${0/bin*}/templates/env/<kit-name>'
+  NOTE: Kit env template are expected at: '${templates_path}/env/<kit-name>'
 
 USAGE
 EOT
@@ -33,8 +33,9 @@ exit 0
 
 fail() { echo -e "$*" >&2 ; exit 1 ; }
 
-templates_path="${0/\/bin*}"
-cmd=$1 ; shift || usage
+templates_path="${0%\/ocfp}/templates"
+cmd=$1 
+shift || usage
 case ${cmd} in
   (init-pg)
     echo "TODO: Merge with pg init script -> ocpf-init"
@@ -42,7 +43,9 @@ case ${cmd} in
   (init-env)
     while [[ $# > 0 ]]
     do
-      case in
+      action=$1
+      shift || usage
+      case ${action} in
         (vault-prefix)
           export OCFP_VAULT_PREFIX="${1}" # override default of secret/
           ;;
@@ -84,7 +87,6 @@ case ${cmd} in
           usage
           ;;
       esac
-      shift
     done
     [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
     [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' must be given"
@@ -94,9 +96,12 @@ case ${cmd} in
       fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
     else
     echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
-    bash "${0/bin*}/templates/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
+    bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
     fi
-  ;;
+    ;;
+  (*)
+    usage
+    ;;
 esac
 
 
