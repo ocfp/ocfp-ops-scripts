@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+
+usage() {
+  cat <<USAGE
+Usage: $0 <env-file-name> <deployments-kit-name>
+
+Where:
+  <env-file-name> is an env name (declared intent, does not need to exist yet)
+  <deployments-kit-name> is one of bosh, cf, autoscaler, scheduler, stratos, concourse
+
+Requirements:
+
+  * \`safe\` is in the path, targeting, and authenticated via token
+  * \`psql\` is in the path, version 14 or later
+  * postgres database information is stored in vault by terraform outputs according
+    to the ocfp contracts, eg:
+      \${OCFP_VAULT_PREFIX}/tf/\${OCFP_REGION//-/\/}/\${env_type//-/\/}/dbs/\${kit}/db:{key}
+      Where {key} is in hostname, postgres_username, postgres_password, port,
+        scheme, {kit dbs}_{username,_password}
+      Ex: bosh kit will have kit dbs: bosh, uaa, and credhub
+   * VAULT_NAMESPACE may be set and exported, if required, it will be exported
+   * OCFP_VAULT_PREFIX may be set and exported, if required, defaults to 'secret/'
+
+USAGE
+}
+
+fail() { echo -e "$*" >&2 ; exit 1; }
+
+pg::psql() {
+  local _db="$1"
+  shift
+  \psql "${PG_URI}/${_db}" "$*"
+}
+
+set_contract_secrets() {
+  local _d="$1"
+  local _h="$2"
+  local _u="$3"
+  local _p="$4"
+
+  echo -e "\nvault: ${src_path} -> ${dst_path}/db"
+
+  safe set "${dst_path}/db" \
+    hostname="${_h}" # Test for connection errors first
+
+  safe set "${dst_path}/db" \
+    scheme="postgres" \
+    username="${_u}" \
+    password="${_p}" \
+    hostname="${_h}" \
+    port="5432" \
+    database="${_d}" \
+    sslmode="enable" \
+    uri="postgres://${_u}:${_p}@${_h}:5432/${_d}?sslmode=verify-full" \
+    &> /dev/null # Do not leak credentials to output
+}
+
+prepare() {
+  local tf_prefix="${OCFP_VAULT_PREFIX:-secret/}/tf/${OCFP_REGION//-/\/}"
+  local src_path="${tf_prefix}/ocfp/${env_type//-/\/}/dbs/${kit}"
+  local dst_path="${OCFP_VAULT_PREFIX}/${env_name//-/\/}/${kit}"
+
+  PGHOSTNAME="$(safe get "${src_path}/db/hostname")"
+  PGUSERNAME="$(safe get "${src_path}/db/postgres_username")"
+  PGPASSWORD="$(safe get "${src_path}/db/postgres_password")"
+
+
+  [[ -n ${PGHOSTNAME} ]] || fail "Could not find hostname for ${src_path}/db:hostname"
+  [[ -n ${PGUSERNAME} ]] || fail "Could not find username for ${src_path}/db:postgres_username"
+  [[ -n ${PGPASSWORD} ]] || fail "Could not find password for ${src_path}/db:postgres_password"
+
+  PG_URI="postgresql://${PGUSERNAME}:${PGPASSWORD}@${PGHOSTNAME}:5432"
+
+  local _db
+  for _db in ${@}; do
+    set_contract_secrets "${_db}"
+
+    local _u="$(safe get "${src_path}:${_db}_username")"
+    local _p="$(safe get "${src_path}:${_db}_password")"
+
+    echo -e "postgres: ${_u} @ ${PGHOSTNAME} / ${_db}"
+    pg::psql "${_db}" -c "CREATE DATABASE ${_db};"
+
+
+    local _ext
+    for _ext in citext pgcrypto 
+    do pg::psql "${_db}" -c "CREATE EXTENSION IF NOT EXISTS ${_ext};"
+    done
+
+
+    pg::psql "postgres" -c "CREATE USER ${_u};"
+    pg::psql "postgres" -c "ALTER USER ${_u} WITH ENCRYPTED PASSWORD '${_p}';"
+    pg::psql "postgres" -c "GRANT CONNECT ON DATABASE ${_db} TO ${_u};"
+    pg::psql "postgres" -c "GRANT ALL PRIVILEGES ON DATABASE ${_db} TO ${_u};"
+    pg::psql "postgres" -c "GRANT USAGE ON SCHEMA public TO ${_u};"
+    pg::psql "postgres" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${_u};"
+    pg::psql "postgres" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${_u};"
+  done
+}
+
+logs_path="$HOME/.ocfp/logs"
+mkdir -p ${logs_path}
+
+timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
+
+
+exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
+
+[[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
+[[ -n ${OCFP_REGION} ]] || fail "OCFP_REGION must be set and exported."
+
+[[ $# > 1 ]] || fail "$(usage)"
+
+# TODO: change parameters to specify and case: env <env-name> kit <kit-name>
+while [[ $# > 0 ]]
+do
+  action=$1 ; shift
+  case "${action}" in
+    (env) 
+      env_name="$1" 
+      shift || fail "${0//*/} ... env <name>"
+      ;;
+    (kit) 
+      kit="$1" 
+      shift || fail "${0//*/} ... kit <name>"
+      case ${kit} in
+        (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+        (*) fail "Unsupported kit: ${kit}" ;;
+      esac
+      ;;
+    (*) fail "$(usage)" ;;
+  esac
+done
+
+env_name="${env_name%.yml}"
+case "${env_name}" in
+  (*-mgmt-*) env_type="mgmt" ;;
+  (*)        env_type="ocf"  ;;
+esac
+
+[[ -n ${env_name} ]] || fail "'env <name>' required"
+[[ -n ${kit} ]]      || fail "'kit <name>' required"
+
+case "${kit}" in
+  (bosh)
+    prepare bosh uaa credhub
+    ;;
+  (cf) # Question, is it routing_api or routing-api?
+    prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
+    ;;
+  (autoscaler)
+    kit="cf-app-autoscaler" # :/ # Contract FAIL
+    prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL
+    ;;
+  (scheduler)
+    prepare scheduler
+    ;;
+  (stratos)
+    prepare stratos # console_db <- default, Can we make this stratos to align with the contract?
+    ;;
+  (concourse)
+    prepare concourse # ats <- default, Can we make this concourse to align with the contract?
+    ;;
+  (*)
+    fail "$(usage)"
+    ;;
+esac
+
+exit 0
