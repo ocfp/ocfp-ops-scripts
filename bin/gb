@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+# Author: Wayne E. Seguin
+
+usage() {
+  cat <<USAGE
+
+OCFP Genesis BOSH Script
+
+  There are two sub command paths as described below.
+
+(b|bosh|d|director) -> 
+
+  Genesis BOSH Director do
+  
+  Usage: ${0//*\/} <bosh-env-regex> [bosh director cli args]
+  
+  Environment variables:
+  
+    BOSH_DEPLOYMENTS_PATH - Path to the genesis bosh kit deployments directory
+                            Defaults to ~/deployments/bosh
+  
+  Required:
+  
+    bosh-env-regex - Regex to match the bosh environment to use
+  
+  Prerequisites:
+  
+    safe     - cli in the path, targeting a vault, and authenticated
+    genesis  - cli in the path
+    bosh     - cli in the path
+
+(l|logs) -> 
+
+  Genesis BOSH Logs Fetcher
+  
+  Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> [<job-name> <job-index> <log-file-name>]
+  
+  WHERE [options] are:
+  
+            --dir=      Destination directory (default: .)
+        -f, --follow    Follow logs via SSH
+            --num=      Last number of lines
+        -q, --quiet     Suppresses printing of headers when multiple files are being examined
+            --job=      Limit to only specific jobs
+            --only=     Filter logs (comma-separated)
+            --agent     Include only agent logs
+  
+  Environment variables:
+  
+    LOGS_PATH       - Logs path to download and process bosh logs into
+
+USAGE
+}
+
+fail() { echo -e "$*" >&2; exit 1; }
+
+bosh::vaildate::environment() {
+  if [[ -n "${BOSH_DEPLOYMENTS_PATH}" ]]
+  then bosh_path="${BOSH_DEPLOYMENTS_PATH}"
+  else bosh_path="${HOME}/deployments/bosh"
+  fi
+  
+  [[ -d "${bosh_path}" ]] || 
+    fail "BOSH deployments path '${bosh_path}' does not exist"
+  
+  for cmd in genesis bosh safe ; do 
+    command -v "${cmd}" &>/dev/null ||
+      fail "ERROR: \`${cmd}\` is not in PATH, please install it and try again."
+  done
+}
+
+find::env::file() {
+  local _env_regex="${1}"
+  local _env_file
+  local _yamls=($(find ${bosh_path} -maxdepth 1 -iname "*${regex}*.yml" -print | sort -r | head -1))
+
+  if [[ ${#_yamls[@]} -eq 0 ]]
+  then fail "No bosh env files found matching regex '${regex}'"
+  elif [[ ${#_yamls[@]} -gt 1 ]]
+  then fail "Multiple bosh env files found matching regex '${regex}': ${_yamls[*]}"
+  fi
+
+  _env_file="${_yamls[0]}"
+  [[ -s "${_env_file}" ]] || 
+    fail "ERROR: No bosh environment found matching '${_env_regex}' or file is empty"
+
+  echo "${_env_file}"
+}
+
+find::env() {
+  local _env_regex="${1}"
+  local _env_file
+  _env_file=$(find::env::file "${_env_regex}")
+  echo ${_env_file%.yml}
+}
+
+bosh::logs::fetch() {
+  local _env_regex="$1" _dep_regex="$2"
+  shift 2|| fail "$(usage)"
+  local _logs_path="${LOGS_PATH:-$HOME/logs}"
+  mkdir -p "$_logs_path"
+  cd "${_logs_path}"
+
+  local _env=$(find::env "${_env_regex}")
+
+  local deps=($(bosh::deps ${_env}))
+  local _d _dep
+  for _d in ${deps[@]}
+  do
+    if [[ "${_d}" =~ ${_dep_regex} ]]
+    then _dep="${_d}" ; break
+    fi
+  done
+
+  [[ -n "${_dep}" ]] || fail "No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
+  
+  bosh::do ${_env} -d ${_dep} logs "${@}"
+  
+  bosh::logs::extract "${_env}" "${_dep}" "${@}"
+}
+
+# TODO: Handle the case where specifiers are involved like $*=`uaa` eg:
+# ${logs_path}/dev-cf.uaa-20220510-215713-800046211.tgz
+bosh::logs::extract() {
+  local _env="$1" ; shift
+  local _dep="$2" ; shift
+  local dep_logs_path="${logs_path}/${_env}/${_dep}"
+  local _f _fn _job _vmid _ts
+
+  mkdir -p "${dep_logs_path}"
+  for _f in ${_dep}*.tgz
+  do
+    tar -zxf "${_f}" -C "${dep_logs_path}"
+    rm -f "${_f}"
+  done
+
+  cd "${dep_logs_path}"
+
+  for _f in $(find "${dep_logs_path}" -iname '*.tgz')
+  do
+    _fn=$(basename ${_f})
+    _job=$(echo ${_fn}  | awk -F. '{print $1}')
+    _vmid=$(echo ${_fn} | awk -F. '{print $2}')
+    _ts=$(echo ${_fn}   | awk -F. '{print $3}')
+  
+    mkdir -p "${dep_logs_path}/${_job}/${_vmid}/${_ts}"
+  
+    tar -zxf "${_job}.${_vmid}.${_ts}.tgz" -C "${dep_logs_path}/${_job}/${_vmid}/${_ts}"
+  
+    rm -f "${job}.${vmid}.${ts}.tgz"
+  done
+}
+
+bosh::do() {
+  local _env_regex="$1" 
+  shift || fail "$(usage)"
+  
+  bosh::vaildate::environment
+  
+  _env_file="$(find::env::file "${_env_regex}")"
+  {
+    cd "${bosh_path}"
+    eval "$(genesis ${_env_file} bosh -A --connect)"
+    exec bosh "$@"
+  }
+}
+
+bosh::deps() {
+  local _env="$1"
+  shift || fail "$(usage)"
+  bosh::do "${_env}" deps --json | jq -r '.Tables[].Rows[].name'
+}
+
+while [[ $# -gt 0 ]]
+do
+  cmd="${1}" ; shift
+  case "${cmd}" in
+    (b|bosh|d|director)
+      bosh::do "${@}"
+      ;;
+    (l|logs)
+      bosh::logs::fetch "$@"
+      ;;
+    (-h|--help|*)
+      usage
+      exit 0
+      ;;
+  esac
+done
+
+exit 0
+
