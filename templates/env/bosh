@@ -76,24 +76,24 @@ meta:
   vault_tf: (( concat "${OCFP_VAULT_PREFIX:-"secret"}" "/${OCFP_REGION//-/\/}" ))
 
 params:
-#  trusted_certs:
-#  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
-#  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
+  trusted_certs:
+  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
+  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
 
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" ))
 
   default_gateway: (( vault meta.vault_tf "/iaas/ocfp/${env_type}/net/bosh:gateway" ))
 
   dns: 
-    - (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:dns" ))
+  - (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:dns" ))
 
   static_ip: (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:ip" ))
   
   aws_region: "${OCFP_REGION}"
   
   aws_default_sgs:
-    - (( vault meta.vault_tf "iaas/sgs/default:id" ))
-    - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
+  - (( vault meta.vault_tf "iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
   
 YAML
 
@@ -103,8 +103,8 @@ case ${env_type} in
   aws_subnet_id: (( vault meta.vault_tf "iaas/subnets/ocfp/1:id" ))
   
   aws_security_groups: (default,bosh)
-    - (( vault meta.vault_tf "iaas/sgs/default:id" ))
-    - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
+  - (( vault meta.vault_tf "iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
 
 YAML
     ;;
