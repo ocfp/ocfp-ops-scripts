@@ -68,20 +68,20 @@ pg::prepare() {
   local src_path="${tf_prefix}/ocfp/${env_type//-/\/}/dbs/${kit}"
   local dst_path="${OCFP_VAULT_PREFIX}/${env_name//-/\/}/${kit}"
 
-  PGHOSTNAME="$(safe get "${src_path}:hostname")"
-  PGUSERNAME="$(safe get "${src_path}:postgres_username")"
-  PGPASSWORD="$(safe get "${src_path}:postgres_password")"
+  PG_HOSTNAME="$(safe get "${src_path}:hostname")"
+  PG_USERNAME="$(safe get "${src_path}:postgres_username")"
+  PG_PASSWORD="$(safe get "${src_path}:postgres_password")"
 
-  [[ -n ${PGHOSTNAME} ]] || 
+  [[ -n ${PG_HOSTNAME} ]] || 
     fail "Could not find hostname at ${src_path}:hostname"
 
-  [[ -n ${PGUSERNAME} ]] || 
+  [[ -n ${PG_USERNAME} ]] || 
     fail "Could not find username at ${src_path}:postgres_username"
 
-  [[ -n ${PGPASSWORD} ]] || 
+  [[ -n ${PG_PASSWORD} ]] || 
     fail "Could not find password at ${src_path}:postgres_password"
 
-  PG_URI="postgresql://${PGUSERNAME}:${PGPASSWORD}@${PGHOSTNAME}:5432"
+  PG_URI="postgresql://${PG_USERNAME}:${PG_PASSWORD}@${PG_HOSTNAME}:5432"
 
   local _db
   for _db in ${@}; do
@@ -89,7 +89,7 @@ pg::prepare() {
     local _p="$(safe get "${src_path}:${_db}_password")"
     local _o="${PG_PORT:-5432}"
 
-    echo -e "Initializing: postgresql://${_u}@${PGHOSTNAME}/${_db}"
+    echo -e "Initializing: postgresql://${_u}@${PG_HOSTNAME}/${_db}"
     pg::psql "${_db}" -c "CREATE DATABASE ${_db};"
 
     local _ext
