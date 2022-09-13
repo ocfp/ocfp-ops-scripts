@@ -73,7 +73,7 @@ cat <<-YAML
 
 meta:
   vault_certs: "${OCFP_VAULT_PREFIX:-"secret"}/certs" 
-  vault_tf: (( concat "${OCFP_VAULT_PREFIX:-"secret"}" "/${OCFP_REGION//-/\/}" ))
+  vault_tf: "${OCFP_VAULT_PREFIX:-"secret"}/tf/${OCFP_REGION//-/\/}"
 
 params:
   trusted_certs:
