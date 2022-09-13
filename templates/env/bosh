@@ -82,7 +82,7 @@ params:
 
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" ))
 
-  default_gateway: (( vault meta.vault_tf "/iaas/ocfp/${env_type}/net/bosh:gateway" ))
+  default_gateway: (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:gateway" ))
 
   dns: 
   - (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:dns" ))
