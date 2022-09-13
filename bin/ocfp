@@ -77,7 +77,7 @@ __parse::args() {
 }
 
 __init::pg() {
-  __init::parse::args "$@"
+  __parse::args "$@"
   echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
   bash "${templates_path}/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
 }
