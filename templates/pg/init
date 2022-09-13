@@ -41,12 +41,12 @@ pg::set::contract::secrets() {
   local _u="$3"
   local _p="$4"
 
-  echo -e "\nvault: ${src_path} -> ${dst_path}/db"
+  echo -e "\nvault: ${src_path} -> ${dst_path}/db/${_d}"
 
-  safe set "${dst_path}/db" \
+  safe set "${dst_path}/db/${_d}" \
     hostname="${_h}" # Test for connection errors first
 
-  safe set "${dst_path}/db" \
+  safe set "${dst_path}/db/${_d}" \
     scheme="postgres" \
     username="${_u}" \
     password="${_p}" \
@@ -57,7 +57,7 @@ pg::set::contract::secrets() {
     uri="postgres://${_u}:${_p}@${_h}:5432/${_d}?sslmode=verify-full" \
     &> /dev/null # Do not leak credentials to output
 
-  safe cp "${OCFP_VAULT_PREFIX}/certs/dbs:ca" "${dst_path}/db:ca"
+  safe cp "${OCFP_VAULT_PREFIX}/certs/dbs:ca" "${dst_path}/db/${_d}:ca"
 }
 
 pg::prepare() {
