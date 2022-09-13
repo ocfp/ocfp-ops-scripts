@@ -36,7 +36,7 @@ kit:
   - sysop-access
 YAML
 
-case ${OCFP_ENV_NAME} in
+case ${OCFP_ENV_TYPE} in
   (*mgmt*) echo "  - proto # legacy name" ;;
   (*) true ;;
 esac
@@ -63,35 +63,39 @@ esac
 cat <<-YAML
 
 meta:
+  vault_certs: "${OCFP_VAULT_PREFIX:-"secret"}/certs" 
   vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
 
 params:
   trusted_certs:
-  - (( vault meta.vault "/certs/rds:ca" )) # RDS Global CA
-  - (( vault meta.vault "/certs/org:ca" )) # Organizaion CA
+  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
+  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
 
-  subnet_addr: (( vault meta.vault_tf "/aws/subnets/ocfp/1:cidr_block" ))
-  default_gateway: (( vault meta.vault_tf "/aws/ocfp/mgmt/bosh:gateway" )) # tf: cidrhost(ocfp/1, 1)
+  subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" ))
+
+  default_gateway: (( vault meta.vault_tf "/iaas/ocfp/mgmt/bosh:gateway" ))
+
   dns: 
-    - (( vault meta.vault_tf "ocfp/mgmt/bosh:dns" )) #cidrhost(ocfp/1, 2)
-  static_ip: (( vault meta.vault_tf "ocfp/mgmt/bosh:ip" )) #cidrhost(ocfp/1, 4)
+    - (( vault meta.vault_tf "ocfp/mgmt/bosh:dns" ))
+
+  static_ip: (( vault meta.vault_tf "ocfp/mgmt/bosh:ip" ))
   
   aws_region: "${OCFP_REGION}"
   
   aws_default_sgs:
-    - (( vault meta.vault_tf "aws/sgs/default:id" ))
-    - (( vault meta.vault_tf "aws/sgs/${OCFP_ENV_TYPE}:id" ))
+    - (( vault meta.vault_tf "iaas/sgs/default:id" ))
+    - (( vault meta.vault_tf "iaas/sgs/${OCFP_ENV_TYPE}:id" ))
   
 YAML
 
 case ${OCFP_ENV_NAME} in
   (*-mgmt-*)
     cat <<-YAML
-  aws_subnet_id: (( vault meta.vault_tf "aws/subnets/ocfp/1:id" ))
+  aws_subnet_id: (( vault meta.vault_tf "iaas/subnets/ocfp/1:id" ))
   
   aws_security_groups: (default,bosh)
-    - (( vault meta.vault_tf "aws/sgs/default:id" ))
-    - (( vault meta.vault_tf "aws/sgs/${OCFP_ENV_TYPE}:id" ))
+    - (( vault meta.vault_tf "iaas/sgs/default:id" ))
+    - (( vault meta.vault_tf "iaas/sgs/${OCFP_ENV_TYPE}:id" ))
 
 YAML
     ;;
@@ -99,11 +103,10 @@ YAML
 esac
 
 cat <<-YAML
-  s3_blobstore_bucket: (( vault meta.vault_tf "/ocfp/${OCFP_ENV_TYPE}/s3/bosh:name" ))
+  s3_blobstore_bucket: (( vault meta.vault_tf "/ocfp/${OCFP_ENV_TYPE}/blobstore/bosh:name" ))
   s3_blobstore_region: ${OCFP_REGION} # TODO: check if needs to be set in ^^^
   
   dns_cache: true # DNS Caching (for runtime config)
 
 YAML
-
 
