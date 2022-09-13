@@ -59,13 +59,17 @@ __parse::args() {
         shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
         ;;
       (iaas)
-        export OCFP_IAAS=$1
+        export OCFP_IAAS="$1"
         shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
         case ${OCFP_IAAS} in
           #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
           (aws|azure|gcp|openstack|vsphere|warden) true ;;
           (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
         esac
+        ;;
+      (bosh)
+        export OCFP_BOSH_ENV="$1"
+        shift || fail "${0//*/} ... bosh <bosh-env-name>"
         ;;
       (*)
         usage
@@ -77,10 +81,24 @@ __parse::args() {
   [[ -n ${OCFP_REGION} ]]   || fail "'region <region>' must be given"
   [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' must be given"
 
+  __set::env::type
+
+  # All envs need to know their deployer/bosh_env, mgmt bosh is the exception
+  if ! [[ ${OCFP_KIT} == "bosh" && ${env_type} == "mgmt" ]]
+  then [[ -n ${OCFP_BOSH_ENV} ]] || fail "'bosh <bosh-env-name>' must be given"
+  fi
+
   case ${OCFP_KIT} in
     (bosh)
       [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
       ;;
+  esac
+}
+
+__set::env::type() {
+  case "${OCFP_ENV_NAME}" in
+    (*-mgmt-*) env_type="mgmt" ;;
+    (*)        env_type="ocf"  ;;
   esac
 }
 
@@ -96,10 +114,7 @@ __init::env() {
     fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
   fi
 
-  case "${OCFP_ENV_NAME}" in
-    (*-mgmt-*) env_type="mgmt" ;;
-    (*)        env_type="ocf"  ;;
-  esac
+  __set::env::type
 
   case "${OCFP_KIT}" in
     (bosh)
