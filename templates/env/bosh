@@ -30,7 +30,7 @@ cat <<-YAML
 ---
 kit:
   name: bosh
-  version: 2.2.7-rc.7 # minimum version for external-db-vault
+  version: 2.2.7-rc.1 # minimum version for external-db-vault
   features:
   - (( append ))
   - ${OCFP_IAAS}
