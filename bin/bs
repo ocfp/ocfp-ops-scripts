@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+# Author: Wayne E. Seguin
+
+usage() {
+  cat <<USAGE
+
+Blacksmith Ops - Reconciling Blacksmith Services
+
+Sub commands:
+
+(d|deps) -> 
+
+(c|count) -> 
+
+(dd|ddiff) -> 
+
+  Usage: ${0//*\/} <bosh-env-regex> [bosh director cli args]
+  
+  Environment variables:
+  
+    BOSH_DEPLOYMENTS_PATH - Path to the genesis bosh kit deployments directory
+                            Defaults to ~/deployments/bosh
+  
+  Required:
+  
+    env-regex - Regex to match the bosh environment to use
+  
+  Prerequisites:
+  
+    safe     - cli in the path, targeting a vault, and authenticated
+    genesis  - cli in the path
+    bosh     - cli in the path
+    boss     - cli in the path
+
+
+USAGE
+}
+
+fail() { echo -e "$*" >&2; exit 1; }
+
+blacksmith::boss::guids() {
+  # TODO: Add in the env file searching
+  genesis do *${bd}*.yml boss -- -k list 2>/dev/null |
+    awk '/^[a-z0-9]/{print $1}'
+}
+
+blacksmith::deps() {
+  boshd $bd deps  2>/dev/null |
+    awk '$4 == "blacksmith" {print $1}' |
+    awk "/$1/" |
+    sort -V
+}
+
+blacksmith::deps::count() {
+  blacksmith::deps "$1" | wc -l
+}
+
+blacksmith::deps::diff() {
+  diff <(blacksmith::deps::guids) <(blacksmith::boss::guids)
+}
+
+blacksmith::depsguids() {
+  deps | awk -F- '{print $(NF-4)"-"$(NF-3)"-"$(NF-2)"-"$(NF-1)"-"$NF}'
+}
+
+boss::vaildate::environment() {
+  if [[ -n "${BOSH_DEPLOYMENTS_PATH}" ]]
+  then bosh_path="${BOSH_DEPLOYMENTS_PATH}"
+  else bosh_path="${HOME}/deployments/bosh"
+  fi
+  
+  [[ -d "${bosh_path}" ]] ||
+    fail "BOSH deployments path '${bosh_path}' does not exist"
+  
+  for cmd in genesis bosh safe ; do 
+    command -v "${cmd}" &>/dev/null ||
+      fail "ERROR: \`${cmd}\` is not in PATH, please install it and try again."
+  done
+}
+
+bd=${BOSH_DIRECTOR}
+
+[[ -n "${bd}" ]] || fail "ERROR: BOSH_DIRECTOR is not set, please set it and try again."
+
+cd ~/deployments/blacksmith
+
+while [[ $# -gt 0 ]]
+do
+  cmd="${1}" ; shift
+  case "${cmd}" in
+    (b|bosh|d|director)
+      bosh::do "${@}"
+      ;;
+    (l|logs)
+      bosh::logs::fetch "$@"
+      ;;
+    (-h|--help|*)
+      usage
+      exit 0
+      ;;
+  esac
+done
+
+exit 0
+
