@@ -36,25 +36,28 @@ pg::psql() {
 }
 
 pg::set::contract::secrets() {
-  local _d="$1"
-  local _h="$2"
-  local _u="$3"
-  local _p="$4"
+  local _u="$1"
+  local _p="$2"
+  local _h="$3"
+  local _o="$4"
+  local _d="$5"
 
   echo -e "\nvault: ${src_path} -> ${dst_path}/db/${_d}"
 
   safe set "${dst_path}/db/${_d}" \
     hostname="${_h}" # Test for connection errors first
 
+  # Q: Should scheme be postgres or postgresql? Official for uri is postgresql.
+  # Q: Should we parameterize the sslmode?
   safe set "${dst_path}/db/${_d}" \
     scheme="postgres" \
     username="${_u}" \
     password="${_p}" \
     hostname="${_h}" \
-    port="5432" \
+    port="${_o}" \
     database="${_d}" \
     sslmode="enable" \
-    uri="postgres://${_u}:${_p}@${_h}:5432/${_d}?sslmode=verify-full" \
+    uri="postgresql://${_u}:${_p}@${_h}:${_o}/${_d}?sslmode=verify-full" \
     &> /dev/null # Do not leak credentials to output
 
   safe cp "${OCFP_VAULT_PREFIX}/certs/dbs:ca" "${dst_path}/db/${_d}:ca"
@@ -82,12 +85,11 @@ pg::prepare() {
 
   local _db
   for _db in ${@}; do
-    pg::set::contract::secrets "${_db}"
-
     local _u="$(safe get "${src_path}:${_db}_username")"
     local _p="$(safe get "${src_path}:${_db}_password")"
+    local _o="${PG_PORT:-5432}"
 
-    echo -e "postgres: ${_u} @ ${PGHOSTNAME} / ${_db}"
+    echo -e "Initializing: postgresql://${_u}@${PGHOSTNAME}/${_db}"
     pg::psql "${_db}" -c "CREATE DATABASE ${_db};"
 
     local _ext
@@ -102,6 +104,8 @@ pg::prepare() {
     pg::psql "postgres" -c "GRANT USAGE ON SCHEMA public TO ${_u};"
     pg::psql "postgres" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${_u};"
     pg::psql "postgres" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${_u};"
+
+    pg::set::contract::secrets "${_u}" "${_p}" "${PG_HOSTNAME}" "${_o}" "${_db}"
   done
 }
 
