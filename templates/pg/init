@@ -35,7 +35,7 @@ pg::psql() {
   \psql "${PG_URI}/${_db}" "$*"
 }
 
-set_contract_secrets() {
+pg::set::contract::secrets() {
   local _d="$1"
   local _h="$2"
   local _u="$3"
@@ -58,29 +58,29 @@ set_contract_secrets() {
     &> /dev/null # Do not leak credentials to output
 }
 
-prepare() {
+pg::prepare() {
   local tf_prefix="${OCFP_VAULT_PREFIX:-secret/}/tf/${OCFP_REGION//-/\/}"
   local src_path="${tf_prefix}/ocfp/${env_type//-/\/}/dbs/${kit}"
   local dst_path="${OCFP_VAULT_PREFIX}/${env_name//-/\/}/${kit}"
 
-  PGHOSTNAME="$(safe get "${src_path}/db/hostname")"
-  PGUSERNAME="$(safe get "${src_path}/db/postgres_username")"
-  PGPASSWORD="$(safe get "${src_path}/db/postgres_password")"
+  PGHOSTNAME="$(safe get "${src_path}:hostname")"
+  PGUSERNAME="$(safe get "${src_path}:postgres_username")"
+  PGPASSWORD="$(safe get "${src_path}:postgres_password")"
 
   [[ -n ${PGHOSTNAME} ]] || 
-    fail "Could not find hostname at ${src_path}/db:hostname"
+    fail "Could not find hostname at ${src_path}:hostname"
 
   [[ -n ${PGUSERNAME} ]] || 
-    fail "Could not find username at ${src_path}/db:postgres_username"
+    fail "Could not find username at ${src_path}:postgres_username"
 
   [[ -n ${PGPASSWORD} ]] || 
-    fail "Could not find password at ${src_path}/db:postgres_password"
+    fail "Could not find password at ${src_path}:postgres_password"
 
   PG_URI="postgresql://${PGUSERNAME}:${PGPASSWORD}@${PGHOSTNAME}:5432"
 
   local _db
   for _db in ${@}; do
-    set_contract_secrets "${_db}"
+    pg::set::contract::secrets "${_db}"
 
     local _u="$(safe get "${src_path}:${_db}_username")"
     local _p="$(safe get "${src_path}:${_db}_password")"
@@ -103,68 +103,71 @@ prepare() {
   done
 }
 
-logs_path="$HOME/.ocfp/logs"
-mkdir -p ${logs_path}
+__parse::args() {
+  while [[ $# > 0 ]]
+  do
+    action=$1 ; shift
+    case "${action}" in
+      (region)
+        OCFP_REGION=$1
+        shift || fail "${0//*/} ... env <name>"
+        ;;
+      (env) 
+        env_name="$1" 
+        shift || fail "${0//*/} ... env <name>"
+        ;;
+      (kit) 
+        kit="$1" 
+        shift || fail "${0//*/} ... kit <name>"
+        case ${kit} in
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+          (*) fail "Unsupported kit: ${kit}" ;;
+        esac
+        ;;
+      (*) fail "$(usage)" ;;
+    esac
+  done
+  
+  env_name="${env_name%.yml}"
+  case "${env_name}" in
+    (*-mgmt-*) env_type="mgmt" ;;
+    (*)        env_type="ocf"  ;;
+  esac
+  
+  [[ -n ${OCFP_REGION} ]] || fail "OCFP_REGION must be set and exported."
+  [[ -n ${env_name} ]] || fail "'env <name>' required"
+  [[ -n ${kit} ]]      || fail "'kit <name>' required"
+  [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
+}
 
 timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
-
+logs_path="$HOME/.ocfp/logs"
+mkdir -p ${logs_path}
 exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
-
-[[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
-
-[[ -n ${OCFP_REGION} ]] || fail "OCFP_REGION must be set and exported."
 
 [[ $# > 1 ]] || fail "$(usage)"
 
-# TODO: change parameters to specify and case: env <env-name> kit <kit-name>
-while [[ $# > 0 ]]
-do
-  action=$1 ; shift
-  case "${action}" in
-    (env) 
-      env_name="$1" 
-      shift || fail "${0//*/} ... env <name>"
-      ;;
-    (kit) 
-      kit="$1" 
-      shift || fail "${0//*/} ... kit <name>"
-      case ${kit} in
-        (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
-        (*) fail "Unsupported kit: ${kit}" ;;
-      esac
-      ;;
-    (*) fail "$(usage)" ;;
-  esac
-done
-
-env_name="${env_name%.yml}"
-case "${env_name}" in
-  (*-mgmt-*) env_type="mgmt" ;;
-  (*)        env_type="ocf"  ;;
-esac
-
-[[ -n ${env_name} ]] || fail "'env <name>' required"
-[[ -n ${kit} ]]      || fail "'kit <name>' required"
+__parse::args "$@"
 
 case "${kit}" in
   (bosh)
-    prepare bosh uaa credhub
+    pg::prepare bosh uaa credhub
     ;;
   (cf) # Question, is it routing_api or routing-api?
-    prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
+    pg::prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
     ;;
   (autoscaler)
     kit="cf-app-autoscaler" # :/ # Contract FAIL
-    prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL
+    pg::prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL
     ;;
   (scheduler)
-    prepare scheduler
+    pg::prepare scheduler
     ;;
   (stratos)
-    prepare stratos # console_db <- default, Can we make this stratos to align with the contract?
+    pg::prepare stratos # console_db <- default, Can we make this stratos to align with the contract?
     ;;
   (concourse)
-    prepare concourse # ats <- default, Can we make this concourse to align with the contract?
+    pg::prepare concourse # ats <- default, Can we make this concourse to align with the contract?
     ;;
   (*)
     fail "$(usage)"

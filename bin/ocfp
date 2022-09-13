@@ -35,76 +35,120 @@ exit 0
 
 fail() { echo -e "$*" >&2 ; exit 1 ; }
 
+__parse::args() {
+  local _action
+  while [[ $# > 0 ]]
+  do
+    _action="${1}" ; shift
+    case ${_action} in
+      (vault-prefix)
+        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        ;;
+      (region)
+        export OCFP_REGION=$1 # ex: us-east-1, us-west-2
+        shift || fail "${0//*/} ... region <region>"
+        ;;
+      (kit)
+        export OCFP_KIT=$1
+        shift || fail "${0//*/} ... kit <name>"
+        case ${OCFP_KIT} in
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+          (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
+        esac
+        ;;
+      (env|name)
+        export OCFP_ENV_NAME=${1//.yml}
+        shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
+        ;;
+      (iaas)
+        export OCFP_IAAS=$1
+        shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
+        case ${OCFP_IAAS} in
+          #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
+          (aws|azure|gcp|openstack|vsphere|warden) true ;;
+          (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
+        esac
+        ;;
+      (*)
+        usage
+        ;;
+    esac
+  done
+}
+
+__init::pg() {
+  __init::parse::args "$@"
+  echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
+  bash "${templates_path}/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
+}
+
+__init::env() {
+  local _action
+  while [[ $# > 0 ]]
+  do
+    _action="${1}" ; shift
+    case ${_action} in
+      (vault-prefix)
+        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        ;;
+      (region)
+        export OCFP_REGION=$1 # ex: us-east-1, us-west-2
+        shift || fail "${0//*/} ... region <region>"
+        ;;
+      (kit)
+        export OCFP_KIT=$1
+        shift || fail "${0//*/} ... kit <name>"
+        case ${OCFP_KIT} in
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+          (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
+        esac
+        ;;
+      (e|name)
+        export OCFP_ENV_NAME=${1//.yml}
+        shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
+        ;;
+      (iaas)
+        export OCFP_IAAS=$1
+        shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
+        case ${OCFP_IAAS} in
+          #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
+          (aws|azure|gcp|openstack|vsphere|warden) true ;;
+          (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
+        esac
+        ;;
+      (*)
+        usage
+        ;;
+    esac
+  done
+
+  [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
+  [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' must be given"
+  [[ -n ${OCFP_REGION} ]] || fail "'region <region>' must be given"
+
+  case ${OCFP_KIT} in
+    (bosh)
+      [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
+      ;;
+  esac
+
+  if [[ -s ${OCFP_ENV_NAME}.yml ]] 
+  then
+    fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
+  else
+    echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
+    bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
+    exit $?
+  fi
+}
+
 templates_path="${0%\/ocfp}/templates"
 cmd=$1 
 shift || usage
 case ${cmd} in
-  (init-pg)
-    echo "TODO: Merge with pg init script -> ocpf-init"
-      echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
-      bash "${templates_path}/pg/init"
-    ;;
-  (init-env)
-    while [[ $# > 0 ]]
-    do
-      action=$1 ; shift
-      case ${action} in
-        (vault-prefix)
-          export OCFP_VAULT_PREFIX="${1}" # override default of secret/
-          ;;
-        (region)
-          export OCFP_REGION=$1 # ex: us-east-1, us-west-2
-          shift || fail "${0//*/} ... region <region>"
-          ;;
-        (kit)
-          export OCFP_KIT=$1
-          shift || fail "${0//*/} ... kit <name>"
-          case ${OCFP_KIT} in
-            (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
-            (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
-          esac
-          ;;
-        (name)
-          export OCFP_ENV_NAME=${1//.yml}
-          shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
-          ;;
-        (iaas)
-          export OCFP_IAAS=$1
-          shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
-          case ${OCFP_IAAS} in
-            #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
-            (aws|azure|gcp|openstack|vsphere|warden) true ;;
-            (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
-          esac
-          ;;
-        (*)
-          usage
-          ;;
-      esac
-    done
-
-    [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
-    [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' must be given"
-    [[ -n ${OCFP_REGION} ]] || fail "'region <region>' must be given"
-
-    case ${OCFP_KIT} in
-      (bosh)
-        [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
-        ;;
-    esac
-
-    if [[ -s ${OCFP_ENV_NAME}.yml ]] 
-    then
-      fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
-    else
-      echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
-      bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
-      exit $?
-    fi
-    ;;
-  (*)
-    usage
-    ;;
+  (init-pg) __init::pg "$@" ;;
+  (init-env) __init::env "$@" ;;
+  (*) usage ;;
 esac
 
 
