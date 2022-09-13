@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Author: Wayne E. Seguin
 
 usage() {
@@ -60,7 +61,7 @@ bosh::vaildate::environment() {
   else bosh_path="${HOME}/deployments/bosh"
   fi
   
-  [[ -d "${bosh_path}" ]] || 
+  [[ -d "${bosh_path}" ]] ||
     fail "BOSH deployments path '${bosh_path}' does not exist"
   
   for cmd in genesis bosh safe ; do 

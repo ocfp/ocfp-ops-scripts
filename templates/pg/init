@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+# Author: Wayne E. Seguin
+
 usage() {
   cat <<USAGE
+
 Usage: $0 <env-file-name> <deployments-kit-name>
 
 Where:
@@ -24,7 +27,7 @@ Requirements:
 USAGE
 }
 
-fail() { echo -e "$*" >&2 ; exit 1; }
+fail() { echo -e "$*" >&2 ; exit 1 ; }
 
 pg::psql() {
   local _db="$1"
@@ -64,10 +67,14 @@ prepare() {
   PGUSERNAME="$(safe get "${src_path}/db/postgres_username")"
   PGPASSWORD="$(safe get "${src_path}/db/postgres_password")"
 
+  [[ -n ${PGHOSTNAME} ]] || 
+    fail "Could not find hostname at ${src_path}/db:hostname"
 
-  [[ -n ${PGHOSTNAME} ]] || fail "Could not find hostname for ${src_path}/db:hostname"
-  [[ -n ${PGUSERNAME} ]] || fail "Could not find username for ${src_path}/db:postgres_username"
-  [[ -n ${PGPASSWORD} ]] || fail "Could not find password for ${src_path}/db:postgres_password"
+  [[ -n ${PGUSERNAME} ]] || 
+    fail "Could not find username at ${src_path}/db:postgres_username"
+
+  [[ -n ${PGPASSWORD} ]] || 
+    fail "Could not find password at ${src_path}/db:postgres_password"
 
   PG_URI="postgresql://${PGUSERNAME}:${PGPASSWORD}@${PGHOSTNAME}:5432"
 
@@ -81,12 +88,10 @@ prepare() {
     echo -e "postgres: ${_u} @ ${PGHOSTNAME} / ${_db}"
     pg::psql "${_db}" -c "CREATE DATABASE ${_db};"
 
-
     local _ext
     for _ext in citext pgcrypto 
     do pg::psql "${_db}" -c "CREATE EXTENSION IF NOT EXISTS ${_ext};"
     done
-
 
     pg::psql "postgres" -c "CREATE USER ${_u};"
     pg::psql "postgres" -c "ALTER USER ${_u} WITH ENCRYPTED PASSWORD '${_p}';"
@@ -103,10 +108,10 @@ mkdir -p ${logs_path}
 
 timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
 
-
 exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
 
 [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
+
 [[ -n ${OCFP_REGION} ]] || fail "OCFP_REGION must be set and exported."
 
 [[ $# > 1 ]] || fail "$(usage)"
