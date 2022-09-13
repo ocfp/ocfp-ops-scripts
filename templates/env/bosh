@@ -35,9 +35,9 @@ kit:
   - (( append ))
   - ${OCFP_IAAS}
   - external-db-vault
-  - bosh-dns-health-check
   - netop-access
   - sysop-access
+# - bosh-dns-health-check
 YAML
 
 case "${env_type}" in
@@ -71,9 +71,9 @@ meta:
   vault_tf: (( concat "${OCFP_VAULT_PREFIX:-"secret"}" "/${OCFP_REGION//-/\/}" ))
 
 params:
-  trusted_certs:
-  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
-  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
+#  trusted_certs:
+#  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
+#  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
 
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" ))
 
