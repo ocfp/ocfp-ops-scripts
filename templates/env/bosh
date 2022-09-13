@@ -40,12 +40,12 @@ kit:
   - sysop-access
 YAML
 
-case ${env_type} in
-  (*mgmt*) echo "  - proto # legacy name" ;;
+case "${env_type}" in
+  (*mgmt*) echo "  - proto # legacy name, proto -> mgmt" ;;
   (*) true ;;
 esac
 
-case ${OCFP_IAAS} in
+case "${OCFP_IAAS}" in
   (aws) echo "  - s3-blobstore" ;;
   (gcp) echo "  - gcp-blobstore" ;;
   (azure) echo "  - azure-blobstore" ;;
@@ -59,7 +59,7 @@ genesis:
   min_version: 2.8.5
 YAML
 
-case ${OCFP_VAULT_PREFIX} in
+case "${OCFP_VAULT_PREFIX}" in
   (secret/*) echo "  secrets_mount: \"${OCFP_VAULT_PREFIX}\"" ;;
   (*) true ;;
 esac
@@ -68,7 +68,7 @@ cat <<-YAML
 
 meta:
   vault_certs: "${OCFP_VAULT_PREFIX:-"secret"}/certs" 
-  vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
+  vault_tf: (( concat "${OCFP_VAULT_PREFIX:-"secret"}" "/${OCFP_REGION//-/\/}" ))
 
 params:
   trusted_certs:
