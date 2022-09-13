@@ -85,26 +85,26 @@ params:
   default_gateway: (( vault meta.vault_tf "/iaas/ocfp/${env_type}/net/bosh:gateway" ))
 
   dns: 
-  - (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:dns" ))
+  - (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:dns" ))
 
-  static_ip: (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:ip" ))
+  static_ip: (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:ip" ))
   
   aws_region: "${OCFP_REGION}"
   
   aws_default_sgs:
-  - (( vault meta.vault_tf "iaas/sgs/default:id" ))
-  - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/${env_type}:id" ))
   
 YAML
 
 case ${env_type} in
   (mgmt)
     cat <<-YAML
-  aws_subnet_id: (( vault meta.vault_tf "iaas/subnets/ocfp/1:id" ))
+  aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
   
-  aws_security_groups: (default,bosh)
-  - (( vault meta.vault_tf "iaas/sgs/default:id" ))
-  - (( vault meta.vault_tf "iaas/sgs/${env_type}:id" ))
+  aws_security_groups:
+  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/${env_type}:id" ))
 
 YAML
     ;;
