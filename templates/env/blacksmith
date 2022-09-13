@@ -5,6 +5,11 @@ fail() { echo -e "$*" >&2 ; exit 1 ; }
 [[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION   must be set and exported."
 [[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
 
+case "${OCFP_ENV_NAME}" in
+  (*-mgmt-*) env_type="mgmt" ;;
+  (*)        env_type="ocf" ;;
+esac
+
 usage() {
   echo -e "$(cat <<EOT
 
@@ -58,19 +63,21 @@ exodus:
 
 meta:
   vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
-  ...plans...
+  TODO: ...plans...
 
 params:
   env: ${OCFP_ENV_NAME}
-  ip: (( vault meta.vault_tf "ocfp/ocf/blacksmith:ip" )) # Computed in TF cidrhost(ocfp/1,5
-  fqdn: (( vault meta.vault "ocfp/ocf/blacksmith:dns" ))
+  ip: (( vault meta.vault_tf "ocfp/${env_type}/net/blacksmith:ip" ))
+  fqdn: (( vault meta.vault_tf "ocfp/${env_type}/net/blacksmith:fqdn" ))
 
   # blacksmith_debug: true
 
   #TODO: Do we need to pass in the external bosh director IP???
-  #boshdir_ip: (( vault meta.vault_tf "ocfp/mgmt/bosh:ip" )) #cidrhost(ocfp/1, 4) -> should be `.4` - validate, this might need to be ,5 if it computes from 0
+  #boshdir_ip: (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:ip" ))
 
   # TODO: SHIELD Backups..
+
+  # TODO: Plans
 
 YAML
 
