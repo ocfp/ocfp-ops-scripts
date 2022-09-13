@@ -50,6 +50,26 @@ OCFP Genesis BOSH Script
   
     LOGS_PATH       - Logs path to download and process bosh logs into
 
+(vmsdo) -> 
+  
+    Genesis BOSH VMs do
+
+    Run commands on all VMs in a deployment
+    
+    Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> <cmd>
+    
+    Required:
+    
+      bosh-env-regex - Regex to match the bosh environment to use
+      deployment-name-regexp - Regex to match the deployment name to use
+      vm-name-regexp - Regex to match the vm name to use
+    
+    Prerequisites:
+    
+      safe     - cli in the path, targeting a vault, and authenticated
+      genesis  - cli in the path
+      bosh     - cli in the path
+
 USAGE
 }
 
@@ -169,7 +189,22 @@ bosh::do() {
 bosh::deps() {
   local _env="$1"
   shift || fail "$(usage)"
-  bosh::do "${_env}" deps --json | jq -r '.Tables[].Rows[].name'
+  bosh::do "${_env}" deps --json |jq -r '.Tables[].Rows[].name'
+}
+
+bosh::vms::do() {
+  local _env_regex="$1" _dep_regex="$2"
+  shift 2 || fail "$(usage)"
+
+  vms=($(
+    bosh::do "${_env}" -d "${_dep}" vms --json |
+    jq -r '.Tables[].Rows[].instance' | 
+    tr -d '"'
+  ))
+
+  for _vm in "${vms[@]}"
+  do bosh::do "${_env}" -d "${_dep}" ssh "${_vm}" "$@"
+  done
 }
 
 while [[ $# -gt 0 ]]
@@ -181,6 +216,9 @@ do
       ;;
     (l|logs)
       bosh::logs::fetch "$@"
+      ;;
+    (vmsdo)
+      bosh::vms::do "${@}"
       ;;
     (-h|--help|*)
       usage
