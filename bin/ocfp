@@ -131,7 +131,7 @@ __init::env() {
   esac
 
   if [[ -n ${OCFP_BOSH_ENV} ]]
-  then safe set "${dst_path}/env" bosh="${OCFP_BOSH_ENV}"
+  then safe set "${_dst_path}/env" bosh="${OCFP_BOSH_ENV}"
   fi
 
   echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
