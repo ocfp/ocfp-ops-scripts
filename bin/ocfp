@@ -97,6 +97,17 @@ __init::env() {
     fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
   fi
 
+  case "${OCFP_IAAS}" in
+    (aws)
+      local dst_path="${OCFP_VAULT_PREFIX}/${env_name//-/\/}/bosh"
+      echo "BOSH EC2 IAM Creds for ${env_name}..."
+      safe cp "${OFP_VAULT_PREFIX}/${env_type}/aws/bosh" "${dst_path}/aws"
+      echo "BOSH s3 Blobstore IAM Creds for ${env_name}..."
+      safe cp "${OFP_VAULT_PREFIX}/${env_type}/aws/s3" "${dst_path}/blobstore/s3"
+      ;;
+    (*) fail "Not Yet Implemented" ;;
+  esac
+
   echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
   bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
   exit $?
