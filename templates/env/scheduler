@@ -27,7 +27,7 @@ kit:
   version: 0.0.17
   features:
   - (( append ))
-  - external-db-vault
+  - ocfp
 
 genesis:
   env: ${OCFP_ENV_NAME}

@@ -34,16 +34,7 @@ kit:
   features:
   - (( append ))
   - ${OCFP_IAAS}
-  - external-db-vault
-  - netop-access
-  - sysop-access
-# - bosh-dns-health-check
 YAML
-
-case "${env_type}" in
-  (*mgmt*) echo "  - proto # legacy name, proto -> mgmt" ;;
-  (*) true ;;
-esac
 
 case "${OCFP_IAAS}" in
   (aws) echo "  - s3-blobstore" ;;
@@ -52,7 +43,16 @@ case "${OCFP_IAAS}" in
   (*) true ;;
 esac
 
+case "${env_type}" in
+  (*mgmt*) echo "  - proto # legacy name, proto -> mgmt" ;;
+  (*) true ;;
+esac
+
 cat <<-YAML
+  - netop-access
+  - sysop-access
+  - ocfp
+# - bosh-dns-health-check
 
 genesis:
   env: ${OCFP_ENV_NAME}

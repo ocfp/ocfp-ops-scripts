@@ -32,7 +32,7 @@ kit:
   version: 0.12.1-rc.14
   features:
   - (( append ))
-  - external-bosh # -vault???
+  - ocfp
   #- bosh-dns-health-check
   #- broker-tls
   #- redis-tls
