@@ -17,12 +17,14 @@ Requirements:
   * \`psql\` is in the path, version 14 or later
   * postgres database information is stored in vault by terraform outputs according
     to the ocfp contracts, eg:
-      \${OCFP_VAULT_PREFIX}/tf/\${OCFP_REGION//-/\/}/\${env_type//-/\/}/dbs/\${kit}/db:{key}
+      \${OCFP_VAULT_PREFIX}/tf/\${OCFP_ENV_NAME//-/\/}/\${env_type//-/\/}/dbs/\${kit}/db:{key}
       Where {key} is in hostname, postgres_username, postgres_password, port,
         scheme, {kit dbs}_{username,_password}
       Ex: bosh kit will have kit dbs: bosh, uaa, and credhub
    * VAULT_NAMESPACE may be set and exported, if required, it will be exported
    * OCFP_VAULT_PREFIX may be set and exported, if required, defaults to 'secret/'
+   * OCFP_VAULT_ENV_PREFIX must be set and exported
+   * OCFP_VAULT_TF_PREFIX must be set and exported
 
 USAGE
 }
@@ -64,9 +66,8 @@ pg::set::contract::secrets() {
 }
 
 pg::prepare() {
-  local tf_prefix="${OCFP_VAULT_PREFIX:-secret/}/tf/${OCFP_REGION//-/\/}"
-  local src_path="${tf_prefix}/ocfp/${env_type//-/\/}/dbs/${kit}"
-  local dst_path="${OCFP_VAULT_PREFIX}/${env_name//-/\/}/${kit}"
+  local src_path="${OCFP_VAULT_TF_PATH}/dbs/${kit}"
+  local dst_path="${OCFP_VAULT_ENV_PATH}/${kit}"
 
   PG_HOSTNAME="$(safe get "${src_path}:hostname")"
   PG_USERNAME="$(safe get "${src_path}:postgres_username")"
@@ -140,10 +141,12 @@ __parse::args() {
     (*)        env_type="ocf"  ;;
   esac
   
-  [[ -n ${OCFP_REGION} ]] || fail "OCFP_REGION must be set and exported."
   [[ -n ${env_name} ]] || fail "'env <name>' required"
   [[ -n ${kit} ]]      || fail "'kit <name>' required"
+  [[ -n ${OCFP_REGION} ]] || fail "'region <name>' required"
   [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
+  [[ -n ${OCFP_VAULT_ENV_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
+  [[ -n ${OCFP_VAULT_TF_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
 }
 
 timestamp="$(date +%Y-%m-%dT%H:%M:%S)"

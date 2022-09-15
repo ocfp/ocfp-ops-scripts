@@ -9,6 +9,8 @@ USAGE ${0//*/} <pg|env> <kit> <full-genesis-env-name> [<args>]
 
 WHERE
 
+  init    - Intialize both pg databases and environment.
+
   init-pg - Initializing the pg databases via vault data, and update env data in vault
 
   init-env - Generating env files from templates via vault data
@@ -24,6 +26,16 @@ WHERE init-env <args> IN
   vault-prefix "secret/...." # optional - only to override the default 'secret/'
 
   NOTE: Kit env template are expected at: '${templates_path}/env/<kit-name>'
+
+WHERE init-pg <args> IN
+
+  region <region> # Reqired
+
+  kit <kit-name> # Required: bosh, cf, blacksmith, shield, concourse, autoscaler, scheduler, vault, jumpbox
+
+  name <env-name> # Required. Ex: ocfp-codex-mgmt-us-east-1, ocfp-codex-us-east-1
+
+  vault-prefix "secret/...." # optional - only to override the default 'secret/'
 
 USAGE
 EOT
@@ -95,6 +107,12 @@ __parse::args() {
   esac
 }
 
+__set::vault::paths() {
+  local _env_path="${OCFP_ENV_NAME//-/\/}"
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"secret/"}/${_env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"secret/"}/tf/${_env_path}"
+}
+
 __set::env::type() {
   case "${OCFP_ENV_NAME}" in
     (*-mgmt-*) env_type="mgmt" ;;
@@ -116,12 +134,13 @@ __init::env() {
 
   __set::env::type
 
+  _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
+  _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
+
   case "${OCFP_KIT}" in
     (bosh)
       case "${OCFP_IAAS}" in
         (aws)
-          _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
-          _dst_path="${OCFP_VAULT_PREFIX}/${OCFP_ENV_NAME//-/\/}/bosh"
           safe cp "${_src_path}/bosh" "${_dst_path}/aws"
           safe cp "${_src_path}/s3" "${_dst_path}/blobstore/s3"
           ;;
@@ -149,6 +168,8 @@ cmd=$1
 shift || usage
 
 __parse::args "$@"
+
+__set::vault::paths
 
 case ${cmd} in
   (init)     __init::all "$@" ;;

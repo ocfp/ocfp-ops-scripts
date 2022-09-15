@@ -5,6 +5,8 @@ fail() { echo -e "$*" >&2 ; exit 1 ; }
 [[ -n ${OCFP_IAAS:-} ]]     || fail "OCFP_IAAS     must be set and exported."
 [[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION   must be set and exported."
 [[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
+[[ -n ${OCFP_VAULT_ENV_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
+[[ -n ${OCFP_VAULT_TF_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
 
 usage() {
   echo -e "$(cat <<EOT
@@ -73,7 +75,7 @@ cat <<-YAML
 
 meta:
   vault_certs: "${OCFP_VAULT_PREFIX:-"secret"}/certs" 
-  vault_tf: "${OCFP_VAULT_PREFIX:-"secret"}/tf/${OCFP_REGION//-/\/}"
+  vault_tf: "${OCFP_VAULT_TF_PATH}"
 
 params:
   trusted_certs:
