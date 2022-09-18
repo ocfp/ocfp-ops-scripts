@@ -32,27 +32,10 @@ cat <<-YAML
 ---
 kit:
   name: bosh
-  version: 2.2.7-rc.1 # minimum version for external-db-vault
+  version: 2.2.7-rc.5 # minimum version for external-db-vault
   features:
   - (( append ))
   - ${OCFP_IAAS}
-YAML
-
-case "${OCFP_IAAS}" in
-  (aws) echo "  - s3-blobstore" ;;
-  (gcp) echo "  - gcp-blobstore" ;;
-  (azure) echo "  - azure-blobstore" ;;
-  (*) true ;;
-esac
-
-case "${env_type}" in
-  (*mgmt*) echo "  - proto # legacy name, proto -> mgmt" ;;
-  (*) true ;;
-esac
-
-cat <<-YAML
-  - netop-access
-  - sysop-access
   - ocfp
 # - bosh-dns-health-check
 
@@ -73,49 +56,7 @@ esac
 
 cat <<-YAML
 
-meta:
-  vault_certs: "${OCFP_VAULT_PREFIX:-"secret"}/certs" 
-  vault_tf: "${OCFP_VAULT_TF_PATH}"
-
 params:
-  trusted_certs:
-  - (( vault meta.vault_certs "/dbs:ca" )) # Databases CA
-  - (( vault meta.vault_certs "/org:ca" )) # Organizaion CA, if exists
-
-  subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" ))
-
-  default_gateway: (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:gateway" ))
-
-  dns: 
-  - (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:dns" ))
-
-  static_ip: (( vault meta.vault_tf "/ocfp/${env_type}/net/bosh:ip" ))
-  
-  aws_region: "${OCFP_REGION}"
-  
-  aws_default_sgs:
-  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
-  - (( vault meta.vault_tf "/iaas/sgs/${env_type}:id" ))
-  
-YAML
-
-case ${env_type} in
-  (mgmt)
-    cat <<-YAML
-  aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
-  
-  aws_security_groups:
-  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
-  - (( vault meta.vault_tf "/iaas/sgs/${env_type}:id" ))
-
-YAML
-    ;;
-  (*) true ;; # ocf env (eg. non create-env bosh) does not use these
-esac
-
-cat <<-YAML
-  s3_blobstore_bucket: (( vault meta.vault_tf "/ocfp/${env_type}/blobstore/bosh:name" ))
-  s3_blobstore_region: ${OCFP_REGION} # TODO: check if needs to be set in ^^^
   
   dns_cache: true # DNS Caching (for runtime config)
 

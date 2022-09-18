@@ -1,0 +1,283 @@
+---
+################################################################################
+# Management BOSH Director
+# Cloud Config
+################################################################################
+
+################################################################################
+# AZs
+################################################################################
+azs:
+- { name: z1, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[0].availability_zone )) } }
+- { name: z2, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[1].availability_zone )) } }
+- { name: z3, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[2].availability_zone )) } }
+
+################################################################################
+# VM Types
+################################################################################
+vm_types:
+- { name: default-dev,           cloud_properties: { instance_type: t3.medium,   ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+- { name: default-prod,          cloud_properties: { instance_type: m6i.large,   ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+- { name: compilation-dev,       cloud_properties: { instance_type: t3.large,    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
+- { name: compilation-prod,      cloud_properties: { instance_type: c6i.xlarge,  ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
+- { name: bosh-dev,              cloud_properties: { instance_type: t3.large,    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
+- { name: bosh-prod,             cloud_properties: { instance_type: m6i.4xlarge, ephemeral_disk: { size: 131072, type: gp3, encrypted: true }}}
+- { name: vault-dev,             cloud_properties: { instance_type: t3.medium,   ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+- { name: vault-prod,            cloud_properties: { instance_type: m6i.xlarge,  ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+- { name: concourse-worker-dev,  cloud_properties: { instance_type: t3.large,    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }}}
+- { name: concourse-worker-prod, cloud_properties: { instance_type: m6i.large,   ephemeral_disk: { size: 204800, type: gp3, encrypted: true }}}
+- { name: jumpbox-dev,           cloud_properties: { instance_type: t3.large,    ephemeral_disk: { size: 131072, type: gp3, encrypted: true }}}
+- { name: jumpbox-prod,          cloud_properties: { instance_type: m6i.xlarge,  ephemeral_disk: { size: 131072, type: gp3, encrypted: true }}}
+- { name: shield-dev,            cloud_properties: { instance_type: t3.medium,   ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+- { name: shield-prod,           cloud_properties: { instance_type: m6i.xlarge,  ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
+
+################################################################################
+# Disk Types
+################################################################################
+disk_types:
+- { name: default-dev,     disk_size: 40960,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: default-prod,    disk_size: 81920,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: bosh-dev,        disk_size: 32768,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: bosh-prod,       disk_size: 65536,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: concourse-dev,   disk_size: 32768,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: concourse-prod,  disk_size: 65536,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: jumpbox-dev,     disk_size: 65536,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: jumpbox-prod,    disk_size: 65536,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: prometheus-dev,  disk_size: 32768,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: prometheus-prod, disk_size: 1280000, cloud_properties: { type: gp3, encrypted: true }}
+- { name: shield-dev,      disk_size: 8192,    cloud_properties: { type: gp3, encrypted: true }}
+- { name: shield-prod,     disk_size: 8192,    cloud_properties: { type: gp3, encrypted: true }}
+- { name: vault-dev,       disk_size: 16384,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: vault-prod,      disk_size: 32768,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: doomsday-dev,    disk_size: 16384,   cloud_properties: { type: gp3, encrypted: true }}
+- { name: doomsday-prod,   disk_size: 32768,   cloud_properties: { type: gp3, encrypted: true }}
+
+################################################################################
+# Networks
+################################################################################
+networks:
+
+################################################################################
+# Network: Compilation
+################################################################################
+  - name: compilation
+    type: manual
+    subnets: 
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".10" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".14 - " meta.iaas.subnets.ocfp[1].ip_n ))
+
+################################################################################
+# Network: Management BOSH, ips: z{1}/.4
+################################################################################
+  - name: mgmt-bosh
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".3" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".5 - " meta.iaas.subnets.ocfp[0].ip_n ))
+
+################################################################################
+# Network: Management Vault
+#          ips: z{1,2,3}/subnet/.5
+################################################################################
+  - name: mgmt-vault
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".4" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".6 - " meta.iaas.subnets.ocfp[0].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".4" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".6 - " meta.iaas.subnets.ocfp[1].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[2].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z3 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[2].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[2].ip_0 " - " meta.iaas.subnets.ocfp[2].cidr_prefix ".4" ))
+          - (( concat meta.iaas.subnets.ocfp[2].cidr_prefix ".6 - " meta.iaas.subnets.ocfp[2].ip_n ))
+
+################################################################################
+# Network: Management Jumpbox, ips: z{1,2,3}/subnet/.6
+################################################################################
+  - name: mgmt-jumpbox
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".5" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".7 - " meta.iaas.subnets.ocfp[0].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".5" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".7 - " meta.iaas.subnets.ocfp[1].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[2].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z3 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[2].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[2].ip_0 " - " meta.iaas.subnets.ocfp[2].cidr_prefix ".5" ))
+          - (( concat meta.iaas.subnets.ocfp[2].cidr_prefix ".7 - " meta.iaas.subnets.ocfp[2].ip_n ))
+
+################################################################################
+# Network: Management Concourse, ips: z{1,2,3}/subnet/.7
+################################################################################
+  - name: mgmt-concourse
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".6" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".8 - " meta.iaas.subnets.ocfp[0].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".6" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".8 - " meta.iaas.subnets.ocfp[1].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[2].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z3 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[2].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[2].ip_0 " - " meta.iaas.subnets.ocfp[2].cidr_prefix ".6" ))
+          - (( concat meta.iaas.subnets.ocfp[2].cidr_prefix ".8 - " meta.iaas.subnets.ocfp[2].ip_n ))
+
+################################################################################
+# Network: Management Prometheus, ips: z{1,2,3}/subnet/.8
+################################################################################
+  - name: mgmt-prometheus
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".7" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".9 - " meta.iaas.subnets.ocfp[0].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".7" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".9 - " meta.iaas.subnets.ocfp[1].ip_n ))
+      - range: (( grab meta.iaas.subnets.ocfp[2].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z3 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[2].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[2].ip_0 " - " meta.iaas.subnets.ocfp[2].cidr_prefix ".7" ))
+          - (( concat meta.iaas.subnets.ocfp[2].cidr_prefix ".9 - " meta.iaas.subnets.ocfp[2].ip_n ))
+
+################################################################################
+# Network: Management SHIELD, ips: z{1}/subnet/.9
+################################################################################
+  - name: mgmt-shield
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].ip_0 " - " meta.iaas.subnets.ocfp[0].cidr_prefix ".7" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr_prefix ".9 - " meta.iaas.subnets.ocfp[0].ip_n ))
+
+################################################################################
+# Network: Management Doomsday, ips: z{2}/subnet/.9
+################################################################################
+  - name: mgmt-doomsday
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[1].cidr_block ))
+        gateway: (( grab meta.iaas.net.bosh.gateway ))
+        azs: [ z2 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[1].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[1].ip_0 " - " meta.iaas.subnets.ocfp[1].cidr_prefix ".7" ))
+          - (( concat meta.iaas.subnets.ocfp[1].cidr_prefix ".9 - " meta.iaas.subnets.ocfp[1].ip_n ))
+
+################################################################################
+# Compilation Settings
+################################################################################
+compilation:
+  az: z2
+  network: compilation
+  vm_type: (( concat "compilation-" meta.scale ))
+  workers: 6
+  reuse_compilation_vms: true
+
+################################################################################
+# Compilation Settings
+################################################################################
+vm_extensions:
+  - name: vault-lb
+    cloud_properties:
+      lb_target_group:
+        - ocfp-mgmt-vault-alb-tg
+  - name: concourse-lb
+    cloud_properties:
+      lb_target_group:
+        - ocfp-mgmt-concourse-alb-tg
+

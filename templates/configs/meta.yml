@@ -1,0 +1,43 @@
+################################################################################
+# OCFP Metadata information via Vault 
+# According to the OCFP metadata contract for environments
+################################################################################
+meta:
+  scale: (( grab ${OCFP_ENV_SCALE} ))
+
+  ocfp:
+    vault:
+      env:
+        path: (( grab ${OCFP_VAULT_ENV_PATH} ))   # Env Var Must Be Exported
+        tf_path: (( grab ${OCFP_VAULT_TF_PATH} )) # Env Var Must Be Exported
+
+    net:
+      bosh:
+        gateway: (( vault meta.ocfp.vault.env.tf_path "/iaas/net/bosh:gateway" ))
+        dns: (( vault meta.ocfp.vault.env.tf_path "/iaas/net/bosh:dns" ))
+        ip: (( vault meta.ocfp.vault.env.tf_path "/iaas/net/bosh:ip" ))
+
+    iaas:
+      subnets:
+        - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:id" ))
+          availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:availability_zone" ))
+          cidr:
+            block: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:cidr_block" ))
+            prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:cidr_prefix" ))
+            ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:cidr_ip_0" ))
+            ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:cidr_ip_n" ))
+        - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:id" ))
+          availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:availability_zone" ))
+          cidr:
+            block: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:cidr_block" ))
+            prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:cidr_prefix" ))
+            ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:cidr_ip_0" ))
+            ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:cidr_ip_n" ))
+        - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:id" ))
+          availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/3:availability_zone" ))
+          cidr:
+            block: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:cidr_block" ))
+            prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:cidr_prefix" ))
+            ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:cidr_ip_0" ))
+            ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:cidr_ip_n" ))
+  

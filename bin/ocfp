@@ -83,6 +83,14 @@ __parse::args() {
         export OCFP_BOSH_ENV="$1"
         shift || fail "${0//*/} ... bosh <bosh-env-name>"
         ;;
+      (config) 
+        config_type="${1}"
+        shift || fail "${0//*/} ... config <type>"
+        ;;
+      (scale) 
+        config_scale="${1}"
+        shift || fail "${0//*/} ... scale <type>"
+        ;;
       (*)
         usage
         ;;
@@ -128,11 +136,8 @@ __init::pg() {
 __init::env() {
   local _src_path _dst_path
   if [[ -s ${OCFP_ENV_NAME}.yml ]] 
-  then
-    fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
+  then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
   fi
-
-  __set::env::type
 
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
@@ -158,9 +163,44 @@ __init::env() {
   exit $?
 }
 
+__init::config() {
+  local _src_path _dst_path
+
+  _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
+  _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
+
+  if [[ -s configs/${_config_type}/${OCFP_ENV_NAME}.yml ]] 
+  then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
+  fi
+
+  case "${OCFP_KIT}" in
+    (bosh)
+      case "${OCFP_IAAS}" in
+        (aws)
+          #safe cp "${_src_path}/bosh" "${_dst_path}/aws"
+          #safe cp "${_src_path}/s3" "${_dst_path}/blobstore/s3"
+          ;;
+        (*) fail "Not Yet Implemented" ;;
+      esac
+      ;;
+  esac
+
+  mkdir -p "configs/${config_type}"
+
+  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
+  local _template="${templates_path}/configs/${config_type}/${env_type}-${config_scale:-"dev"}.yml"
+  local _meta="${templates_path}/configs/${config_type}/meta.yml"
+  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${target}"
+  export OCFP_ENV_SCALE=${config_scale:-"dev"}
+
+  spruce merge -m "${_meta}" "${_template}" > "${_target}"
+  exit $?
+}
+
 __init::all() {
   __init::pg "$@"
   __init::env "$@"
+  # If bosh, init configs
 }
 
 templates_path="${0%\/ocfp}/templates"
@@ -169,12 +209,14 @@ shift || usage
 
 __parse::args "$@"
 
+__set::env::type
 __set::vault::paths
 
 case ${cmd} in
   (init)     __init::all "$@" ;;
   (init-pg)  __init::pg "$@"  ;;
   (init-env) __init::env "$@" ;;
+  (init-config) __init::config "$@" ;;
   (*) usage ;;
 esac
 
