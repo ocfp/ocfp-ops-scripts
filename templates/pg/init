@@ -91,7 +91,7 @@ pg::prepare() {
     local _o="${PG_PORT:-5432}"
 
     echo -e "Initializing: postgresql://${_u}@${PG_HOSTNAME}/${_db}"
-    pg::psql "${_db}" -c "CREATE DATABASE ${_db};"
+    pg::psql "postgres" -c "CREATE DATABASE ${_db};"
 
     local _ext
     for _ext in citext pgcrypto 
