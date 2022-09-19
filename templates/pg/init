@@ -23,8 +23,8 @@ Requirements:
       Ex: bosh kit will have kit dbs: bosh, uaa, and credhub
    * VAULT_NAMESPACE may be set and exported, if required, it will be exported
    * OCFP_VAULT_PREFIX may be set and exported, if required, defaults to 'secret/'
-   * OCFP_VAULT_ENV_PREFIX must be set and exported
-   * OCFP_VAULT_TF_PREFIX must be set and exported
+   * OCFP_VAULT_ENV_PATH must be set and exported
+   * OCFP_VAULT_TF_PATH must be set and exported
 
 USAGE
 }
@@ -145,8 +145,8 @@ __parse::args() {
   [[ -n ${kit} ]]      || fail "'kit <name>' required"
   [[ -n ${OCFP_REGION} ]] || fail "'region <name>' required"
   [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
-  [[ -n ${OCFP_VAULT_ENV_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
-  [[ -n ${OCFP_VAULT_TF_PREFIX:-} ]] || fail "OCFP_VAULT_ENV_PREFIX must be set and exported."
+  [[ -n ${OCFP_VAULT_ENV_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
+  [[ -n ${OCFP_VAULT_TF_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
 }
 
 timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
