@@ -5,7 +5,7 @@
 usage() {
   echo -e "$(cat <<EOT
 
-USAGE ${0//*/} <pg|env> <kit> <full-genesis-env-name> [<args>]
+USAGE ${0//*/} <init-pg,init-env,init-configs> [<args>]
 
 WHERE
 
@@ -15,7 +15,7 @@ WHERE
 
   init-env - Generating env files from templates via vault data
 
-WHERE init-env <args> IN
+WHERE init-{pg,env,configs} <args> IN
 
   region <region> # Reqired
 
@@ -26,27 +26,6 @@ WHERE init-env <args> IN
   vault-prefix "secret/...." # optional - only to override the default 'secret/'
 
   NOTE: Kit env template are expected at: '${templates_path}/env/<kit-name>'
-
-WHERE init-pg <args> IN
-
-  region <region> # Reqired
-
-  kit <kit-name> # Required: bosh, cf, blacksmith, shield, concourse, autoscaler, scheduler, vault, jumpbox
-
-  name <env-name> # Required. Ex: ocfp-codex-mgmt-us-east-1, ocfp-codex-us-east-1
-
-  vault-prefix "secret/...." # optional - only to override the default 'secret/'
-
-WHERE init-configs <args> IN
-
-  region <region> # Reqired
-
-  kit <kit-name> # Required: bosh, cf, blacksmith, shield, concourse, autoscaler, scheduler, vault, jumpbox
-
-  name <env-name> # Required. Ex: ocfp-mgmt-us-east-1, ocfp-us-east-1
-
-  vault-prefix "secret/...." # optional - only to override the default 'secret/'
-
 
 USAGE
 EOT
@@ -211,12 +190,6 @@ __init::config() {
   exit $?
 }
 
-__init::all() {
-  __init::pg "$@"
-  __init::env "$@"
-  # If bosh, init configs
-}
-
 templates_path="${0%\/ocfp}/templates"
 cmd=$1 
 shift || usage
@@ -230,7 +203,6 @@ if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
 if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
-  (init)     __init::all "$@" ;;
   (init-pg)  __init::pg "$@"  ;;
   (init-env) __init::env "$@" ;;
   (init-config) __init::config "$@" ;;
