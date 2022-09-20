@@ -203,7 +203,7 @@ __init::config() {
   local _meta="${templates_path}/configs/${config_type}/meta.yml"
   local _meta_prune="${templates_path}/configs/meta-prune.yml"
 
-  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${target}"
+  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
 
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
