@@ -37,6 +37,17 @@ WHERE init-pg <args> IN
 
   vault-prefix "secret/...." # optional - only to override the default 'secret/'
 
+WHERE init-configs <args> IN
+
+  region <region> # Reqired
+
+  kit <kit-name> # Required: bosh, cf, blacksmith, shield, concourse, autoscaler, scheduler, vault, jumpbox
+
+  name <env-name> # Required. Ex: ocfp-mgmt-us-east-1, ocfp-us-east-1
+
+  vault-prefix "secret/...." # optional - only to override the default 'secret/'
+
+
 USAGE
 EOT
 )"
@@ -188,9 +199,11 @@ __init::config() {
   mkdir -p "configs/${config_type}"
 
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-  local _template="${templates_path}/configs/${config_type}/${env_type}-${config_scale:-"dev"}.yml"
-  local _meta="${templates_path}/configs/${config_type}/meta.yml"
+  local _template="${templates_path}/configs/${config_type}/${OCFP_IAAS}/${env_type}.yml"
+  local _meta="${templates_path}/configs/meta.yml"
+
   echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${target}"
+
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
   spruce merge -m "${_meta}" "${_template}" > "${_target}"

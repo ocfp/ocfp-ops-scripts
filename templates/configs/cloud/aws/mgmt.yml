@@ -8,9 +8,15 @@
 # AZs
 ################################################################################
 azs:
-- { name: z1, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[0].availability_zone )) } }
-- { name: z2, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[1].availability_zone )) } }
-- { name: z3, cloud_properties: { availability_zone: (( grab meta.ocfp.subnets[2].availability_zone )) } }
+- name: z1
+  cloud_properties: 
+    availability_zone: (( grab meta.ocfp.subnets[0].availability_zone ))
+- name: z2 
+  cloud_properties: 
+    availability_zone: (( grab meta.ocfp.subnets[1].availability_zone ))
+- name: z3 
+  cloud_properties: 
+    availability_zone: (( grab meta.ocfp.subnets[2].availability_zone ))
 
 ################################################################################
 # VM Types
