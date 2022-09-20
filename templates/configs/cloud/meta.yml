@@ -3,13 +3,13 @@
 # According to the OCFP metadata contract for environments
 ################################################################################
 meta:
-  scale: (( grab ${OCFP_ENV_SCALE} ))
+  scale: (( grab $OCFP_ENV_SCALE ))
 
   ocfp:
     vault:
       env:
-        path: (( grab ${OCFP_VAULT_ENV_PATH} ))   # Env Var Must Be Exported
-        tf_path: (( grab ${OCFP_VAULT_TF_PATH} )) # Env Var Must Be Exported
+        path: (( grab $OCFP_VAULT_ENV_PATH ))   # Env Var Must Be Exported
+        tf_path: (( grab $OCFP_VAULT_TF_PATH )) # Env Var Must Be Exported
 
     net:
       bosh:
