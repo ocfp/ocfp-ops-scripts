@@ -200,13 +200,14 @@ __init::config() {
 
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
   local _template="${templates_path}/configs/${config_type}/${OCFP_IAAS}/${env_type}.yml"
-  local _meta="${templates_path}/configs/meta.yml"
+  local _meta="${templates_path}/configs/${config_type}/meta.yml"
+  local _meta_prune="${templates_path}/configs/meta-prune.yml"
 
   echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${target}"
 
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
-  spruce merge -m "${_meta}" "${_template}" > "${_target}"
+  spruce merge -m "${_meta}" "${_template}" "${_meta_prune}" > "${_target}"
   exit $?
 }
 
@@ -224,6 +225,9 @@ __parse::args "$@"
 
 __set::env::type
 __set::vault::paths
+
+if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
+if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
   (init)     __init::all "$@" ;;
