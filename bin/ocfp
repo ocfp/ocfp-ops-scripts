@@ -198,17 +198,21 @@ __init::config() {
   local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}" ; do
+    local _dep_env="${dep%%\%*}"
+    local _vault_prefix="${dep##*\%}"
     { 
-    OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX}/${dep//-/\/}" \
-    OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX}/tf/${dep//-/\/}" \
-    OCFP_ENV_NAME="${dep}" \
-    spruce merge -m "${_meta}" "${_config_path}/networks/ocf-bosh" > \
-      "${_tmp_path}/${dep}.yml"
+    OCFP_VAULT_ENV_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/${_dep_env//-/\/}" \
+    OCFP_VAULT_TF_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/tf/${_dep_env//-/\/}" \
+    OCFP_ENV_NAME="${_dep_env}" \
+    VAULT_PREFIX="${_vault_prefix}"
+    spruce merge -m \
+      "${_meta}" "${_config_path}/networks/ocf-bosh.yml" "${_meta_prune}" > \
+      "${_tmp_path}/${_dep_env}.yml"
     }
-    _merge+=( "${_tmp_path}/${dep}.yml" ) 
+    _merge+=( "${_tmp_path}/${_dep_env}.yml" ) 
   done
 
-  _merge=( "${_meta_prune}")
+  _merge+=( "${_meta_prune}")
 
   spruce merge -m "${_merge[@]}" > "${_target}"
 
