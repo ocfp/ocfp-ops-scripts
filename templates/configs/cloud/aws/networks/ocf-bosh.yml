@@ -1,0 +1,16 @@
+---
+networks:
+  - (( append ))
+  - name: (( concat $OCFP_ENV_NAME "-bosh" ))
+    type: manual
+    subnets:
+      - range: (( grab meta.iaas.subnets.ocfp[0].cidr.block ))
+        gateway: (( grab meta.net.bosh.gateway ))
+        azs: [ z1 ]
+        dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets.ocfp[0].id ))
+        reserved:
+          - (( concat meta.iaas.subnets.ocfp[0].cidr.ip_0 " - " meta.iaas.subnets.ocfp[0].cidr.prefix ".9" ))
+          - (( concat meta.iaas.subnets.ocfp[0].cidr.prefix ".11 - " meta.iaas.subnets.ocfp[0].cidr.ip_n ))
+

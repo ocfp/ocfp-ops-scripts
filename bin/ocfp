@@ -41,6 +41,10 @@ __parse::args() {
   do
     _action="${1}" ; shift
     case ${_action} in
+      (dep)
+        deps+=( "${1//.yml}" )
+        shift || fail "${0//*/} ... dep <env-name> # no .yml"
+        ;;
       (vault-prefix)
         export OCFP_VAULT_PREFIX="${1}" # override default of secret/
         ;;
@@ -178,7 +182,8 @@ __init::config() {
   mkdir -p "configs/${config_type}"
 
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-  local _template="${templates_path}/configs/${config_type}/${OCFP_IAAS}/${env_type}.yml"
+  local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
+  local _template="${_config_path}/${env_type}.yml"
   local _meta="${templates_path}/configs/${config_type}/meta.yml"
   local _meta_prune="${templates_path}/configs/meta-prune.yml"
 
@@ -186,17 +191,40 @@ __init::config() {
 
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
-  spruce merge -m "${_meta}" "${_template}" "${_meta_prune}" > "${_target}"
+  declare -a _merge
+
+  _merge=( "${_meta}" "${_template}" )
+
+  local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
+
+  for dep in "${deps[@]}" ; do
+    { 
+    OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX}/${dep//-/\/}" \
+    OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX}/tf/${dep//-/\/}" \
+    OCFP_ENV_NAME="${dep}" \
+    spruce merge -m "${_meta}" "${_config_path}/networks/ocf-bosh" > \
+      "${_tmp_path}/${dep}.yml"
+    }
+    _merge+=( "${_tmp_path}/${dep}.yml" ) 
+  done
+
+  _merge=( "${_meta_prune}")
+
+  spruce merge -m "${_merge[@]}" > "${_target}"
+
   exit $?
 }
 
 templates_path="${0%\/ocfp}/templates"
-cmd=$1 
-shift || usage
+
+cmd=$1 ; shift || usage
+
+declare -a deps
 
 __parse::args "$@"
 
 __set::env::type
+
 __set::vault::paths
 
 if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
