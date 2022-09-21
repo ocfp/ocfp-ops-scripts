@@ -161,29 +161,10 @@ __init::env() {
   exit $?
 }
 
-__init::config() {
+__init::config::cloud() {
   local _src_path _dst_path
-
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
-
-  if [[ -s configs/${_config_type}/${OCFP_ENV_NAME}.yml ]] 
-  then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
-  fi
-
-  case "${OCFP_KIT}" in
-    (bosh)
-      case "${OCFP_IAAS}" in
-        (aws)
-          #safe cp "${_src_path}/bosh" "${_dst_path}/aws"
-          #safe cp "${_src_path}/s3" "${_dst_path}/blobstore/s3"
-          ;;
-        (*) fail "Not Yet Implemented" ;;
-      esac
-      ;;
-  esac
-
-  mkdir -p "configs/${config_type}"
 
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
   local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
@@ -220,8 +201,41 @@ __init::config() {
 
   spruce merge -m "${_merge[@]}" > "${_target}"
 
+}
+
+__init::config::runtime() {
+  fail "Not Yet Implemented"
+}
+
+__init::config::cpi() {
+  fail "Not Yet Implemented"
+}
+
+__init::config() {
+  case "${OCFP_KIT}" in
+    (bosh)
+      case "${OCFP_IAAS}" in
+        (aws)
+          #safe cp "${_src_path}/bosh" "${_dst_path}/aws"
+          #safe cp "${_src_path}/s3" "${_dst_path}/blobstore/s3"
+          ;;
+        (*) fail "Not Yet Implemented" ;;
+      esac
+      ;;
+  esac
+
+  mkdir -p "configs/${config_type}"
+
+  case ${config_type} in 
+    (cloud)   __init::config::cloud "$@"   ;;
+    (runtime) __init::config::runtime "$@" ;;
+    (cpi)     __init::config::cpi "$@"     ;;
+    (*) fail "Unsupported config type: ${config_type}, valid types are cloud,runtime,cpi" ;;
+  esac
+
   exit $?
 }
+
 
 templates_path="${0%\/ocfp}/templates"
 
