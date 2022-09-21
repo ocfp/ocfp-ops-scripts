@@ -5,29 +5,34 @@
 usage() {
   echo -e "$(cat <<EOT
 
-USAGE ${0//*/} <init-pg,init-env,init-configs> [<args>]
-
-WHERE
-
-  init    - Intialize both pg databases and environment.
-
-  init-pg - Initializing the pg databases via vault data, and update env data in vault
-
-  init-env - Generating env files from templates via vault data
-
-WHERE init-{pg,env,configs} <args> IN
-
-  region <region> # Reqired
-
-  kit <kit-name> # Required: bosh, cf, blacksmith, shield, concourse, autoscaler, scheduler, vault, jumpbox
-
-  name <env-name> # Required. Ex: ocfp-codex-mgmt-us-east-1, ocfp-codex-us-east-1
-
-  vault-prefix "secret/...." # optional - only to override the default 'secret/'
-
-  NOTE: Kit env template are expected at: '${templates_path}/env/<kit-name>'
-
 USAGE
+
+  ${0//*/} <cmd> <args>
+
+WHERE <cmd> IN
+
+  init-pg     - Initializes pg database servers from vault data, updates env vault
+  init-env    - Generates a kit env file from template via vault data
+  init-config - Generates bosh config files for an env from templates via vault data
+
+WHERE init-{pg,env,config} <args> IN
+
+  region <region> # Required
+  kit <kit-name>  # Required, bosh, vault, jumpbox, cf, blacksmith, shield,
+                              autoscaler, scheduler, concourse
+  name <env-name> # Required, Ex: ocfp-demo-mgmt-us-east-1, ocfp-demo-us-east-1
+  vault-prefix "secret/...." # Optional, overrides default 'secret/'
+
+NOTES
+
+  Templates are expected at the path:
+    -> ${0#ocfp}.
+
+  Default templates can be enhanced/replaced for environment specific context.
+
+  Ex: A bosh kit env template will be located at:
+    -> ${templates_path}/env/bosh
+
 EOT
 )"
 exit 0
@@ -58,8 +63,7 @@ __parse::args() {
         case ${OCFP_KIT} in
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
           (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
-        esac
-        ;;
+        esac ;;
       (env|name)
         export OCFP_ENV_NAME=${1//.yml}
         shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
