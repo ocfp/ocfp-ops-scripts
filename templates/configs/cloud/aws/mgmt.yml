@@ -9,12 +9,15 @@
 ################################################################################
 azs:
 - name: (( concat $OCFP_ENV_NAME "-z1" ))
+  cpi: (( grab $OCFP_ENV_NAME ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[0].availability_zone ))
 - name: (( concat $OCFP_ENV_NAME "-z2" ))
+  cpi: (( grab $OCFP_ENV_NAME ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[1].availability_zone ))
 - name: (( concat $OCFP_ENV_NAME "-z3" ))
+  cpi: (( grab $OCFP_ENV_NAME ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[2].availability_zone ))
 
