@@ -1,0 +1,21 @@
+---
+meta:
+  ocfp:
+    iaas:
+      sgs:
+        mgmt:
+          id: (( vault meta.ocfp.vault.env.tf_path "/bosh/iaas/sgs/mgmt:id" ))
+
+---
+cpis:
+- name: (( grab meta.ocfp.vault.env.name ))
+  type: (( grab meta.ocfp.iaas.name ))
+  properties:
+    access_key_id: (( grab meta.ocfp.bosh.access_key ))
+    secret_access_key: (( grab meta.ocfp.bosh.secret_key ))
+    region: (( grab meta.ocfp.region ))
+    default_key_name: (( grab meta.ocfp.bosh.default_key_name ))
+    default_security_groups:
+    - (( grab meta.ocfp.iaas.sgs.default.id ))
+    - (( grab meta.ocfp.iaas.sgs.mgmt.id ))
+

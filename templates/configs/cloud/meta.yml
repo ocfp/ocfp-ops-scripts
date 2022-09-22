@@ -1,15 +1,12 @@
-################################################################################
-# OCFP Metadata information via Vault 
-# According to the OCFP metadata contract for environments
-################################################################################
+---
 meta:
   scale: (( grab $OCFP_ENV_SCALE ))
 
   ocfp:
     vault:
       env:
-        path: (( concat $OCFP_VAULT_ENV_PATH "/" $OCFP_KIT ))   # Env Var Must Be Exported
-        tf_path: (( concat $OCFP_VAULT_TF_PATH "/" $OCFP_KIT )) # Env Var Must Be Exported
+        path: (( concat $OCFP_VAULT_ENV_PATH "/" $OCFP_KIT ))
+        tf_path: (( concat $OCFP_VAULT_TF_PATH "/" $OCFP_KIT ))
 
     net:
       bosh:
