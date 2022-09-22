@@ -52,6 +52,7 @@ __parse::args() {
         ;;
       (vault-prefix)
         export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        shift || fail "${0//*/} ... vault-prefix \"secret/...\""
         ;;
       (region)
         export OCFP_REGION=$1 # ex: us-east-1, us-west-2
