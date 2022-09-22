@@ -84,7 +84,7 @@ networks:
 ################################################################################
 # Network: Management BOSH, ips: z{1}/.4
 ################################################################################
-  - name: mgmt-bosh
+  - name: (( concat $OCFP_ENV_NAME "-bosh" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -101,7 +101,7 @@ networks:
 # Network: Management Vault
 #          ips: z{1,2,3}/subnet/.5
 ################################################################################
-  - name: mgmt-vault
+  - name: (( concat $OCFP_ENV_NAME "-vault" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -135,7 +135,7 @@ networks:
 ################################################################################
 # Network: Management Jumpbox, ips: z{1,2,3}/subnet/.6
 ################################################################################
-  - name: mgmt-jumpbox
+  - name: (( concat $OCFP_ENV_NAME "-jumpbox" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -169,7 +169,7 @@ networks:
 ################################################################################
 # Network: Management Concourse, ips: z{1,2,3}/subnet/.7
 ################################################################################
-  - name: mgmt-concourse
+  - name: (( concat $OCFP_ENV_NAME "-concourse" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -203,7 +203,7 @@ networks:
 ################################################################################
 # Network: Management Prometheus, ips: z{1,2,3}/subnet/.8
 ################################################################################
-  - name: mgmt-prometheus
+  - name: (( concat $OCFP_ENV_NAME "-prometheus" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -237,7 +237,7 @@ networks:
 ################################################################################
 # Network: Management SHIELD, ips: z{1}/subnet/.9
 ################################################################################
-  - name: mgmt-shield
+  - name: (( concat $OCFP_ENV_NAME "-shield" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -253,7 +253,7 @@ networks:
 ################################################################################
 # Network: Management Doomsday, ips: z{2}/subnet/.9
 ################################################################################
-  - name: mgmt-doomsday
+  - name: (( concat $OCFP_ENV_NAME "-doomsday" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
