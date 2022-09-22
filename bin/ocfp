@@ -191,8 +191,9 @@ __init::config::cloud() {
       OCFP_ENV_NAME="${_dep_env}"
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
-      "${_meta}" 
-      "${_config_path}/networks/ocf-bosh.yml" 
+      "${_meta}"
+      "${_config_path}/azs/ocf.yml"
+      "${_config_path}/networks/ocf-bosh.yml"
       "${_meta_prune}"
       )
       spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
@@ -239,9 +240,8 @@ __init::config::cpi() {
       OCFP_ENV_NAME="${_dep_env}"
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
-        "${_meta}" 
-        "${_config_path}/ocf.yml" 
-        "${_config_path}/azs/ocf.yml"
+        "${_meta}"
+        "${_config_path}/ocf.yml"
         "${_meta_prune}"
       )
       spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
