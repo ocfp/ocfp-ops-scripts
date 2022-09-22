@@ -4,7 +4,7 @@ meta:
     iaas:
       sgs:
         ocf:
-          id: (( vault meta.ocfp.vault.env.tf_path "/bosh/iaas/sgs/ocf:id" ))
+          id: (( vault meta.ocfp.vault.env.tf_path "/iaas/sgs/ocf:id" ))
 
 ---
 cpis:

@@ -93,7 +93,9 @@ bosh::vaildate::environment() {
 find::env::file() {
   local _env_regex="${1}"
   local _env_file
-  local _yamls=($(find ${bosh_path} -maxdepth 1 -iname "*${_env_regex}*.yml" -print | sort -r | head -1))
+  local _yamls=($(
+  find ${bosh_path} -maxdepth 1 -iname "*${_env_regex}*.yml" -print | sort -r | head -1
+  ))
 
   if [[ ${#_yamls[@]} -eq 0 ]]
   then fail "No bosh env files found matching regex '${_env_regex}'"

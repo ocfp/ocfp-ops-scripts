@@ -8,13 +8,13 @@
 # AZs
 ################################################################################
 azs:
-- name: z1
+- name: (( concat $OCFP_ENV_NAME "-z1" ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[0].availability_zone ))
-- name: z2 
+- name: (( concat $OCFP_ENV_NAME "-z2" ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[1].availability_zone ))
-- name: z3 
+- name: (( concat $OCFP_ENV_NAME "-z3" ))
   cloud_properties: 
     availability_zone: (( grab meta.ocfp.iaas.subnets[2].availability_zone ))
 
@@ -71,7 +71,7 @@ networks:
     subnets: 
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -87,7 +87,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z1 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -104,7 +104,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z1 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -113,7 +113,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.prefix ".6 - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -122,7 +122,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[1].cidr.prefix ".6 - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z3 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -138,7 +138,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z1 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -147,7 +147,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.prefix ".7 - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -156,7 +156,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[1].cidr.prefix ".7 - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z3 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -172,7 +172,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z1 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -181,7 +181,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.prefix ".8 - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -190,7 +190,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[1].cidr.prefix ".8 - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z3 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -206,7 +206,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z1 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -215,7 +215,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.prefix ".9 - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -224,7 +224,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[1].cidr.prefix ".9 - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z3 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -240,7 +240,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
@@ -256,7 +256,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ z2 ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -268,7 +268,7 @@ networks:
 # Compilation Settings
 ################################################################################
 compilation:
-  az: z2
+  az: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
   network: compilation
   vm_type: (( concat "compilation-" meta.scale ))
   workers: 6
