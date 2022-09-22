@@ -196,7 +196,7 @@ contiains the `default`, `mgmt`, and `ocf` security group ids.
 
 ```
 iaas/subnets/ocfp/{0,1,2}:{id,cidr_block,cidr_prefix,ip_0,ip_n, availability_zone}
-``` 
+```
 for the `0`,`1`, and `2` subnets contains the:
 - iaas `id`
 - `cidr_block` in cidr representation
@@ -207,7 +207,7 @@ for the `0`,`1`, and `2` subnets contains the:
 
 ```
 iaas/vpc:{id,arn,cidr_block}
-``` 
+```
 contains the vpc's `id`, `arn`, and `cidr_block` in ipv4 cidr format.
 
 ### OCFP Init Contract
