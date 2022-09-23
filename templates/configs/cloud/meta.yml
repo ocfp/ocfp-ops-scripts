@@ -3,6 +3,12 @@ meta:
   scale: (( grab $OCFP_ENV_SCALE ))
 
   ocfp:
+    env:
+      type: (( grab $OCFP_ENV_TYPE ))
+      name: (( grab $OCFP_ENV_NAME ))
+      region: (( grab $OCFP_ENV_REGION ))
+      iaas: (( grab $OCFP_ENV_IAAS ))
+
     vault:
       env:
         path: (( concat $OCFP_VAULT_ENV_PATH "/" $OCFP_KIT ))
@@ -26,6 +32,7 @@ meta:
             ips: (( ips meta.ocfp.iaas.subnets[0].cidr.ip_0 1 meta.ocfp.iaas.subnets[0].cidr.ip_count ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:ip_n" ))
+
         - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:id" ))
           availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:availability_zone" ))
           cidr:
@@ -36,6 +43,7 @@ meta:
             ips: (( ips meta.ocfp.iaas.subnets[1].cidr.ip_0 1 meta.ocfp.iaas.subnets[1].cidr.ip_count ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:ip_n" ))
+
         - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:id" ))
           availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:availability_zone" ))
           cidr:
@@ -46,4 +54,4 @@ meta:
             ips: (( ips meta.ocfp.iaas.subnets[2].cidr.ip_0 1 meta.ocfp.iaas.subnets[2].cidr.ip_count ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:ip_n" ))
-  
+

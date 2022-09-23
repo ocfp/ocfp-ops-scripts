@@ -78,8 +78,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[10] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[14] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].compilation_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].compilation_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
 ################################################################################
 # Network: Management BOSH, ips: z{1}/.4
@@ -94,8 +94,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[3] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[5] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].bosh_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].bosh_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Vault
@@ -111,8 +111,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[4] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[6] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].vault_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].vault_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
@@ -120,8 +120,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[6] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[7] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[1].vault_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].vault_b " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
@@ -129,8 +129,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.subnets[2].cidr.ips[4] ))
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ips[6] " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[2].vault_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].vault_b " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Jumpbox, ips: z{1,2,3}/subnet/.6
@@ -145,8 +145,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[5] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[7] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].jumpbox_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].jumpbox_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
@@ -154,8 +154,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[5] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[7] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[1].jumpbox_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].jumpbox_b " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
@@ -163,8 +163,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.subnets[2].cidr.ips[5] ))
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ips[7] " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[2].jumpbox_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].jumpbox_b " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Concourse, ips: z{1,2,3}/subnet/.7
@@ -179,8 +179,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[6] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[8] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].concourse_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
@@ -188,8 +188,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[6] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[8] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[1].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_b " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
@@ -197,8 +197,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.subnets[2].cidr.ips[6] ))
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ips[8] " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[2].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_b " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Prometheus, ips: z{1,2,3}/subnet/.8
@@ -213,8 +213,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[7] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[9] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].prometheus_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].prometheus_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
@@ -222,8 +222,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[7] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[9] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[1].prometheus_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].prometheus_b " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
@@ -231,8 +231,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.subnets[2].cidr.ips[7] ))
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ips[9] " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[2].prometheus_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].prometheus_b " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Network: Management SHIELD, ips: z{1}/subnet/.9
@@ -247,8 +247,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.subnets[0].cidr.ips[7] ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ips[9] " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].shield_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].shield_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Doomsday, ips: z{2}/subnet/.9
@@ -263,8 +263,8 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.subnets[1].cidr.ips[7] ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ips[9] " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[1].doomsday_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].doomsday_b " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
 
 ################################################################################
 # Compilation Settings

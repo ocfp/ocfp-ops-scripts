@@ -125,6 +125,7 @@ __set::env::type() {
     (*-mgmt-*) env_type="mgmt" ;;
     (*)        env_type="ocf"  ;;
   esac
+  export OCFP_ENV_TYPE="${env_type}"
 }
 
 __init::pg() {
@@ -179,7 +180,11 @@ __init::config::cloud() {
 
   declare -a _merge
 
-  _merge=( "${_meta}" "${_template}" )
+  _merge=(
+    "${_meta}"
+    "${templates_path}/configs/meta/mgmt.yml"
+    "${_template}" 
+  )
 
   local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
@@ -193,6 +198,7 @@ __init::config::cloud() {
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
       "${_meta}"
+      "${templates_path}/configs/meta/ocf.yml"
       "${_config_path}/azs/ocf.yml"
       "${_config_path}/networks/ocf-bosh.yml"
       "${_meta_prune}"
