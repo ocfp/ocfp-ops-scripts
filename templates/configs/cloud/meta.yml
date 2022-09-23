@@ -6,8 +6,8 @@ meta:
     env:
       type: (( grab $OCFP_ENV_TYPE ))
       name: (( grab $OCFP_ENV_NAME ))
-      region: (( grab $OCFP_ENV_REGION ))
-      iaas: (( grab $OCFP_ENV_IAAS ))
+      region: (( grab $OCFP_REGION ))
+      iaas: (( grab $OCFP_IAAS ))
 
     vault:
       env:
