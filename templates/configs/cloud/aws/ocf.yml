@@ -138,7 +138,7 @@ networks:
       - range: (( grab meta.iaas.subnets[0].cidr.block ))
         azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
-        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns)) ]
+        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
@@ -154,7 +154,7 @@ networks:
       - range: (( grab meta.iaas.subnets[0].cidr.block ))
         azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
-        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns)) ]
+        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
@@ -170,7 +170,7 @@ networks:
       - range: (( grab meta.iaas.subnets[0].cidr.block ))
         azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
-        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns)) ]
+        dns: [ (( grab meta.ocfp.iaas.subnets[0].cidr.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
@@ -179,7 +179,7 @@ networks:
       - range: (( grab meta.iaas.subnets[1].cidr.block ))
         azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
         gateway: (( grab meta.ocfp.iaas.subnets[1].cidr.gateway ))
-        dns: [ (( grab meta.ocfp.iaas.subnets[1].cidr.dns)) ]
+        dns: [ (( grab meta.ocfp.iaas.subnets[1].cidr.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
@@ -188,7 +188,7 @@ networks:
       - range: (( grab meta.iaas.subnets[2].cidr.block ))
         azs: [ (( concat $OCFP_ENV_NAME "-z3" )) ]
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
-        dns: [ (( grab meta.ocfp.iaas.subnets[2].cidr.dns)) ]
+        dns: [ (( grab meta.ocfp.iaas.subnets[2].cidr.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
