@@ -71,12 +71,12 @@ networks:
   - name: compilation
     type: manual
     subnets: 
-      - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
         azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
-          subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
+          subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 " - " meta.ocfp.iaas.ips.reserved[0].compilation_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].compilation_b " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
