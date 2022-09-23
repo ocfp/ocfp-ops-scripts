@@ -30,6 +30,8 @@ meta:
             prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:cidr_prefix" ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:ip_n" ))
+            gateway: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:gateway" )) 
+            dns:  (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:dns" ))
 
         - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:id" ))
           availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:availability_zone" ))
@@ -39,6 +41,8 @@ meta:
             prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:cidr_prefix" ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:ip_n" ))
+            gateway: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:gateway" )) 
+            dns:  (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1:dns" ))
 
         - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:id" ))
           availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:availability_zone" ))
@@ -48,4 +52,6 @@ meta:
             prefix: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:cidr_prefix" ))
             ip_0: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:ip_0" ))
             ip_n: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:ip_n" ))
+            gateway: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:gateway" )) 
+            dns:  (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2:dns" ))
 
