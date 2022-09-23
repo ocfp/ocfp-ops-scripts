@@ -182,7 +182,7 @@ __init::config::cloud() {
 
   _merge=(
     "${_meta}"
-    "${templates_path}/configs/meta/mgmt.yml"
+    "${templates_path}/configs/cloud/meta/mgmt.yml"
     "${_template}" 
   )
 
@@ -198,7 +198,7 @@ __init::config::cloud() {
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
       "${_meta}"
-      "${templates_path}/configs/meta/ocf.yml"
+      "${templates_path}/configs/cloud/meta/ocf.yml"
       "${_config_path}/azs/ocf.yml"
       "${_config_path}/networks/ocf-bosh.yml"
       "${_meta_prune}"
