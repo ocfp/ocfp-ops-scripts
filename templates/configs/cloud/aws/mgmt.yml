@@ -73,7 +73,7 @@ networks:
     subnets: 
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs: [ (( concat $OCFP_ENV_NAME "-z2" )) ]
+        azs: [ (( concat $OCFP_ENV_NAME "-z1" )) ]
         dns: [ (( grab meta.ocfp.net.bosh.dns )) ]
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -270,7 +270,7 @@ networks:
 # Compilation Settings
 ################################################################################
 compilation:
-  az: (( concat $OCFP_ENV_NAME "-z2" ))
+  az: (( concat $OCFP_ENV_NAME "-z1" ))
   network: compilation
   vm_type: (( concat "compilation-" meta.scale ))
   workers: 6
