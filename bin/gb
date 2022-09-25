@@ -119,14 +119,12 @@ find::env() {
 
 bosh::logs::fetch() {
   local _env_regex="$1" _dep_regex="$2"
-  shift 2|| fail "$(usage)"
-  local _logs_path="${LOGS_PATH:-$HOME/logs}"
-  mkdir -p "$_logs_path"
-  cd "${_logs_path}"
-
+  shift 2 || fail "$(usage)"
+  local _logs_path="${LOGS_PATH:-"${HOME}/logs"}"
   local _env=$(find::env "${_env_regex}")
+  local _env_name="${_env//*\/}"
 
-  local deps=($(bosh::deps ${_env}))
+  local deps=($(bosh::deps ${_env_name}))
   local _d _dep
   for _d in ${deps[@]}
   do
@@ -137,38 +135,30 @@ bosh::logs::fetch() {
 
   [[ -n "${_dep}" ]] || fail "No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
   
-  bosh::do ${_env} -d ${_dep} logs "${@}"
+  bosh::do ${_env_name} -d ${_dep} logs "${@}"
   
-  bosh::logs::extract "${_env}" "${_dep}" "${@}"
-}
-
-# TODO: Handle the case where specifiers are involved like $*=`uaa` eg:
-# ${logs_path}/dev-cf.uaa-20220510-215713-800046211.tgz
-bosh::logs::extract() {
-  local _env="$1" ; shift
-  local _dep="$2" ; shift
-  local dep_logs_path="${logs_path}/${_env}/${_dep}"
   local _f _fn _job _vmid _ts
 
-  mkdir -p "${dep_logs_path}"
-  for _f in ${_dep}*.tgz
-  do
-    tar -zxf "${_f}" -C "${dep_logs_path}"
-    rm -f "${_f}"
+  local _dep_logs_path="${_logs_path}/${_env_name}/${_dep}"
+  mkdir -p "${_dep_logs_path}"
+
+  local _archives=($(find "${bosh_path}" -maxdepth 1 -iname "${_dep}*.tgz" -print))
+  for _f in "${_archives[@]}"
+  do tar -zxf "${_f}" -C "${_dep_logs_path}" ; rm -f "${_f}"
   done
 
-  cd "${dep_logs_path}"
-
-  for _f in $(find "${dep_logs_path}" -iname '*.tgz')
+  local _dep_archives=($(find "${_dep_logs_path}" -maxdepth 1 -iname '*.tgz' -print))
+  for _f in "${_dep_archives[@]}"
   do
-    _fn=$(basename ${_f})
+    _fn=$(basename ${_f//*\/})
     _job=$(echo ${_fn}  | awk -F. '{print $1}')
     _vmid=$(echo ${_fn} | awk -F. '{print $2}')
     _ts=$(echo ${_fn}   | awk -F. '{print $3}')
   
-    mkdir -p "${dep_logs_path}/${_job}/${_vmid}/${_ts}"
+    mkdir -p "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
   
-    tar -zxf "${_job}.${_vmid}.${_ts}.tgz" -C "${dep_logs_path}/${_job}/${_vmid}/${_ts}"
+    tar -zxf "${_job}.${_vmid}.${_ts}.tgz" \
+      -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
   
     rm -f "${job}.${vmid}.${ts}.tgz"
   done
@@ -181,17 +171,17 @@ bosh::do() {
   bosh::vaildate::environment
   
   _env_file="$(find::env::file "${_env_regex}")"
-  {
+  (
     cd "${bosh_path}"
     eval "$(genesis ${_env_file} bosh -A --connect)"
     exec bosh "$@"
-  }
+  )
 }
 
 bosh::deps() {
   local _env="$1"
   shift || fail "$(usage)"
-  bosh::do "${_env}" deps --json |jq -r '.Tables[].Rows[].name'
+  bosh::do "${_env}" deps --json | jq -r '.Tables[].Rows[].name'
 }
 
 bosh::vms::do() {
@@ -209,25 +199,22 @@ bosh::vms::do() {
   done
 }
 
-while [[ $# -gt 0 ]]
-do
-  cmd="${1}" ; shift
-  case "${cmd}" in
-    (b|bosh|d|director)
-      bosh::do "${@}"
-      ;;
-    (l|logs)
-      bosh::logs::fetch "$@"
-      ;;
-    (vmsdo)
-      bosh::vms::do "${@}"
-      ;;
-    (-h|--help|*)
-      usage
-      exit 0
-      ;;
-  esac
-done
+cmd="${1}" ; shift
+case "${cmd}" in
+  (b|bosh|d|director)
+    bosh::do "${@}"
+    ;;
+  (l|logs)
+    bosh::logs::fetch "$@"
+    ;;
+  (vmsdo)
+    bosh::vms::do "${@}"
+    ;;
+  (-h|--help|*)
+    usage
+    exit 0
+    ;;
+esac
 
 exit 0
 
