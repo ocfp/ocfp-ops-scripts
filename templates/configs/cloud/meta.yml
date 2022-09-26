@@ -21,6 +21,9 @@ meta:
         ip: (( vault meta.ocfp.vault.env.tf_path "/net/bosh:ip" ))
 
     iaas:
+      vpc:
+        dns: (( vault meta.ocfp.vault.env.tf_path "/iaas/vpc:dns" ))
+
       subnets:
         - id: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:id" ))
           availability_zone: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/0:availability_zone" ))
