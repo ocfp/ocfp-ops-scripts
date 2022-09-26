@@ -6,8 +6,7 @@ networks:
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         gateway: (( grab meta.ocfp.net.bosh.gateway ))
-        azs:
-         - (( concat $OCFP_ENV_NAME "-z1" ))
+        az: (( concat $OCFP_ENV_NAME "-z1" ))
         dns:
           - (( grab meta.ocfp.iaas.vpc.dns ))
         cloud_properties:
