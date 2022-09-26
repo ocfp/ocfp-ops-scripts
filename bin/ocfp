@@ -195,6 +195,7 @@ __init::config::cloud() {
       OCFP_VAULT_ENV_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/${_dep_env//-/\/}"
       OCFP_VAULT_TF_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/tf/${_dep_env//-/\/}"
       OCFP_ENV_NAME="${_dep_env}"
+      OCFP_ENV_TYPE="ocf"
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
       "${_meta}"
