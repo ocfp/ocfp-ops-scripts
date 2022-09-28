@@ -164,7 +164,7 @@ case "${kit}" in
     ;;
   (cf) # Question, is it routing_api or routing-api?
     pg::prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
-    ;;
+    ;; 
   (autoscaler)
     kit="cf-app-autoscaler" # :/ # Contract FAIL
     pg::prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL

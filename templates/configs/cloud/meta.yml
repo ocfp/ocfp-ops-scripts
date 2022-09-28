@@ -17,8 +17,8 @@ meta:
     net:
       bosh:
         gateway: (( vault meta.ocfp.vault.env.tf_path "/net/bosh:gateway" ))
-        dns: (( vault meta.ocfp.vault.env.tf_path "/net/bosh:dns" ))
         ip: (( vault meta.ocfp.vault.env.tf_path "/net/bosh:ip" ))
+        cidr: (( vault meta.ocfp.vault.env.tf_path "/net/bosh:cidr_block" ))
 
     iaas:
       vpc:

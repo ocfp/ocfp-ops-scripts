@@ -129,7 +129,7 @@ networks:
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[2].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -166,7 +166,7 @@ networks:
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[2].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -193,7 +193,7 @@ networks:
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[1].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         gateway: (( grab meta.ocfp.iaas.subnets[1].cidr.gateway ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
@@ -203,7 +203,7 @@ networks:
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[2].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -240,7 +240,7 @@ networks:
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[2].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
@@ -275,7 +275,7 @@ networks:
         gateway: (( grab meta.ocfp.iaas.subnets[1].cidr.gateway ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
         dns:
-          - (( grab meta.ocfp.iaas.subnets[1].cidr.dns ))
+          - (( grab meta.ocfp.iaas.vpc.dns ))
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
