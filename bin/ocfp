@@ -186,23 +186,24 @@ __init::config::cloud() {
     "${_template}" 
   )
 
-  local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
+  _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}" ; do
-    local _dep_env="${dep%%\%*}"
-
-    case ${dep} in
-      (*\%*) _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
-      (*)   _vault_prefix="${dep##*\%}" ;;
-    esac
-
     ( # Subshell so as to not clobber parents env vars
-      OCFP_VAULT_ENV_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/${_dep_env//-/\/}"
-      OCFP_VAULT_TF_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/tf/${_dep_env//-/\/}"
+      _dep_env="${dep%%\%*}" # vault mount override via %<vault-mount>
+
+      case ${dep} in
+        (*\%*) _vault_prefix="${dep##*\%}" ;;
+        (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
+      esac
+
+      OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
+      OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
       OCFP_ENV_NAME="${_dep_env}"
       OCFP_ENV_TYPE="ocf"
       VAULT_PREFIX="${_vault_prefix}"
-      local _m=(
+
+      _m=(
       "${_meta}"
       "${templates_path}/configs/cloud/meta/ocf.yml"
       "${_config_path}/azs/ocf.yml"
@@ -245,11 +246,14 @@ __init::config::cpi() {
   local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}" ; do
-    local _dep_env="${dep%%\%*}"
-    local _vault_prefix="${dep##*\%}"
     ( # Subshell so as to not clobber parents env vars
-      OCFP_VAULT_ENV_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/${_dep_env//-/\/}"
-      OCFP_VAULT_TF_PATH="${_vault_prefix:-${OCFP_VAULT_PREFIX}}/tf/${_dep_env//-/\/}"
+      _dep_env="${dep%%\%*}" # vault mount override via %<vault-mount>
+      case ${dep} in
+        (*\%*) _vault_prefix="${dep##*\%}" ;;
+        (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
+      esac
+      OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
+      OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
       OCFP_ENV_NAME="${_dep_env}"
       VAULT_PREFIX="${_vault_prefix}"
       local _m=(
