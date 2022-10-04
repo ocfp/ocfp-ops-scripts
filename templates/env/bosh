@@ -31,7 +31,7 @@ cat <<-YAML
 ---
 kit:
   name: bosh
-  version: 2.2.7-rc.5 # minimum version for external-db-vault
+  version: 2.2.7-rc.21 # minimum version for external-db-vault
   features:
   - (( append ))
   - ${OCFP_IAAS}
@@ -40,7 +40,7 @@ kit:
 
 genesis:
   env: ${OCFP_ENV_NAME}
-  min_version: 2.8.5
+  min_version: 2.8.5 # TODO: bump to 2.8.6 when released
 YAML
 
 case "${env_type}" in
@@ -56,7 +56,7 @@ esac
 cat <<-YAML
 
 params:
-  
+  # env_scale: prod
   dns_cache: true # DNS Caching (for runtime config)
 
 YAML
