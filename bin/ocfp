@@ -168,11 +168,11 @@ __init::config::cloud() {
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
 
-  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
   local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
-  local _template="${_config_path}/${env_type}.yml"
   local _meta="${templates_path}/configs/${config_type}/meta.yml"
+  local _template="${_config_path}/${env_type}.yml"
   local _meta_prune="${templates_path}/configs/meta-prune.yml"
+  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
 
   echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
 
@@ -218,10 +218,6 @@ __init::config::cloud() {
   _merge+=( "${_meta_prune}")
 
   spruce merge -m "${_merge[@]}" > "${_target}"
-}
-
-__init::config::runtime() {
-  fail "Not Yet Implemented"
 }
 
 __init::config::cpi() {
@@ -288,9 +284,8 @@ __init::config() {
 
   case ${config_type} in 
     (cloud)   __init::config::cloud "$@"   ;;
-    (runtime) __init::config::runtime "$@" ;;
     (cpi)     __init::config::cpi "$@"     ;;
-    (*) fail "Unsupported config type: ${config_type}, valid types are cloud,runtime,cpi" ;;
+    (*) fail "Unsupported config type: ${config_type}, valid types are cloud,cpi" ;;
   esac
 
   exit $?
