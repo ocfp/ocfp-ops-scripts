@@ -47,7 +47,7 @@ vm_types:
 - name: bosh-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.bosh.prod ))
-    ephemeral_disk: { size: 131072 type: gp3, encrypted: true }
+    ephemeral_disk: { size: 131072, type: gp3, encrypted: true }
 - name: api-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.dev ))
@@ -508,7 +508,7 @@ compilation:
 # Compilation Settings
 ################################################################################
 vm_extensions:
-  - name: cf-system-apps-tcp-lb
+  - name: cf-system-apps-lb
     cloud_properties:
       lb_target_group:
         - ocfp-ocf-cf-system-lb-tg
@@ -517,10 +517,10 @@ vm_extensions:
     cloud_properties:
       lb_target_group:
         - ocfp-ocf-cf-ssh-lb-tg
-  - name: cf-ssh-lb
+  - name: cf-tcp-lb
     cloud_properties:
       lb_target_group:
-        - ocfp-ocf-cf-ssh-lb-tg
+        - ocfp-ocf-cf-tcp-lb-tg
   - name: blacksmith-lb
     cloud_properties:
       lb_target_group:
