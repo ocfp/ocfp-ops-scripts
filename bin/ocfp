@@ -170,7 +170,6 @@ __init::config::cloud() {
 
   local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
   local _meta="${templates_path}/configs/${config_type}/meta.yml"
-  local _template="${_config_path}/${env_type}.yml"
   local _meta_prune="${templates_path}/configs/meta-prune.yml"
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
 
@@ -183,7 +182,8 @@ __init::config::cloud() {
   _merge=(
     "${_meta}"
     "${templates_path}/configs/cloud/meta/mgmt.yml"
-    "${_template}" 
+    "${_config_path}/scale/${env_type}.yml"
+    "${_config_path}/${env_type}.yml"
   )
 
   _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')

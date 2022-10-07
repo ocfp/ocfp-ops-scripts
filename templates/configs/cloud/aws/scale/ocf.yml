@@ -1,0 +1,147 @@
+---
+meta:
+  vm_types:
+    default:
+      dev:  (( grab params.vm_types.default.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.default.prod || "m6i.large" ))
+    compilation:
+      dev:  (( grab params.vm_types.compilation.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.compilation.prod || "c6i.xlarge" ))
+    bosh:
+      dev:  (( grab params.vm_types.bosh.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.bosh.prod || "m6i.2xlarge" ))
+    as-api:
+      dev:  (( grab params.vm_types.as-api.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-api.prod || "m6i.large" ))
+    as-broker:
+      dev:  (( grab params.vm_types.as-broker.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-broker.prod || "m6i.large" ))
+    as-collector:
+      dev:  (( grab params.vm_types.as-collector.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-collector.prod || "m6i.xlarge" ))
+    as-engine:
+      dev:  (( grab params.vm_types.as-engine.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-engine.prod || "m6i.xlarge" ))
+    as-operator:
+      dev:  (( grab params.vm_types.as-operator.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-operator.prod || "m6i.large" ))
+    as-scaler:
+      dev:  (( grab params.vm_types.as-scaler.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-scaler.prod || "m6i.large" ))
+    as-scheduler:
+      dev:  (( grab params.vm_types.as-scheduler.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-scheduler.prod || "m6i.xlarge" ))
+    bbs:
+      dev:  (( grab params.vm_types.bbs.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.bbs.prod || "m6i.xlarge" ))
+    blobstore:
+      dev:  (( grab params.vm_types.blobstore.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blobstore.prod || "m6i.large" ))
+    cc-worker:
+      dev:  (( grab params.vm_types.cc-worker.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.cc-worker.prod || "m6i.large" ))
+    credhub:
+      dev:  (( grab params.vm_types.credhub.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.credhub.prod || "r6i.large" ))
+    diego-api:
+      dev:  (( grab params.vm_types.diego-api.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.diego-api.prod || "c6i.2xlarge" ))
+    diego-cell:
+      dev:  (( grab params.vm_types.diego-cell.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.diego-cell.prod || "r6i.2xlarge" ))
+    doppler:
+      dev:  (( grab params.vm_types.doppler.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.doppler.prod || "c6i.xlarge" ))
+    errand:
+      dev:  (( grab params.vm_types.errand.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.errand.prod || "m6i.large" ))
+    haproxy:
+      dev:  (( grab params.vm_types.haproxy.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.haproxy.prod || "m6i.xlarge" ))
+    log-api:
+      dev:  (( grab params.vm_types.log-api.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.log-api.prod || "c6i.xlarge" ))
+    loggregator:
+      dev:  (( grab params.vm_types.loggregator.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.loggregator.prod || "m6i.xlarge" ))
+    nats:
+      dev:  (( grab params.vm_types.nats.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.nats.prod || "m6i.large" ))
+    postgres:
+      dev:  (( grab params.vm_types.postgres.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.postgres.prod || "m6i.xlarge" ))
+    router:
+      dev:  (( grab params.vm_types.router.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.router.prod || "c6i.xlarge" ))
+    scheduler:
+      dev:  (( grab params.vm_types.scheduler.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.scheduler.prod || "m6i.large" ))
+    syslogger:
+      dev:  (( grab params.vm_types.syslogger.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.syslogger.prod || "m6i.xlarge" ))
+    tcp-router:
+      dev:  (( grab params.vm_types.tcp-router.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.tcp-router.prod || "c6i.xlarge" ))
+    uaa:
+      dev:  (( grab params.vm_types.uaa.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.uaa.prod || "c6i.large" ))
+    shield:
+      dev:  (( grab params.vm_types.shield.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.shield.prod || "m6i.xlarge" ))
+    blacksmith:
+      dev:  (( grab params.vm_types.blacksmith.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blacksmith.prod || "m6i.large" ))
+    blacksmith-redis-small:
+      dev:  (( grab params.vm_types.blacksmith-redis-small.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blacksmith-redis-small.prod || "c6i.large" ))
+    blacksmith-redis-medium:
+      dev:  (( grab params.vm_types.blacksmith-redis-medium.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blacksmith-redis-medium.prod || "c6i.xlarge" ))
+    blacksmith-redis-large:
+      dev:  (( grab params.vm_types.blacksmith-redis-large.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.blacksmith-redis-large.prod || "c6i.2xlarge" ))
+    blacksmith-rabbitmq-small:
+      dev:  (( grab params.vm_types.blacksmith-rabbitmq-small.dev  || "t3.small" ))
+      prod: (( grab params.vm_types.blacksmith-rabbitmq-small.prod || "c6i.large" ))
+    blacksmith-rabbitmq-medium:
+      dev:  (( grab params.vm_types.blacksmith-rabbitmq-medium.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blacksmith-rabbitmq-medium.prod || "c6i.xlarge" ))
+    blacksmith-rabbitmq-large:
+      dev:  (( grab params.vm_types.blacksmith-rabbitmq-large.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.blacksmith-rabbitmq-large.prod || "c6i.2xlarge" ))
+    blacksmith-postgres-small:
+      dev:  (( grab params.vm_types.blacksmith-postgres-small.dev  || "t3.small" ))
+      prod: (( grab params.vm_types.blacksmith-postgres-small.prod || "c6i.large" ))
+    blacksmith-postgres-medium:
+      dev:  (( grab params.vm_types.blacksmith-postgres-medium.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.blacksmith-postgres-medium.prod || "c6i.xlarge" ))
+    blacksmith-postgres-large:
+      dev:  (( grab params.vm_types.blacksmith-postgres-large.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.blacksmith-postgres-large.prod || "c6i.2xlarge" ))
+
+  disk_types:
+    default:
+      dev:  (( grab params.disk_types.default.size || "32768" ))
+      prod: (( grab params.disk_types.default.size || "65536" ))
+    bosh:
+      dev:  (( grab params.disk_types.bosh.size || "32768" ))
+      prod: (( grab params.disk_types.bosh.size || "65536" ))
+    blobstore:
+      dev:  (( grab params.disk_types.blobstore.size || "32768" ))
+      prod: (( grab params.disk_types.blobstore.size || "524288" ))
+    postgres:
+      dev:  (( grab params.disk_types.postgres.size || "16384" ))
+      prod: (( grab params.disk_types.postgres.size || "65536" ))
+    redis:
+      dev:  (( grab params.disk_types.redis.size || "16384" ))
+      prod: (( grab params.disk_types.redis.size || "65536" ))
+    rabbitmq:
+      dev:  (( grab params.disk_types.rabbitmq.size || "16384" ))
+      prod: (( grab params.disk_types.rabbitmq.size || "32768" ))
+    shield:
+      dev:  (( grab params.disk_types.shield.size || "8192" ))
+      prod: (( grab params.disk_types.shield.size || "16384" ))
+    minio:
+      dev:  (( grab params.disk_types.minio.size || "32768" ))
+      prod: (( grab params.disk_types.minio.size || "262144" ))
+

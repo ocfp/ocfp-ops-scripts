@@ -1,0 +1,54 @@
+---
+meta:
+  vm_types:
+    default:
+      dev:  (( grab params.vm_types.default.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.default.prod || "m6i.large" ))
+    compilation:
+      dev:  (( grab params.vm_types.compilation.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.compilation.prod || "c6i.xlarge" ))
+    bosh:
+      dev:  (( grab params.vm_types.bosh.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.bosh.prod || "m6i.2xlarge" ))
+    vault:
+      dev:  (( grab params.vm_types.vault.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.vault.prod || "m6i.large" ))
+    concourse-worker:
+      dev:  (( grab params.vm_types.concourse-worker.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.concourse-worker.prod || "m6i.large" ))
+    jumpbox:
+      dev:  (( grab params.vm_types.jumpbox.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.jumpbox.prod || "m6i.xlarge" ))
+    shield:
+      dev:  (( grab params.vm_types.jumpbox.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.jumpbox.prod || "m6i.xlarge" ))
+
+  disk_types:
+    default:
+      dev:  (( grab params.disk_types.default.size || "40960" ))
+      prod: (( grab params.disk_types.default.size || "81920" ))
+    compilation:
+      dev:  (( grab params.disk_types.compilation.size || "16384" ))
+      prod: (( grab params.disk_types.compilation.size || "16384" ))
+    bosh:
+      dev:  (( grab params.disk_types.bosh.size || "32768" ))
+      prod: (( grab params.disk_types.bosh.size || "65536" ))
+    vault:
+      dev:  (( grab params.disk_types.vault.size || "16384" ))
+      prod: (( grab params.disk_types.vault.size || "32768" ))
+    concourse:
+      dev:  (( grab params.disk_types.concourse.size || "32768" ))
+      prod: (( grab params.disk_types.concourse.size || "65536" ))
+    jumpbox:
+      dev:  (( grab params.disk_types.jumpbox.size || "65536" ))
+      prod: (( grab params.disk_types.jumpbox.size || "65536" ))
+    shield:
+      dev:  (( grab params.disk_types.shield.size || "8192" ))
+      prod: (( grab params.disk_types.shield.size || "8192" ))
+    doomsday:
+      dev:  (( grab params.disk_types.doomsday.size || "16384" ))
+      prod: (( grab params.disk_types.doomsday.size || "32768" ))
+    prometheus:
+      dev:  (( grab params.disk_types.prometheus.size || "32768" ))
+      prod: (( grab params.disk_types.prometheus.size || "1280000" ))
+

@@ -24,108 +24,379 @@ azs:
 # VM Types
 ################################################################################
 vm_types:
-- { name: default-dev,       cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
-- { name: default-prod,      cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }}}
-- { name: compilation-dev,   cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: compilation-prod,  cloud_properties: { instance_type: c6i.xlarge, ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: bosh-dev,          cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: bosh-prod,         cloud_properties: { instance_type: m6i.4xlarge,ephemeral_disk: { size: 131072, type: gp3, encrypted: true }}}
-- { name: api-dev,           cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: api-prod,          cloud_properties: { instance_type: m5.large,   ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }}}
-- { name: as-api-dev,        cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-api-prod,       cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-broker-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-broker-prod,    cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-collector-dev,  cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-collector-prod, cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-engine-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-engine-prod,    cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-operator-dev,   cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-operator-prod,  cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-scaler-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-scaler-prod,    cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-scheduler-dev,  cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: as-scheduler-prod, cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: bbs-dev,           cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: bbs-prod,          cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: blobstore-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: blobstore-prod,    cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: cc-worker-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: cc-worker-prod,    cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: credhub-dev,       cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: credhub-prod,      cloud_properties: { instance_type: r5.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: diego-cell-dev,    cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: diego-cell-prod,   cloud_properties: { instance_type: r5.2xlarge, ephemeral_disk: { size: 262144, type: gp3, encrypted: true }}}
-- { name: diego-api-dev,     cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: diego-api-prod,    cloud_properties: { instance_type: c5.2xlarge, ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }}}
-- { name: dopper-dev,        cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: dopper-prod,       cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }}}
-- { name: errand-dev,        cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: errand-prod,       cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: haproxy-dev,       cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: haproxy-prod,      cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: log-api-dev,       cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: log-api-prod,      cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }}}
-- { name: loggregator-dev,   cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: loggregator-prod,  cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }}}
-- { name: nats-dev,          cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: nats-prod,         cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: postgres-dev,      cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-- { name: postgres-prod,     cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }}}
-- { name: router-dev,        cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: router-prod,       cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: scheduler-dev,     cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: scheduler-prod,    cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: syslogger-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: syslogger-prod,    cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: tcp-router-dev,    cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: tcp-router-prod,   cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: uaa-dev,           cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }}}
-- { name: uaa-prod,          cloud_properties: { instance_type: c5.large,   ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }}}
-
-- { name: blacksmith-dev,                  cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-prod,                 cloud_properties: { instance_type: m6i.large,  ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-small-dev,      cloud_properties: { instance_type: t3.small,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-small-prod,     cloud_properties: { instance_type: c5.large,   ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-medium-dev,     cloud_properties: { instance_type: t3.medium,  ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-medium-prod,    cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-large-dev,      cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-redis-large-prod,     cloud_properties: { instance_type: c5.2xlarge, ephemeral_disk: { size: 32768, type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-small-dev,   cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-small-prod,  cloud_properties: { instance_type: c5.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-medium-dev,  cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-medium-prod, cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-large-dev,   cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-rabbitmq-large-prod,  cloud_properties: { instance_type: c5.2xlarge, ephemeral_disk: { size: 32768, type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-small-dev,   cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-small-prod,  cloud_properties: { instance_type: c5.large,   ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-medium-dev,  cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-medium-prod, cloud_properties: { instance_type: c5.xlarge,  ephemeral_disk: { size: 32768, type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-large-dev,   cloud_properties: { instance_type: t3.large,   ephemeral_disk: { size: 16384, type: gp3, encrypted: true }}}
-- { name: blacksmith-postgres-large-prod,  cloud_properties: { instance_type: c5.2xlarge, ephemeral_disk: { size: 65536, type: gp3, encrypted: true }}}
+- name: default-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.default.dev ))
+    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+- name: default-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.default.prod ))
+    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+- name: compilation-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.compilation.dev ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: compilation-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.compilation.prod ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: bosh-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.bosh.dev ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: bosh-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.bosh.prod ))
+    ephemeral_disk: { size: 131072 type: gp3, encrypted: true }
+- name: api-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.api.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: api-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.api.prod ))
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+- name: as-api-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.api.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-api-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-api.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-broker-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-broker.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-broker-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-broker.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-collector-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-collector.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-collector-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-collector.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-engine-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-engine.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-engine-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-engine.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-operator-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-operator.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-operator-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-operator.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-scaler-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-scaler.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-scaler-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-scaler.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-scheduler-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-scheduler.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: as-scheduler-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.as-scheduler.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: bbs-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.bbs.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: bbs-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.bbs.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: blobstore-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blobstore.dev ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: blobstore-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blobstore.prod ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: cc-worker-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.cc-worker.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: cc-worker-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.cc-worker.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: credhub-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.credhub.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: credhub-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.credhub.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: diego-cell-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.diego-cell.dev ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: diego-cell-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.diego-cell.prod ))
+    ephemeral_disk: { size: 262144, type: gp3, encrypted: true }
+- name: diego-api-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.diego-api.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: diego-api-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.diego-api.prod ))
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+- name: doppler-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.doppler.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: doppler-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.doppler.prod ))
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+- name: errand-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.errand.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: errand-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.errand.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: haproxy-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.haproxy.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: haproxy-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.haproxy.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: log-api-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.log-api.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: log-api-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.log-api.prod ))
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+- name: loggregator-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.loggregator.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: loggregator-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.loggregator.prod ))
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+- name: nats-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.nats.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: nats-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.nats.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: postgres-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.postgres.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: postgres-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.postgres.prod ))
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+- name: router-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.router.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: router-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.router.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: scheduler-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.scheduler.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: scheduler-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.scheduler.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: syslogger-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.syslogger.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: syslogger-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.syslogger.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: tcp-router-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.tcp-router.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: tcp-router-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.tcp-router.prod ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: uaa-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.uaa.dev ))
+    ephemeral_disk: { size: 8192,   type: gp3, encrypted: true }
+- name: uaa-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.uaa.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: shield-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.shield.dev ))
+    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+- name: shield-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.shield.prod ))
+    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+- name: blacksmith-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith.prod ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-redis-small-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-small.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-redis-small-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-small.prod ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-redis-medium-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-medium.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-redis-medium-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-medium.prod ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-redis-large-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-large.dev ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-redis-large-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-redis-large.prod ))
+    ephemeral_disk: { size: 32768, type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-small-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-small.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-small-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-small.prod ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-medium-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-medium.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-medium-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-medium.prod ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-large-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-large.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-large-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-rabbitmq-large.prod ))
+    ephemeral_disk: { size: 32768, type: gp3, encrypted: true }
+- name: blacksmith-postgres-small-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-postgres.small.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-postgres-small-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-postgres-small.prod ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-postgres-medium-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.postgres-medium.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: blacksmith-postgres-medium-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.postgres-medium.prod ))
+    ephemeral_disk: { size: 32768, type: gp3, encrypted: true }
+- name: blacksmith-postgres-large-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.postgres-large.dev ))
+    ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
+- name: blacksmith-postgres-large-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.blacksmith-postgres.large ))
+    ephemeral_disk: { size: 65536, type: gp3, encrypted: true }
 
 ################################################################################
 # Disk Types
 ################################################################################
 disk_types:
-- { name: default-dev,    disk_size: 8192,   cloud_properties: { type: gp3, encrypted: true }}
-- { name: default-prod,   disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: bosh-dev,       disk_size: 32768,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: bosh-prod,      disk_size: 65536,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: consul-dev,     disk_size: 4096,   cloud_properties: { type: gp3, encrypted: true }}
-- { name: consul-prod,    disk_size: 8192,   cloud_properties: { type: gp3, encrypted: true }}
-- { name: postgres-dev,   disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: postgres-prod,  disk_size: 65536,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: blobstore-dev,  disk_size: 32768,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: blobstore-prod, disk_size: 524288, cloud_properties: { type: gp3, encrypted: true }}
-- { name: shield-dev,     disk_size: 8192,   cloud_properties: { type: gp3, encrypted: true }}
-- { name: shield-prod,    disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: redis-dev,      disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: redis-prod,     disk_size: 32768,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: rabbitmq-dev,   disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: rabbitmq-prod,  disk_size: 32768,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: minio-dev,      disk_size: 16384,  cloud_properties: { type: gp3, encrypted: true }}
-- { name: minio-prod,     disk_size: 65536,  cloud_properties: { type: gp3, encrypted: true }}
+- name: default-dev
+  disk_size: (( grab meta.disk_types.default.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: default-prod
+  disk_size: (( grab meta.disk_types.default.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: bosh-dev
+  disk_size: (( grab meta.disk_types.bosh.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: bosh-prod
+  disk_size: (( grab meta.disk_types.bosh.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: postgres-dev
+  disk_size: (( grab meta.disk_types.postgres.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: postgres-prod
+  disk_size: (( grab meta.disk_types.postgres.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blobstore-dev
+  disk_size: (( grab meta.disk_types.blobstore.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blobstore-prod
+  disk_size: (( grab meta.disk_types.blobstore.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: shield-dev
+  disk_size: (( grab meta.disk_types.shield.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: shield-prod
+  disk_size: (( grab meta.disk_types.shield.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: redis-dev
+  disk_size: (( grab meta.disk_types.redis.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: redis-prod
+  disk_size: (( grab meta.disk_types.redis.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: rabbitmq-dev
+  disk_size: (( grab meta.disk_types.rabbitmq.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: rabbitmq-prod
+  disk_size: (( grab meta.disk_types.rabbitmq.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: minio-dev
+  disk_size: (( grab meta.disk_types.minio.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: minio-prod
+  disk_size: (( grab meta.disk_types.minio.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
 
 ################################################################################
 # Networks
@@ -167,6 +438,25 @@ networks:
           - (( concat meta.ocfp.iaas.ips.reserved[0].bosh_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
         static:
           - (( grab meta.ocfp.net.bosh.ip ))
+
+################################################################################
+# Network: Management SHIELD, ips: z{1}/subnet/.10
+################################################################################
+  - name: (( concat $OCFP_ENV_NAME "-shield" ))
+    type: manual
+    subnets:
+      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
+        az: (( concat $OCFP_ENV_NAME "-z1" ))
+        dns:
+          - (( grab meta.ocfp.iaas.vpc.dns ))
+        gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
+        cloud_properties:
+          subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
+        reserved:
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].shield_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].shield_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+        static:
+          - (( meta.ocfp.iaas.ips.reserved[0].shield_ip ))
 
 ################################################################################
 # Network: OCF
