@@ -44,8 +44,12 @@ genesis:
 YAML
 
 case "${env_type}" in
-  (*mgmt*) true ;;
-  (*) echo "  bosh_env: ${OCFP_BOSH_ENV}" ;;
+  (*mgmt*) 
+    echo "  use_create_env: true"
+    ;;
+  (*) 
+    echo "  bosh_env: ${OCFP_BOSH_ENV}"
+    ;;
 esac
 
 case "${OCFP_VAULT_PREFIX}" in
