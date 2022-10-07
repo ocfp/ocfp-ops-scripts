@@ -45,10 +45,10 @@ YAML
 
 case "${env_type}" in
   (*mgmt*) 
-    echo "  use_create_env: true"
+    echo "  use_create_env: true # REQUIRED for Mgmt env"
     ;;
   (*) 
-    echo "  bosh_env: ${OCFP_BOSH_ENV}"
+    echo "  bosh_env: ${OCFP_BOSH_ENV} # Who deploys me?"
     ;;
 esac
 
