@@ -44,8 +44,10 @@ esac
 
 cat <<-YAML
 
-meta:
-  vault_tf: (( concat ${OCFP_VAULT_PREFIX:-"secret"} "/${OCFP_REGION//-/\/}" ))
-
+params:
+#  ocfp:
+#    env:
+#      scale: "prod" # default is "dev"
+  dns_cache: true # DNS Caching (for runtime config)
 YAML
 

@@ -60,8 +60,9 @@ esac
 cat <<-YAML
 
 params:
-  # env_scale: prod
+#  ocfp:
+#    env:
+#      scale: "prod" # default is "dev"
   dns_cache: true # DNS Caching (for runtime config)
-
 YAML
 

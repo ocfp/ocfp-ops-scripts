@@ -41,3 +41,12 @@ case ${OCFP_VAULT_PREFIX:-} in
   (*) true ;;
 esac
 
+cat <<-YAML
+
+params:
+#  ocfp:
+#    env:
+#      scale: "prod" # default is "dev"
+  dns_cache: true # DNS Caching (for runtime config)
+YAML
+
