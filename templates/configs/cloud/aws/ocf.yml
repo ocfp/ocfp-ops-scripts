@@ -322,7 +322,7 @@ vm_types:
     ephemeral_disk: { size: 32768, type: gp3, encrypted: true }
 - name: blacksmith-postgres-small-dev
   cloud_properties:
-    instance_type: (( grab meta.vm_types.blacksmith-postgres.small.dev ))
+    instance_type: (( grab meta.vm_types.blacksmith-postgres-small.dev ))
     ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
 - name: blacksmith-postgres-small-prod
   cloud_properties:
@@ -342,7 +342,7 @@ vm_types:
     ephemeral_disk: { size: 16384, type: gp3, encrypted: true }
 - name: blacksmith-postgres-large-prod
   cloud_properties:
-    instance_type: (( grab meta.vm_types.blacksmith-postgres.large ))
+    instance_type: (( grab meta.vm_types.blacksmith-postgres-large.prod ))
     ephemeral_disk: { size: 65536, type: gp3, encrypted: true }
 
 ################################################################################
