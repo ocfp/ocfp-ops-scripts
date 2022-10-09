@@ -409,7 +409,7 @@ networks:
   - name: (( concat $OCFP_ENV_NAME "-compilation" ))
     type: manual
     subnets: 
-      - range: (( grab meta.bosh.iaas.subnets[0].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z1" ))
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
         dns:
@@ -426,7 +426,7 @@ networks:
   - name: (( concat $OCFP_ENV_NAME "-bosh" ))
     type: manual
     subnets:
-      - range: (( grab meta.bosh.iaas.subnets[0].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z1" ))
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
         dns:
@@ -464,7 +464,7 @@ networks:
   - name: (( concat $OCFP_ENV_NAME "-ocf" ))
     type: manual
     subnets:
-      - range: (( grab meta.bosh.iaas.subnets[0].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z1" ))
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
         dns:
@@ -474,7 +474,7 @@ networks:
         reserved:
           - (( meta.ocfp.iaas.ips.reserved[0].ocf_a - meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
-      - range: (( grab meta.bosh.iaas.subnets[1].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
         gateway: (( grab meta.ocfp.iaas.subnets[1].cidr.gateway ))
         dns:
@@ -484,7 +484,7 @@ networks:
         reserved:
           - (( meta.ocfp.iaas.ips.reserved[1].ocf_a - meta.ocfp.iaas.subnets[1].cidr.ip_n ))
 
-      - range: (( grab meta.bosh.iaas.subnets[2].cidr.block ))
+      - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
         gateway: (( grab meta.ocfp.iaas.subnets[2].cidr.gateway ))
         dns:
