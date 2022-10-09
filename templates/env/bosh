@@ -31,12 +31,11 @@ cat <<-YAML
 ---
 kit:
   name: bosh
-  version: 2.2.7-rc.21 # minimum version for external-db-vault
+  version: 2.2.7-rc.42 # minimum version for external-db-vault
   features:
   - (( append ))
   - ${OCFP_IAAS}
   - ocfp
-# - bosh-dns-health-check
 
 genesis:
   env: ${OCFP_ENV_NAME}

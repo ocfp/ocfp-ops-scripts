@@ -116,8 +116,8 @@ __parse::args() {
 
 __set::vault::paths() {
   local _env_path="${OCFP_ENV_NAME//-/\/}"
-  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"secret/"}/${_env_path}"
-  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"secret/"}/tf/${_env_path}"
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
 }
 
 __set::env::type() {
@@ -139,7 +139,7 @@ __init::env() {
   then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
   fi
 
-  _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
+  _src_path="${OCFP_VAULT_TF_PATH}/bosh/iam/${env_type}"
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
 
   case "${OCFP_KIT}" in
@@ -193,6 +193,7 @@ __init::config::cloud() {
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
       esac
 
+      # Override vault paths for dependent env
       OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
       OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
       OCFP_ENV_NAME="${_dep_env}"
@@ -244,6 +245,7 @@ __init::config::cpi() {
         (*\%*) _vault_prefix="${dep##*\%}" ;;
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
       esac
+      # Override vault paths for dependent env
       OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
       OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
       OCFP_ENV_NAME="${_dep_env}"
@@ -298,7 +300,7 @@ __parse::args "$@"
 
 __set::env::type
 
-__set::vault::paths
+__set::vault::paths # Sets vault paths for the main script level
 
 if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
 if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
