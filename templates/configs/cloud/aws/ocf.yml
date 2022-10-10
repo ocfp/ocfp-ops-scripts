@@ -456,7 +456,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].shield_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].shield_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
         static:
-          - (( meta.ocfp.iaas.ips.reserved[0].shield_ip ))
+          - (( grab meta.ocfp.iaas.ips.reserved[0].shield_ip ))
 
 ################################################################################
 # Network: OCF
@@ -472,7 +472,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( meta.ocfp.iaas.ips.reserved[0].ocf_a - meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].ocf_a " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
@@ -482,7 +482,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( meta.ocfp.iaas.ips.reserved[1].ocf_a - meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].ocf_a " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
 
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
@@ -492,13 +492,13 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( meta.ocfp.iaas.ips.reserved[2].ocf_a - meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].ocf_a " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Compilation Settings
 ################################################################################
 compilation:
-  az: (( concat $OCFP_ENV_NAME "-z2" ))
+  az: (( concat $OCFP_ENV_NAME "-z1" ))
   network: (( concat $OCFP_ENV_NAME "-compilation" ))
   vm_type: (( concat "compilation-" meta.scale ))
   workers: 6

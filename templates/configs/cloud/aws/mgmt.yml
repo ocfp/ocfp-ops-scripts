@@ -172,7 +172,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].bosh_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].bosh_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
         static:
-          - (( meta.ocfp.iaas.ips.reserved[0].bosh_ip ))
+          - (( grab meta.ocfp.iaas.ips.reserved[0].bosh_ip ))
 
 ################################################################################
 # Network: Management Vault
@@ -340,7 +340,7 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].shield_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].shield_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
         static:
-          - (( meta.ocfp.iaas.ips.reserved[0].shield_ip ))
+          - (( grab meta.ocfp.iaas.ips.reserved[0].shield_ip ))
 
 ################################################################################
 # Network: Management Doomsday, ips: z{2}/subnet/.10
