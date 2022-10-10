@@ -70,13 +70,13 @@ meta:
 
 params:
   env: ${OCFP_ENV_NAME}
-  ip: (( vault meta.vault_tf "ocfp/${env_type}/net/blacksmith:ip" ))
-  fqdn: (( vault meta.vault_tf "ocfp/${env_type}/net/blacksmith:fqdn" ))
+  ip: (( vault meta.ocfp.vault.env.tf "${env_type}/net/blacksmith:ip" ))
+  fqdn: (( vault meta.ocfp.vault.env.tf "${env_type}/net/blacksmith:fqdn" ))
 
   # blacksmith_debug: true
 
   #TODO: Do we need to pass in the external bosh director IP???
-  #boshdir_ip: (( vault meta.vault_tf "ocfp/${env_type}/net/bosh:ip" ))
+  #boshdir_ip: (( vault meta.ocfp.vault.env.tf "${env_type}/bosh/net/bosh:ip" ))
 
   # TODO: SHIELD Backups..
 

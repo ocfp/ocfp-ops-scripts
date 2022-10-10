@@ -51,11 +51,11 @@ vm_types:
 - name: api-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.dev ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
 - name: api-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.prod ))
-    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
 - name: as-api-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.dev ))
@@ -525,4 +525,6 @@ vm_extensions:
     cloud_properties:
       lb_target_group:
         - ocfp-ocf-blacksmith-lb-tg
+  # NOTE: Haven't figured out the mechanism of action for this yet vvv
+  - name: diego-ssh-proxy-network-properties
 
