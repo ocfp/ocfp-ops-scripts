@@ -421,25 +421,6 @@ networks:
           - (( concat meta.ocfp.iaas.ips.reserved[0].compilation_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
 ################################################################################
-# Network: OCF Env BOSH, ips: z{1}/.10
-################################################################################
-  - name: (( concat $OCFP_ENV_NAME "-bosh" ))
-    type: manual
-    subnets:
-      - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
-        az: (( concat $OCFP_ENV_NAME "-z1" ))
-        gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
-        dns:
-          - (( grab meta.ocfp.iaas.vpc.dns ))
-        cloud_properties:
-          subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
-        reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].bosh_a ))
-          - (( concat meta.ocfp.iaas.ips.reserved[0].bosh_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
-        static:
-          - (( grab meta.ocfp.net.bosh.ip ))
-
-################################################################################
 # Network: Management SHIELD, ips: z{1}/subnet/.10
 ################################################################################
   - name: (( concat $OCFP_ENV_NAME "-shield" ))
