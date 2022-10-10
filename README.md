@@ -257,6 +257,6 @@ ocfp init-config type cloud scale prod kit bosh iaas aws env ocfp-mgmt-us-east-1
 Special note, if a different vault prefix, say `secret/dev/sbx` for the sbx env,
 is required per-environment this can be overidden as follows,
 ```
-ocfp init-config type cloud scale prod kit bosh iaas aws env ocfp-mgmt-us-east-1 dep ocfp-sbx-us-east-1%secret/dev/sbx
+ocfp init-config type cloud scale prod kit bosh iaas aws env ocfp-mgmt-us-east-1 dep ocfp-sbx-us-east-1@secret/dev/sbx
 ```
 

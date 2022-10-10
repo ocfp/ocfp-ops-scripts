@@ -186,10 +186,10 @@ __init::config::cloud() {
 
   for dep in "${deps[@]}" ; do
     ( # Subshell so as to not clobber parents env vars
-      _dep_env="${dep%%\%*}" # vault mount override via %<vault-mount>
+      _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
 
       case ${dep} in
-        (*\%*) _vault_prefix="${dep##*\%}" ;;
+        (*\@*) _vault_prefix="${dep##*\@}" ;;
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
       esac
 
@@ -240,9 +240,9 @@ __init::config::cpi() {
 
   for dep in "${deps[@]}" ; do
     ( # Subshell so as to not clobber parents env vars
-      _dep_env="${dep%%\%*}" # vault mount override via %<vault-mount>
+      _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
       case ${dep} in
-        (*\%*) _vault_prefix="${dep##*\%}" ;;
+        (*\@*) _vault_prefix="${dep##*\@}" ;;
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
       esac
       # Override vault paths for dependent env
