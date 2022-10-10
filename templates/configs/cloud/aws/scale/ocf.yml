@@ -124,27 +124,27 @@ meta:
 
   disk_types:
     default:
-      dev:  (( grab params.disk_types.default.size || "32768" ))
-      prod: (( grab params.disk_types.default.size || "65536" ))
+      dev:  (( grab params.disk_types.default.size || 32768 ))
+      prod: (( grab params.disk_types.default.size || 65536 ))
     bosh:
-      dev:  (( grab params.disk_types.bosh.size || "32768" ))
-      prod: (( grab params.disk_types.bosh.size || "65536" ))
+      dev:  (( grab params.disk_types.bosh.size || 32768 ))
+      prod: (( grab params.disk_types.bosh.size || 65536 ))
     blobstore:
-      dev:  (( grab params.disk_types.blobstore.size || "32768" ))
-      prod: (( grab params.disk_types.blobstore.size || "524288" ))
+      dev:  (( grab params.disk_types.blobstore.size || 32768 ))
+      prod: (( grab params.disk_types.blobstore.size || 524288 ))
     postgres:
-      dev:  (( grab params.disk_types.postgres.size || "16384" ))
-      prod: (( grab params.disk_types.postgres.size || "65536" ))
+      dev:  (( grab params.disk_types.postgres.size || 16384 ))
+      prod: (( grab params.disk_types.postgres.size || 65536 ))
     redis:
-      dev:  (( grab params.disk_types.redis.size || "16384" ))
-      prod: (( grab params.disk_types.redis.size || "65536" ))
+      dev:  (( grab params.disk_types.redis.size || 16384 ))
+      prod: (( grab params.disk_types.redis.size || 65536 ))
     rabbitmq:
-      dev:  (( grab params.disk_types.rabbitmq.size || "16384" ))
-      prod: (( grab params.disk_types.rabbitmq.size || "32768" ))
+      dev:  (( grab params.disk_types.rabbitmq.size || 16384 ))
+      prod: (( grab params.disk_types.rabbitmq.size || 32768 ))
     shield:
-      dev:  (( grab params.disk_types.shield.size || "8192" ))
-      prod: (( grab params.disk_types.shield.size || "16384" ))
+      dev:  (( grab params.disk_types.shield.size || 8192 ))
+      prod: (( grab params.disk_types.shield.size || 16384 ))
     minio:
-      dev:  (( grab params.disk_types.minio.size || "32768" ))
-      prod: (( grab params.disk_types.minio.size || "262144" ))
+      dev:  (( grab params.disk_types.minio.size || 32768 ))
+      prod: (( grab params.disk_types.minio.size || 262144 ))
 
