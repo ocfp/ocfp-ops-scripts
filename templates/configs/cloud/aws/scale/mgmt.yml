@@ -25,30 +25,30 @@ meta:
 
   disk_types:
     default:
-      dev:  (( grab params.disk_types.default.size || "40960" ))
-      prod: (( grab params.disk_types.default.size || "81920" ))
+      dev:  (( grab params.disk_types.default.size || 40960 ))
+      prod: (( grab params.disk_types.default.size || 81920 ))
     compilation:
-      dev:  (( grab params.disk_types.compilation.size || "16384" ))
-      prod: (( grab params.disk_types.compilation.size || "16384" ))
+      dev:  (( grab params.disk_types.compilation.size || 16384 ))
+      prod: (( grab params.disk_types.compilation.size || 16384 ))
     bosh:
-      dev:  (( grab params.disk_types.bosh.size || "32768" ))
-      prod: (( grab params.disk_types.bosh.size || "65536" ))
+      dev:  (( grab params.disk_types.bosh.size || 32768 ))
+      prod: (( grab params.disk_types.bosh.size || 65536 ))
     vault:
-      dev:  (( grab params.disk_types.vault.size || "16384" ))
-      prod: (( grab params.disk_types.vault.size || "32768" ))
+      dev:  (( grab params.disk_types.vault.size || 16384 ))
+      prod: (( grab params.disk_types.vault.size || 32768 ))
     concourse:
-      dev:  (( grab params.disk_types.concourse.size || "32768" ))
-      prod: (( grab params.disk_types.concourse.size || "65536" ))
+      dev:  (( grab params.disk_types.concourse.size || 32768 ))
+      prod: (( grab params.disk_types.concourse.size || 65536 ))
     jumpbox:
-      dev:  (( grab params.disk_types.jumpbox.size || "65536" ))
-      prod: (( grab params.disk_types.jumpbox.size || "65536" ))
+      dev:  (( grab params.disk_types.jumpbox.size || 65536 ))
+      prod: (( grab params.disk_types.jumpbox.size || 65536 ))
     shield:
-      dev:  (( grab params.disk_types.shield.size || "8192" ))
-      prod: (( grab params.disk_types.shield.size || "8192" ))
+      dev:  (( grab params.disk_types.shield.size || 8192 ))
+      prod: (( grab params.disk_types.shield.size || 8192 ))
     doomsday:
-      dev:  (( grab params.disk_types.doomsday.size || "16384" ))
-      prod: (( grab params.disk_types.doomsday.size || "32768" ))
+      dev:  (( grab params.disk_types.doomsday.size || 16384 ))
+      prod: (( grab params.disk_types.doomsday.size || 32768 ))
     prometheus:
-      dev:  (( grab params.disk_types.prometheus.size || "32768" ))
-      prod: (( grab params.disk_types.prometheus.size || "1280000" ))
+      dev:  (( grab params.disk_types.prometheus.size || 32768 ))
+      prod: (( grab params.disk_types.prometheus.size || 1280000 ))
 
