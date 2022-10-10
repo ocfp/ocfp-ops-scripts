@@ -492,8 +492,7 @@ vm_extensions:
   - name: cf-system-apps-lb
     cloud_properties:
       lb_target_group:
-        - ocfp-ocf-cf-system-lb-tg
-        - ocfp-ocf-cf-apps-lb-tg
+        - ocfp-ocf-cf-system-apps-lb-tg
   - name: cf-ssh-lb
     cloud_properties:
       lb_target_group:
