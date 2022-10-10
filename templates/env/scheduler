@@ -29,6 +29,7 @@ kit:
   version: 0.0.17
   features:
   - (( append ))
+  - ${OCFP_IAAS}
   - ocfp
 
 genesis:
