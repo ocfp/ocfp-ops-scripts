@@ -453,7 +453,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.ips.reserved[0].ocf_a " - " meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].ocf_a ))
 
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
@@ -463,7 +463,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.ips.reserved[1].ocf_a " - " meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( meta.ocfp.iaas.subnets[1].cidr.ip_0 "-" concat meta.ocfp.iaas.ips.reserved[1].ocf_a ))
 
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
@@ -473,7 +473,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.ips.reserved[2].ocf_a " - " meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( meta.ocfp.iaas.subnets[2].cidr.ip_0 "-" concat meta.ocfp.iaas.ips.reserved[2].ocf_a ))
 
 ################################################################################
 # Compilation Settings
