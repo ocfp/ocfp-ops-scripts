@@ -12,7 +12,7 @@ usage() {
 
 USAGE
 
-  $ export OCFP_IAAS="..." OCFP_REGION="..." OCFP_ENV_NAME="..." 
+  $ export OCFP_IAAS="..." OCFP_REGION="..." OCFP_ENV_NAME="..." OCFP_BOSH_ENV="..."
   $ ${0}
 
 EOT
@@ -39,7 +39,7 @@ genesis:
 YAML
 
 case ${OCFP_VAULT_PREFIX:-} in
-  (secret/*) echo "  secrets_mount: \"${OCFP_VAULT_PREFIX}\"" ;;
+  (secret*) echo "  secrets_mount: \"${OCFP_VAULT_PREFIX}\"" ;;
   (*) true ;;
 esac
 
