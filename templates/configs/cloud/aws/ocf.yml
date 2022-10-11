@@ -493,10 +493,6 @@ vm_extensions:
     cloud_properties:
       lb_target_group:
         - ocfp-ocf-cf-system-apps-lb-tg
-  - name: cf-ssh-lb
-    cloud_properties:
-      lb_target_group:
-        - ocfp-ocf-cf-ssh-lb-tg
   - name: cf-tcp-lb
     cloud_properties:
       lb_target_group:
@@ -505,6 +501,7 @@ vm_extensions:
     cloud_properties:
       lb_target_group:
         - ocfp-ocf-blacksmith-lb-tg
-  # NOTE: Haven't figured out the mechanism of action for this yet vvv
-  - name: diego-ssh-proxy-network-properties
-
+  - name: cf-ssh-lb
+    cloud_properties:
+      lb_target_group:
+        - ocfp-ocf-cf-ssh-lb-tg
