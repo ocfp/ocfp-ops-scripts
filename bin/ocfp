@@ -185,9 +185,8 @@ __init::config::cloud() {
   _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}" ; do
+    _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
     ( # Subshell so as to not clobber parents env vars
-      _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
-
       case ${dep} in
         (*\@*) _vault_prefix="${dep##*\@}" ;;
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
@@ -239,8 +238,8 @@ __init::config::cpi() {
   local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}" ; do
+    _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
     ( # Subshell so as to not clobber parents env vars
-      _dep_env="${dep%%\@*}" # vault mount override via @<vault-mount>
       case ${dep} in
         (*\@*) _vault_prefix="${dep##*\@}" ;;
         (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
