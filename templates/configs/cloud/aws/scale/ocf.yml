@@ -132,6 +132,9 @@ meta:
     blobstore:
       dev:  (( grab params.disk_types.blobstore.size || 32768 ))
       prod: (( grab params.disk_types.blobstore.size || 524288 ))
+    blacksmith:
+      dev:  (( grab params.disk_types.blacksmith.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith.size || 65536 ))
     postgres:
       dev:  (( grab params.disk_types.postgres.size || 16384 ))
       prod: (( grab params.disk_types.postgres.size || 65536 ))
