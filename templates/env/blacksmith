@@ -7,12 +7,6 @@ fail() { echo -e "$*" >&2 ; exit 1 ; }
 [[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
 [[ -n ${OCFP_BOSH_ENV:-} ]] || fail "OCFP_BOSH_ENV must be set and exported."
 
-
-case "${OCFP_ENV_NAME}" in
-  (*-mgmt-*) env_type="mgmt" ;;
-  (*)        env_type="ocf" ;;
-esac
-
 usage() {
   echo -e "$(cat <<EOT
 
