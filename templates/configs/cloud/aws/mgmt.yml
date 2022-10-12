@@ -171,8 +171,6 @@ networks:
         reserved:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].bosh_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].bosh_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
-        static:
-          - (( grab meta.ocfp.iaas.ips.reserved[0].bosh_ip ))
 
 ################################################################################
 # Network: Management Vault

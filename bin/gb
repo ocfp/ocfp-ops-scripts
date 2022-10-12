@@ -64,7 +64,7 @@ OCFP Genesis BOSH Script
       deployment-name-regexp - Regex to match the deployment name to use
       vm-name-regexp - Regex to match the vm name to use
     
-    Prerequisites:
+Prerequisites:
     
       safe     - cli in the path, targeting a vault, and authenticated
       genesis  - cli in the path
@@ -134,7 +134,7 @@ bosh::logs::fetch() {
   done
 
   [[ -n "${_dep}" ]] || fail "No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
-  
+ j
   bosh::do ${_env_name} -d ${_dep} logs "${@}"
   
   local _f _fn _job _vmid _ts
@@ -201,19 +201,10 @@ bosh::vms::do() {
 
 cmd="${1}" ; shift
 case "${cmd}" in
-  (b|bosh|d|director)
-    bosh::do "${@}"
-    ;;
-  (l|logs)
-    bosh::logs::fetch "$@"
-    ;;
-  (vmsdo)
-    bosh::vms::do "${@}"
-    ;;
-  (-h|--help|*)
-    usage
-    exit 0
-    ;;
+  (b|bosh|d|director) bosh::do "${@}" ;;
+  (l|logs) bosh::logs::fetch "$@" ;;
+  (vmsdo) bosh::vms::do "${@}" ;;
+  (-h|--help|*) usage ; exit 0 ;;
 esac
 
 exit 0
