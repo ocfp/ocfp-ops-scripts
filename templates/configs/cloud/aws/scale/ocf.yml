@@ -121,6 +121,9 @@ meta:
     blacksmith-postgres-large:
       dev:  (( grab params.vm_types.blacksmith-postgres-large.dev  || "t3.large" ))
       prod: (( grab params.vm_types.blacksmith-postgres-large.prod || "c6i.2xlarge" ))
+    windows-cell:
+      dev:  (( grab params.vm_types.windows-cell.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.windows-cell.prod || "r6i.2xlarge" ))
 
   disk_types:
     default:
