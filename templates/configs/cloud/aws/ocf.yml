@@ -505,12 +505,16 @@ vm_extensions:
     cloud_properties:
       lb_target_groups:
         - ocfp-ocf-cf-tcp-lb-tg
-  - name: blacksmith-lb
-    cloud_properties:
-      lb_target_groups:
-        - ocfp-ocf-blacksmith-lb-tg
   - name: cf-ssh-lb
     cloud_properties:
       lb_target_groups:
         - ocfp-ocf-cf-ssh-lb-tg
+  - name: shield-lb
+    cloud_properties:
+      lb_target_groups:
+        - ocfp-ocf-shield-lb-tg
+  - name: blacksmith-lb
+    cloud_properties:
+      lb_target_groups:
+        - ocfp-ocf-blacksmith-lb-tg
 
