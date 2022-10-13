@@ -3,7 +3,6 @@
 fail() { echo -e "$*" >&2 ; exit 1 ; }
 
 [[ -n ${OCFP_IAAS:-} ]]     || fail "OCFP_IAAS must be set and exported."
-[[ -n ${OCFP_REGION:-} ]]   || fail "OCFP_REGION must be set and exported."
 [[ -n ${OCFP_ENV_NAME:-} ]] || fail "OCFP_ENV_NAME must be set and exported."
 [[ -n ${OCFP_BOSH_ENV:-} ]] || fail "OCFP_BOSH_ENV must be set and exported."
 
@@ -12,7 +11,7 @@ usage() {
 
 USAGE
 
-  $ export OCFP_REGION="..." OCFP_ENV_NAME="..." 
+  $ export OCFP_BOSH_ENV="..." OCFP_ENV_NAME="..." 
   $ ${0}
 
 EOT
@@ -33,8 +32,8 @@ kit:
   - ocfp
 
 genesis:
-  env: ${OCFP_ENV_NAME}
   min_version: 2.8.5 # TODO: update to 2.8.6 when released
+  env: ${OCFP_ENV_NAME}
   bosh_env: ${OCFP_BOSH_ENV} # <bosh-env>[@/secret{mount-path}/exodus/] that deploys this env
 YAML
 

@@ -47,7 +47,7 @@ case "${env_type}" in
     echo "  use_create_env: true # REQUIRED for Mgmt env"
     ;;
   (*) 
-    echo "  bosh_env: ${OCFP_BOSH_ENV} # Who deploys me?"
+    echo "  bosh_env: ${OCFP_BOSH_ENV} # <bosh-env>[@/secret{mount-path}/exodus/] that deploys this env"
     ;;
 esac
 
