@@ -31,14 +31,12 @@ kit:
   - ${OCFP_IAAS}
   - ocfp
   #- bosh-dns-health-check
-  #- broker-tls
-  #- redis-tls
+  #- redis
   #- redis-dual-mode
   #- rabbitmq
-  #- rabbitmq-tls
   #- rabbitmq-dual-mode
-  #- rabbitmq-dashboard-registration
   #- postgresql
+  #- shield-backups
 YAML
 
 cat <<-YAML
@@ -57,10 +55,17 @@ esac
 cat <<-YAML
 
 params:
+  dns_cache: true # DNS Caching (for runtime config)
+
 #  ocfp:
 #    env:
 #      scale: "prod" # default is "dev"
-  dns_cache: true # DNS Caching (for runtime config)
+
+#   shield_agent:     "127.0.0.1:5444" # IP:PORT
+#   shield_store:     "..."
+
+#   shield:
+#     deployment_env:   "..."
+#     deployment_type:  "shield"
 
 YAML
-
