@@ -62,7 +62,7 @@ __parse::args() {
         export OCFP_KIT=$1
         shift || fail "${0//*/} ... kit <name>"
         case ${OCFP_KIT} in
-          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
           (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
         esac ;;
       (env|name)

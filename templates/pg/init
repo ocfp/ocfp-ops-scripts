@@ -127,7 +127,7 @@ __parse::args() {
         kit="$1" 
         shift || fail "${0//*/} ... kit <name>"
         case ${kit} in
-          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox) true ;;
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
           (*) fail "Unsupported kit: ${kit}" ;;
         esac
         ;;
