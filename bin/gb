@@ -202,9 +202,9 @@ bosh::vms::do() {
 cmd="${1}" ; shift
 case "${cmd}" in
   (b|bosh|d|director) bosh::do "${@}" ;;
-  (l|logs) bosh::logs::fetch "$@" ;;
-  (vmsdo) bosh::vms::do "${@}" ;;
-  (-h|--help|*) usage ; exit 0 ;;
+  (l|logs)            bosh::logs::fetch "$@" ;;
+  (vmsdo)             bosh::vms::do "${@}" ;;
+  (-h|--help|*)       usage ; exit 0 ;;
 esac
 
 exit 0

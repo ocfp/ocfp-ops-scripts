@@ -89,18 +89,10 @@ while [[ $# -gt 0 ]]
 do
   cmd="${1}" ; shift
   case "${cmd}" in
-    (b|bosh|d|director)
-      bosh::do "${@}"
-      ;;
-    (l|logs)
-      bosh::logs::fetch "$@"
-      ;;
-    (-h|--help|*)
-      usage
-      exit 0
-      ;;
+    (b|bosh|d|director) bosh::do "${@}" ;;
+    (l|logs)            bosh::logs::fetch "$@" ;;
+    (-h|--help|*)       usage ; exit 0 ;;
   esac
 done
 
 exit 0
-

@@ -305,8 +305,8 @@ if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
 if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
-  (init-pg)  __init::pg "$@"  ;;
-  (init-env) __init::env "$@" ;;
+  (init-pg)     __init::pg     "$@" ;;
+  (init-env)    __init::env    "$@" ;;
   (init-config) __init::config "$@" ;;
   (*) usage ;;
 esac
