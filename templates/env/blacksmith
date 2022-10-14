@@ -31,6 +31,7 @@ kit:
   - ${OCFP_IAAS}
   - ocfp
   #- bosh-dns-health-check
+  #- redis
   #- redis-dual-mode
   #- rabbitmq
   #- rabbitmq-dual-mode
