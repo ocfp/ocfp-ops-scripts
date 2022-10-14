@@ -10,6 +10,9 @@ meta:
     bosh:
       dev:  (( grab params.vm_types.bosh.dev  || "t3.large" ))
       prod: (( grab params.vm_types.bosh.prod || "m6i.2xlarge" ))
+    concourse-worker:
+      dev:  (( grab params.vm_types.concourse-worker.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.concourse-worker.prod || "m6i.large" ))
     api:
       dev:  (( grab params.vm_types.api.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.api.prod || "m6i.xlarge" ))

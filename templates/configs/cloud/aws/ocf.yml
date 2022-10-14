@@ -344,6 +344,14 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.blacksmith-postgres-large.prod ))
     ephemeral_disk: { size: 65536, type: gp3, encrypted: true }
+- name: concourse-worker-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.concourse-worker.dev ))
+    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+- name: concourse-worker-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.concourse-worker.prod ))
+    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
 - name: windows-cell-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.windows-cell.dev ))
