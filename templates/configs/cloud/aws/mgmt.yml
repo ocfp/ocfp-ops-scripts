@@ -56,6 +56,14 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.vault.prod ))
     ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+- name: concourse-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.concourse.dev ))
+    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+- name: concourse-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.concourse.prod ))
+    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
 - name: concourse-worker-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.concourse-worker.dev ))
