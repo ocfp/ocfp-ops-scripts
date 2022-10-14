@@ -134,7 +134,7 @@ bosh::logs::fetch() {
   done
 
   [[ -n "${_dep}" ]] || fail "No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
- j
+
   bosh::do ${_env_name} -d ${_dep} logs "${@}"
   
   local _f _fn _job _vmid _ts
