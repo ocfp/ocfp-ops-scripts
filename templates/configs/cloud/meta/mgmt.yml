@@ -46,6 +46,7 @@ meta:
             concourse_a:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_a" ))
             concourse_b:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_b" ))
 
+          - bosh_a:        (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:bosh_a" ))
             bosh_b:        (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:bosh_b" ))
             vault_a:       (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:vault_a" ))
             vault_ip:      (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:vault_ip" ))
