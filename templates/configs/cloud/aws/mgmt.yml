@@ -280,9 +280,9 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 "-" meta.ocfp.iaas.subnets[1].cidr.prefix ".7" ))
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.prefix ".9-" meta.ocfp.iaas.ips.reserved[1].concourse_a ))
-          - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_b "-" meta.ocfp.iaas.subnets[1].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[1].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_b "-" meta.ocfp.iaas.ips.reserved[1].concourse_c ))
+          - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_d "-" meta.ocfp.iaas.subnets[1].cidr.ip_n ))
 
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z3" ))
@@ -292,9 +292,9 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 "-" meta.ocfp.iaas.subnets[2].cidr.prefix ".7" ))
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.prefix ".9-" meta.ocfp.iaas.ips.reserved[2].concourse_a ))
-          - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_b "-" meta.ocfp.iaas.subnets[2].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[2].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_b "-" meta.ocfp.iaas.ips.reserved[2].concourse_c ))
+          - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_d "-" meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
 # Network: Management Prometheus, ips: z{1,2,3}/subnet/.8
