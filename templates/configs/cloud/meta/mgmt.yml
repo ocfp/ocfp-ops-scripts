@@ -43,8 +43,8 @@ meta:
             doomsday_a:    (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:doomsday_a" ))
             doomsday_ip:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:doomsday_ip" ))
             doomsday_b:    (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:doomsday_b" ))
-            concourse_a:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_workers_a" ))
-            concourse_b:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_workers_b" ))
+            concourse_a:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_a" ))
+            concourse_b:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/1/ips/mgmt/reserved:concourse_b" ))
 
             bosh_b:        (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:bosh_b" ))
             vault_a:       (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:vault_a" ))
@@ -59,6 +59,6 @@ meta:
             prometheus_a:  (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:prometheus_a" ))
             prometheus_ip: (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:prometheus_ip" ))
             prometheus_b:  (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:prometheus_b" ))
-            concourse_a:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:concourse_workers_a" ))
-            concourse_b:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:concourse_workers_b" ))
+            concourse_a:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:concourse_a" ))
+            concourse_b:   (( vault meta.ocfp.vault.env.tf_path "/iaas/subnets/ocfp/2/ips/mgmt/reserved:concourse_b" ))
 
