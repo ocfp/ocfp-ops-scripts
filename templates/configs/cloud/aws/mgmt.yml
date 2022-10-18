@@ -382,9 +382,9 @@ vm_extensions:
   - name: vault-lb
     cloud_properties:
       lb_target_group:
-        - ocfp-mgmt-vault-alb-tg
+        - ocfp-mgmt-vault-lb-tg
   - name: concourse-lb
     cloud_properties:
       lb_target_group:
-        - ocfp-mgmt-concourse-alb-tg
+        - ocfp-mgmt-concourse-lb-tg
 
