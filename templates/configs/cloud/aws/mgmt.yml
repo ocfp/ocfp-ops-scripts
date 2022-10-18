@@ -258,7 +258,7 @@ networks:
 ################################################################################
 # Network: Management Concourse, ips: z{1,2,3}/subnet/.7
 ################################################################################
-  - name: (( concat $OCFP_ENV_NAME "-concourse" ))
+  - name: (( concat $OCFP_ENV_NAME "-concourse-web" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
@@ -269,9 +269,14 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[0].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.subnets[0].cidr.prefix ".7" ))
-          - (( concat meta.ocfp.iaas.subnets[0].cidr.prefix ".9-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+          - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].concourse_a ))
+          - (( concat meta.ocfp.iaas.ips.reserved[0].concourse_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
+        #static:
+        #  - (( concat meta.ocfp.iaas.ips.reserved[0].concourse_ip ))
 
+  - name: (( concat $OCFP_ENV_NAME "-concourse-workers" ))
+    type: manual
+    subnets:
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z2" ))
         dns:
@@ -280,8 +285,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[1].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[1].concourse_a ))
-          - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_b "-" meta.ocfp.iaas.ips.reserved[1].concourse_c ))
+          - (( concat meta.ocfp.iaas.subnets[1].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[1].concourse_c ))
           - (( concat meta.ocfp.iaas.ips.reserved[1].concourse_d "-" meta.ocfp.iaas.subnets[1].cidr.ip_n ))
 
       - range: (( grab meta.ocfp.iaas.subnets[2].cidr.block ))
@@ -292,8 +296,7 @@ networks:
         cloud_properties:
           subnet: (( grab meta.ocfp.iaas.subnets[2].id ))
         reserved:
-          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[2].concourse_a ))
-          - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_b "-" meta.ocfp.iaas.ips.reserved[2].concourse_c ))
+          - (( concat meta.ocfp.iaas.subnets[2].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[2].concourse_c ))
           - (( concat meta.ocfp.iaas.ips.reserved[2].concourse_d "-" meta.ocfp.iaas.subnets[2].cidr.ip_n ))
 
 ################################################################################
