@@ -274,7 +274,7 @@ networks:
         #static:
         #  - (( concat meta.ocfp.iaas.ips.reserved[0].concourse_ip ))
 
-  - name: (( concat $OCFP_ENV_NAME "-concourse-workers" ))
+  - name: (( concat $OCFP_ENV_NAME "-concourse" ))
     type: manual
     subnets:
       - range: (( grab meta.ocfp.iaas.subnets[1].cidr.block ))
