@@ -160,8 +160,7 @@ bosh::logs::fetch() {
   
     mkdir -p "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
   
-    tar -zxf "${_job}.${_vmid}.${_ts}.tgz" \
-      -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
+    tar -zxf "${_f}" -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
   
     rm -f "${job}.${vmid}.${ts}.tgz"
   done
