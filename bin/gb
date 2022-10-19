@@ -141,6 +141,7 @@ bosh::logs::fetch() {
   do tar -zxf "${_f}" -C "${_dep_logs_path}" ; rm -f "${_f}"
   done
 
+  echo
   local _dep_archives=($(find "${_dep_logs_path}" -maxdepth 1 -iname '*.tgz' -print))
   for _f in "${_dep_archives[@]}"
   do
@@ -149,7 +150,7 @@ bosh::logs::fetch() {
     _vmid=$(echo ${_fn} | awk -F. '{print $2}')
     _ts=$(echo ${_fn}   | awk -F. '{print $3}')
   
-    echo -e "Extracting logs into ${_dep_logs_path}/${_job}/${_vmid}/${_ts}\n"
+    echo -e "Extracting logs into ${_dep_logs_path}/${_job}/"
     mkdir -p "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
     tar -zxf "${_f}" -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}" 
     rm -f "${_f}"
