@@ -388,10 +388,10 @@ compilation:
 vm_extensions:
   - name: vault-lb
     cloud_properties:
-      lb_target_group:
+      lb_target_groups:
         - ocfp-mgmt-vault-lb-tg
   - name: concourse-lb
     cloud_properties:
-      lb_target_group:
+      lb_target_groups:
         - ocfp-mgmt-concourse-lb-tg
 
