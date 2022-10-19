@@ -5,38 +5,18 @@
 usage() {
   cat <<USAGE
 
-OCFP Genesis BOSH Script
+OCFP Genesis BOSH Operations Script
 
-  There are two sub command paths as described below.
+USAGE: ${0//*\/} <sub-command>
 
-(b|bosh|d|director) -> 
+WHERE <sub-command> is one of:
 
-  Genesis BOSH Director do
-  
-  Usage: ${0//*\/} <bosh-env-regex> [bosh director cli args]
-  
-  Environment variables:
-  
-    BOSH_DEPLOYMENTS_PATH - Path to the genesis bosh kit deployments directory
-                            Defaults to ~/deployments/bosh
-  
-  Required:
-  
-    bosh-env-regex - Regex to match the bosh environment to use
-  
-  Prerequisites:
-  
-    safe     - cli in the path, targeting a vault, and authenticated
-    genesis  - cli in the path
-    bosh     - cli in the path
+  bosh(b|d|director) -> Run a bosh cli command against given bosh env
 
-(l|logs) -> 
+    Usage: ${0//*\/} bosh <bosh-env-regex> <bosh-cli-command>
+    Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> [options] [<job-name> <job-index> <log-file-name>]
 
-  Genesis BOSH Logs Fetcher
-  
-  Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> [<job-name> <job-index> <log-file-name>]
-  
-  WHERE [options] are:
+      Where [options] are:
   
             --dir=      Destination directory (default: .)
         -f, --follow    Follow logs via SSH
@@ -46,29 +26,39 @@ OCFP Genesis BOSH Script
             --only=     Filter logs (comma-separated)
             --agent     Include only agent logs
   
-  Environment variables:
-  
-    LOGS_PATH       - Logs path to download and process bosh logs into
+    Examples:
 
-(vmsdo) -> 
+      Show deps for ocfp-mgmt-us-east-1 bosh director:
+      $ ${0//*\/} b mgmt-us-e deps
   
-    Genesis BOSH VMs do
+      Upload a release to the ocfp-mgmt-us-east-1 bosh director:
+      $ ${0//*\/} b mgmt-us-e upload-release \$PWD/my-bosh-release-0.0.1.tgz
+  
+  logs(l) -> Fetch logs from given bosh env + dep and extrct into ~/logs/<env>/<dep>/
+  
+    Usage: ${0//*\/} logs <bosh-env-regex> <bosh-deployment-name-regex>
 
-    Run commands on all VMs in a deployment
-    
-    Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> <cmd>
-    
-    Required:
-    
-      bosh-env-regex - Regex to match the bosh environment to use
-      deployment-name-regexp - Regex to match the deployment name to use
-      vm-name-regexp - Regex to match the vm name to use
-    
+    Examples:
+
+      Fetch diego-cell logs for cf from ocfp-sbx-us-east-1 bosh director:
+      $ ${0//*\/} l sbx-us-e -cf diego-cell 
+  
+      Fetch gorouter logs from router vms using director ocfp-sbx-us-east-1 cf deployment:
+      $ ${0//*\/} l sbx-us-e -cf router --job gorouter 
+  
+  
+Environment Variables:
+  
+  BOSH_DEPLOYMENTS_PATH - Path to the genesis bosh kit deployments directory
+                            Defaults to ~/deployments/bosh
+  LOGS_PATH             - Logs path to download and process bosh logs into
+                            Defaults to ~/logs
+  
 Prerequisites:
-    
-      safe     - cli in the path, targeting a vault, and authenticated
-      genesis  - cli in the path
-      bosh     - cli in the path
+  
+  safe     - cli in the path, targeting a vault, and authenticated
+  genesis  - cli in the path
+  bosh     - cli in the path
 
 USAGE
 }
@@ -138,6 +128,7 @@ bosh::logs::fetch() {
 
   [[ -n "${_dep}" ]] || fail "No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
 
+  echo -e "Fetching logs from bosh ${_env_name} deployment ${_dep}\n"
   bosh::do ${_env_name} -d ${_dep} logs "${@}"
   
   local _f _fn _job _vmid _ts
@@ -158,11 +149,10 @@ bosh::logs::fetch() {
     _vmid=$(echo ${_fn} | awk -F. '{print $2}')
     _ts=$(echo ${_fn}   | awk -F. '{print $3}')
   
+    echo -e "Extracting logs into ${_dep_logs_path}/${_job}/${_vmid}/${_ts}\n"
     mkdir -p "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
-  
-    tar -zxf "${_f}" -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}"
-  
-    rm -f "${job}.${vmid}.${ts}.tgz"
+    tar -zxf "${_f}" -C "${_dep_logs_path}/${_job}/${_vmid}/${_ts}" 
+    rm -f "${_f}"
   done
 }
 
