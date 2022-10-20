@@ -526,7 +526,8 @@ vm_extensions:
   - name: cf-tcp-lb
     cloud_properties:
       lb_target_groups:
-        - ocfp-ocf-cf-tcp-lb-tg
+        - ocfp-ocf-cf-tcp-lb    # ELB attaches directly
+       #- ocfp-ocf-cf-tcp-lb-tg # NLB uses target-groups
   - name: cf-ssh-lb
     cloud_properties:
       lb_target_groups:
