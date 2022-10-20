@@ -404,10 +404,10 @@ disk_types:
   disk_size: (( grab meta.disk_types.shield.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: blacksmith-dev
-  disk_size: (( grab meta.disk_types.redis.dev ))
+  disk_size: (( grab meta.disk_types.blacksmith.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: blacksmith-prod
-  disk_size: (( grab meta.disk_types.redis.prod ))
+  disk_size: (( grab meta.disk_types.blacksmith.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: redis-dev
   disk_size: (( grab meta.disk_types.redis.dev ))
