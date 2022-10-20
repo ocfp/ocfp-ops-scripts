@@ -2,28 +2,28 @@
 meta:
   vm_types:
     default:
-      dev:  (( grab params.vm_types.default.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.default.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.default.prod || "m6i.large" ))
     compilation:
-      dev:  (( grab params.vm_types.compilation.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.compilation.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.compilation.prod || "c6i.xlarge" ))
     bosh:
-      dev:  (( grab params.vm_types.bosh.dev  || "t3a.large" ))
+      dev:  (( grab params.vm_types.bosh.dev  || "t3.large" ))
       prod: (( grab params.vm_types.bosh.prod || "m6i.2xlarge" ))
     vault:
-      dev:  (( grab params.vm_types.vault.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.vault.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.vault.prod || "m6i.large" ))
     concourse:
-      dev:  (( grab params.vm_types.concourse.dev  || "t3a.large" ))
+      dev:  (( grab params.vm_types.concourse.dev  || "t3.large" ))
       prod: (( grab params.vm_types.concourse.prod || "m6i.large" ))
     concourse-worker:
-      dev:  (( grab params.vm_types.concourse-worker.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.concourse-worker.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.concourse-worker.prod || "m6i.large" ))
     jumpbox:
-      dev:  (( grab params.vm_types.jumpbox.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.jumpbox.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.jumpbox.prod || "m6i.xlarge" ))
     shield:
-      dev:  (( grab params.vm_types.jumpbox.dev  || "t3a.medium" ))
+      dev:  (( grab params.vm_types.jumpbox.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.jumpbox.prod || "m6i.xlarge" ))
 
   disk_types:
