@@ -522,22 +522,21 @@ vm_extensions:
   - name: cf-system-apps-lb
     cloud_properties:
       lb_target_groups:
-        - ocfp-ocf-cf-system-apps-lb-tg
-  - name: cf-tcp-lb
-    cloud_properties:
-      lb_target_groups:
-        - ocfp-ocf-cf-tcp-lb    # ELB attaches directly
-       #- ocfp-ocf-cf-tcp-lb-tg # NLB uses target-groups
+        - ocfp-ocf-cf-system-apps-lb-tg # ALB uses target-groups
   - name: cf-ssh-lb
     cloud_properties:
       lb_target_groups:
-        - ocfp-ocf-cf-ssh-lb-tg
+        - ocfp-ocf-cf-ssh-lb-tg # NLB uses target-groups
   - name: shield-lb
     cloud_properties:
       lb_target_groups:
-        - ocfp-ocf-shield-lb-tg
-  - name: blacksmith-lb
+        - ocfp-ocf-shield-lb-tg # ALB uses target-groups
+  - name: cf-tcp-lb
     cloud_properties:
       lb_target_groups:
-        - ocfp-ocf-blacksmith-lb-tg
+        - ocfp-ocf-cf-tcp-lb-tg # NLB uses target-groups
+  - name: cf-tcp-elb
+    cloud_properties:
+      elbs:
+        - ocfp-ocf-cf-tcp-lb
 
