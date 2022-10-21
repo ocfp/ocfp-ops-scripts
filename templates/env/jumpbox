@@ -44,9 +44,7 @@ esac
 cat <<-YAML
 
 params:
-#  ocfp:
-#    env:
-#      scale: "prod" # default is "dev"
+# ocfp_env_scale: "prod" # default is "dev"
   dns_cache: true # DNS Caching (for runtime config)
 YAML
 

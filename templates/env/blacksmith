@@ -56,10 +56,7 @@ cat <<-YAML
 
 params:
   dns_cache: true # DNS Caching (for runtime config)
-
-#  ocfp:
-#    env:
-#      scale: "prod" # default is "dev"
+# ocfp_env_scale: "prod" # default is "dev"
 
 #   shield_agent:     "127.0.0.1:5444" # IP:PORT
 #   shield_store:     "..."
