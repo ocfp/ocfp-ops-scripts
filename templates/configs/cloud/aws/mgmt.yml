@@ -46,7 +46,7 @@ vm_types:
     ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
 - name: bosh-prod
   cloud_properties:
-    instance_type: (( grab meta.vm_types.bosh.dev ))
+    instance_type: (( grab meta.vm_types.bosh.prod ))
     ephemeral_disk: { size: 131072, type: gp3, encrypted: true }
 - name: vault-dev
   cloud_properties:
