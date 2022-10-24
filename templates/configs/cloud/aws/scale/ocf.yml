@@ -22,24 +22,15 @@ meta:
     as-api:
       dev:  (( grab params.vm_types.as-api.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.as-api.prod || "m6i.large" ))
-    as-broker:
-      dev:  (( grab params.vm_types.as-broker.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-broker.prod || "m6i.large" ))
-    as-collector:
-      dev:  (( grab params.vm_types.as-collector.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-collector.prod || "m6i.xlarge" ))
-    as-engine:
-      dev:  (( grab params.vm_types.as-engine.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-engine.prod || "m6i.xlarge" ))
-    as-operator:
-      dev:  (( grab params.vm_types.as-operator.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-operator.prod || "m6i.large" ))
-    as-scaler:
-      dev:  (( grab params.vm_types.as-scaler.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-scaler.prod || "m6i.large" ))
-    as-scheduler:
-      dev:  (( grab params.vm_types.as-scheduler.dev  || "t3.medium" ))
-      prod: (( grab params.vm_types.as-scheduler.prod || "m6i.xlarge" ))
+    as-actors:
+      dev:  (( grab params.vm_types.as-actors.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-actors.prod || "m6i.large" ))
+    as-metrics:
+      dev:  (( grab params.vm_types.as-metrics.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-metrics.prod || "m6i.xlarge" ))
+    as-nozzle:
+      dev:  (( grab params.vm_types.as-nozzle.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.as-nozzle.prod || "m6i.xlarge" ))
     app-scheduler:
       dev:  (( grab params.vm_types.app-scheduler.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.app-scheduler.prod || "m6i.large" ))

@@ -56,6 +56,7 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.prod ))
     ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+
 - name: as-api-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.dev ))
@@ -64,53 +65,29 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.as-api.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-broker-dev
+- name: as-actors-dev
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-broker.dev ))
+    instance_type: (( grab meta.vm_types.as-actors.dev ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-broker-prod
+- name: as-actors-prod
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-broker.prod ))
+    instance_type: (( grab meta.vm_types.as-actors.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-collector-dev
+- name: as-metrics-dev
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-collector.dev ))
+    instance_type: (( grab meta.vm_types.as-metrics.dev ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-collector-prod
+- name: as-metrics-prod
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-collector.prod ))
+    instance_type: (( grab meta.vm_types.as-metrics.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-engine-dev
+- name: as-nozzle-dev
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-engine.dev ))
+    instance_type: (( grab meta.vm_types.as-nozzle.dev ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-engine-prod
+- name: as-nozzle-prod
   cloud_properties:
-    instance_type: (( grab meta.vm_types.as-engine.prod ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-operator-dev
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-operator.dev ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-operator-prod
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-operator.prod ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-scaler-dev
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-scaler.dev ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-scaler-prod
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-scaler.prod ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-scheduler-dev
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-scheduler.dev ))
-    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
-- name: as-scheduler-prod
-  cloud_properties:
-    instance_type: (( grab meta.vm_types.as-scheduler.prod ))
+    instance_type: (( grab meta.vm_types.as-nozzle.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: app-scheduler-dev
   cloud_properties:
