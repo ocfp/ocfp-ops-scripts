@@ -66,7 +66,7 @@ pg::set::contract::secrets() {
 }
 
 pg::prepare() {
-  local src_path="${OCFP_VAULT_TF_PATH}/dbs/${kit}"
+  local src_path="${OCFP_VAULT_TF_PATH}/dbs/${kit//cf-app-}" # TODO: Fix autoscaler...
   local dst_path="${OCFP_VAULT_ENV_PATH}/${kit}"
 
   PG_HOSTNAME="$(safe get "${src_path}:hostname")"
