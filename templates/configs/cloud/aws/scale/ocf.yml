@@ -40,6 +40,9 @@ meta:
     as-scheduler:
       dev:  (( grab params.vm_types.as-scheduler.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.as-scheduler.prod || "m6i.xlarge" ))
+    app-scheduler:
+      dev:  (( grab params.vm_types.app-scheduler.dev  || "t3.medium" ))
+      prod: (( grab params.vm_types.app-scheduler.prod || "m6i.large" ))
     bbs:
       dev:  (( grab params.vm_types.bbs.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.bbs.prod || "m6i.xlarge" ))

@@ -112,6 +112,14 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.as-scheduler.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: app-scheduler-dev
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.app-scheduler.dev ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: app-scheduler-prod
+  cloud_properties:
+    instance_type: (( grab meta.vm_types.app-scheduler.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: bbs-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.bbs.dev ))
