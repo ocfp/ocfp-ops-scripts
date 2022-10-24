@@ -412,6 +412,30 @@ disk_types:
 - name: minio-prod
   disk_size: (( grab meta.disk_types.minio.prod ))
   cloud_properties: { type: gp3, encrypted: true }
+- name: as-api-dev
+  disk_size: (( grab meta.disk_types.default.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-api-prod
+  disk_size: (( grab meta.disk_types.default.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-actor-dev
+  disk_size: (( grab meta.disk_types.default.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-actor-prod
+  disk_size: (( grab meta.disk_types.default.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-metrics-dev
+  disk_size: (( grab meta.disk_types.default.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-metrics-prod
+  disk_size: (( grab meta.disk_types.default.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-nozzle-dev
+  disk_size: (( grab meta.disk_types.default.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: as-nozzle-prod
+  disk_size: (( grab meta.disk_types.default.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
 
 ################################################################################
 # Networks
