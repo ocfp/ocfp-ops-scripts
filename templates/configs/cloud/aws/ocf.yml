@@ -56,7 +56,6 @@ vm_types:
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.prod ))
     ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
-
 - name: as-api-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.api.dev ))
@@ -418,10 +417,10 @@ disk_types:
 - name: as-api-prod
   disk_size: (( grab meta.disk_types.default.prod ))
   cloud_properties: { type: gp3, encrypted: true }
-- name: as-actor-dev
+- name: as-actors-dev
   disk_size: (( grab meta.disk_types.default.dev ))
   cloud_properties: { type: gp3, encrypted: true }
-- name: as-actor-prod
+- name: as-actors-prod
   disk_size: (( grab meta.disk_types.default.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: as-metrics-dev
