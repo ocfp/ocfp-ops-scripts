@@ -34,7 +34,7 @@ fail() { echo -e "$*" >&2 ; exit 1 ; }
 pg::psql() {
   local _db="$1"
   shift
-  \psql "${PG_URI}/${_db}" "$*"
+  \psql "${PG_URI}/${_db}?sslmode=require" "$*"
 }
 
 pg::set::contract::secrets() {
