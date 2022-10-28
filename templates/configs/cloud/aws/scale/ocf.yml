@@ -140,13 +140,13 @@ meta:
       prod: (( grab params.disk_types.blacksmith.size || 65536 ))
     postgres:
       dev:  (( grab params.disk_types.postgres.size || 16384 ))
-      prod: (( grab params.disk_types.postgres.size || 65536 ))
+      prod: (( grab params.disk_types.postgres.size || 81920 ))
     redis:
       dev:  (( grab params.disk_types.redis.size || 16384 ))
-      prod: (( grab params.disk_types.redis.size || 65536 ))
+      prod: (( grab params.disk_types.redis.size || 81920 ))
     rabbitmq:
       dev:  (( grab params.disk_types.rabbitmq.size || 16384 ))
-      prod: (( grab params.disk_types.rabbitmq.size || 32768 ))
+      prod: (( grab params.disk_types.rabbitmq.size || 81920 ))
     shield:
       dev:  (( grab params.disk_types.shield.size || 8192 ))
       prod: (( grab params.disk_types.shield.size || 16384 ))
