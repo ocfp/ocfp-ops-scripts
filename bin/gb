@@ -11,7 +11,7 @@ USAGE: ${0//*\/} <sub-command>
 
 WHERE <sub-command> is one of:
 
-  bosh(b|d|director) -> Run a bosh cli command against given bosh env
+  bosh(b) -> Run a bosh cli command against given bosh env
 
     Usage: ${0//*\/} bosh <bosh-env-regex> <bosh-cli-command>
     Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> [options] [<job-name> <job-index> <log-file-name>]
@@ -36,7 +36,7 @@ WHERE <sub-command> is one of:
   
   logs(l) -> Fetch logs from given bosh env + dep and extrct into ~/logs/<env>/<dep>/
   
-    Usage: ${0//*\/} logs <bosh-env-regex> <bosh-deployment-name-regex>
+    Usage: ${0//*\/} logs|l <bosh-env-regex> <bosh-deployment-name-regex>
 
     Examples:
 
@@ -45,6 +45,24 @@ WHERE <sub-command> is one of:
   
       Fetch gorouter logs from router vms using director ocfp-sbx-us-east-1 cf deployment:
       $ ${0//*\/} l sbx-us-e -cf router --job gorouter 
+  
+  ssh(s) -> Run bosh ssh against env and deployment
+  
+    Usage: ${0//*\/} ssh|s <bosh-env-regex> <bosh-deployment-name-regex> 
+
+    Examples:
+
+      ssh onto the first router for cf deployment on ocfp-sbx-us-east-1 bosh director:
+      $ ${0//*\/} l sbx-us-e -cf router/0
+
+  deps(d) -> Run bosh ssh against env and deployment
+  
+    Usage: ${0//*\/} deps|d <bosh-env-regex>
+
+    Examples:
+
+      Show deployments for ocfp-sbx-us-east-1
+      $ ${0//*\/} d sbx-us-e
   
   
 Environment Variables:
