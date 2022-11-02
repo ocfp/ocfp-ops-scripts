@@ -125,7 +125,7 @@ meta:
       dev:  (( grab params.vm_types.windows-cell.dev  || "t3.large" ))
       prod: (( grab params.vm_types.windows-cell.prod || "r6i.2xlarge" ))
 
-  disk_types:
+  disk_sizes:
     default:
       dev:  (( grab params.disk_types.default.size || 32768 ))
       prod: (( grab params.disk_types.default.size || 65536 ))

@@ -27,19 +27,19 @@ vm_types:
 - name: default-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.default.dev ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 4096,  type: gp3, encrypted: true }
 - name: default-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.default.prod ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: compilation-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.compilation.dev ))
-    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
 - name: compilation-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.compilation.prod ))
-    ephemeral_disk: { size: 65536,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
 - name: bosh-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.bosh.dev ))
@@ -51,95 +51,95 @@ vm_types:
 - name: vault-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.vault.dev ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 4096,  type: gp3, encrypted: true }
 - name: vault-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.vault.prod ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: concourse-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.concourse.dev ))
-    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 65536, type: gp3, encrypted: true }
 - name: concourse-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.concourse.prod ))
-    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 131072, type: gp3, encrypted: true }
 - name: concourse-worker-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.concourse-worker.dev ))
-    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 65536, type: gp3, encrypted: true }
 - name: concourse-worker-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.concourse-worker.prod ))
-    ephemeral_disk: { size: 204800, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 262144, type: gp3, encrypted: true }
 - name: jumpbox-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.jumpbox.dev ))
-    ephemeral_disk: { size: 131072, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 4096, type: gp3, encrypted: true }
 - name: jumpbox-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.jumpbox.prod ))
-    ephemeral_disk: { size: 131072, type: gp3, encrypted: true }
+    ephemeral_disk: { size: 8192, type: gp3, encrypted: true }
 - name: shield-dev
   cloud_properties:
     instance_type: (( grab meta.vm_types.shield.dev ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 4096,  type: gp3, encrypted: true }
 - name: shield-prod
   cloud_properties:
     instance_type: (( grab meta.vm_types.shield.prod ))
-    ephemeral_disk: { size: 51200,  type: gp3, encrypted: true }
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
 
 ################################################################################
-# Disk Types
+# Disk Pools
 ################################################################################
-disk_types:
+disk_pools:
 - name: default-dev
-  disk_size: (( grab meta.disk_types.default.dev ))
+  disk_size: (( grab meta.disk_sizes.default.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: default-prod
-  disk_size: (( grab meta.disk_types.default.prod ))
+  disk_size: (( grab meta.disk_sizes.default.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: bosh-dev
-  disk_size: (( grab meta.disk_types.bosh.dev ))
+  disk_size: (( grab meta.disk_sizes.bosh.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: bosh-prod
-  disk_size: (( grab meta.disk_types.bosh.prod ))
+  disk_size: (( grab meta.disk_sizes.bosh.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: concourse-dev
-  disk_size: (( grab meta.disk_types.concourse.dev ))
+  disk_size: (( grab meta.disk_sizes.concourse.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: concourse-prod
-  disk_size: (( grab meta.disk_types.concourse.prod ))
+  disk_size: (( grab meta.disk_sizes.concourse.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: jumpbox-dev
-  disk_size: (( grab meta.disk_types.jumpbox.dev ))
+  disk_size: (( grab meta.disk_sizes.jumpbox.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: jumpbox-prod
-  disk_size: (( grab meta.disk_types.jumpbox.prod ))
+  disk_size: (( grab meta.disk_sizes.jumpbox.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: prometheus-dev
-  disk_size: (( grab meta.disk_types.prometheus.dev ))
+  disk_size: (( grab meta.disk_sizes.prometheus.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: prometheus-prod
-  disk_size: (( grab meta.disk_types.prometheus.prod ))
+  disk_size: (( grab meta.disk_sizes.prometheus.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: shield-dev
-  disk_size: (( grab meta.disk_types.shield.dev ))
+  disk_size: (( grab meta.disk_sizes.shield.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: shield-prod
-  disk_size: (( grab meta.disk_types.shield.prod ))
+  disk_size: (( grab meta.disk_sizes.shield.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: vault-dev
-  disk_size: (( grab meta.disk_types.vault.dev ))
+  disk_size: (( grab meta.disk_sizes.vault.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: vault-prod
-  disk_size: (( grab meta.disk_types.vault.prod ))
+  disk_size: (( grab meta.disk_sizes.vault.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: doomsday-dev
-  disk_size: (( grab meta.disk_types.doomsday.dev ))
+  disk_size: (( grab meta.disk_sizes.doomsday.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: doomsday-prod
-  disk_size: (( grab meta.disk_types.doomsday.prod ))
+  disk_size: (( grab meta.disk_sizes.doomsday.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 
 ################################################################################

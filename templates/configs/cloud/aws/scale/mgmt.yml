@@ -26,7 +26,7 @@ meta:
       dev:  (( grab params.vm_types.jumpbox.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.jumpbox.prod || "m6i.xlarge" ))
 
-  disk_types:
+  disk_sizes:
     default:
       dev:  (( grab params.disk_types.default.size || 40960 ))
       prod: (( grab params.disk_types.default.size || 81920 ))
