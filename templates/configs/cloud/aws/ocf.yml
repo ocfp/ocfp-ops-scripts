@@ -375,35 +375,20 @@ disk_types:
 - name: postgres-prod
   disk_size: (( grab meta.disk_sizes.postgres.prod ))
   cloud_properties: { type: gp3, encrypted: true }
-- name: blobstore-dev
-  disk_size: (( grab meta.disk_sizes.blobstore.dev ))
-  cloud_properties: { type: gp3, encrypted: true }
-- name: blobstore-prod
-  disk_size: (( grab meta.disk_sizes.blobstore.prod ))
-  cloud_properties: { type: gp3, encrypted: true }
 - name: shield-dev
   disk_size: (( grab meta.disk_sizes.shield.dev ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: shield-prod
   disk_size: (( grab meta.disk_sizes.shield.prod ))
   cloud_properties: { type: gp3, encrypted: true }
-- name: blacksmith-dev
-  disk_size: (( grab meta.disk_sizes.blacksmith.dev ))
+  ################################################################################
+  # Blobstores
+  ################################################################################
+- name: blobstore-dev
+  disk_size: (( grab meta.disk_sizes.blobstore.dev ))
   cloud_properties: { type: gp3, encrypted: true }
-- name: blacksmith-prod
-  disk_size: (( grab meta.disk_sizes.blacksmith.prod ))
-  cloud_properties: { type: gp3, encrypted: true }
-- name: redis-dev
-  disk_size: (( grab meta.disk_sizes.redis.dev ))
-  cloud_properties: { type: gp3, encrypted: true }
-- name: redis-prod
-  disk_size: (( grab meta.disk_sizes.redis.prod ))
-  cloud_properties: { type: gp3, encrypted: true }
-- name: rabbitmq-dev
-  disk_size: (( grab meta.disk_sizes.rabbitmq.dev ))
-  cloud_properties: { type: gp3, encrypted: true }
-- name: rabbitmq-prod
-  disk_size: (( grab meta.disk_sizes.rabbitmq.prod ))
+- name: blobstore-prod
+  disk_size: (( grab meta.disk_sizes.blobstore.prod ))
   cloud_properties: { type: gp3, encrypted: true }
 - name: minio-dev
   disk_size: (( grab meta.disk_sizes.minio.dev ))
@@ -411,6 +396,9 @@ disk_types:
 - name: minio-prod
   disk_size: (( grab meta.disk_sizes.minio.prod ))
   cloud_properties: { type: gp3, encrypted: true }
+  ##############################################################################
+  # Autoscaler
+  ##############################################################################
 - name: as-api-dev
   disk_size: (( grab meta.disk_sizes.default.dev ))
   cloud_properties: { type: gp3, encrypted: true }
@@ -435,15 +423,77 @@ disk_types:
 - name: as-nozzle-prod
   disk_size: (( grab meta.disk_sizes.default.prod ))
   cloud_properties: { type: gp3, encrypted: true }
+  ##############################################################################
+  # Blacksmith & Services
+  ##############################################################################
+- name: blacksmith-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-small-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-small.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-small-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-small.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-medium-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-medium.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-medium-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-medium.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-large-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-large.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-redis-large-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-redis-large.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-small-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-small.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-small-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-small.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-medium-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-medium.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-medium-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-medium.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-large-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-large.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-rabbitmq-large-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-rabbitmq-large.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-small-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-small.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-small-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-small.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-medium-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-medium.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-medium-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-medium.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-large-dev
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-large.dev ))
+  cloud_properties: { type: gp3, encrypted: true }
+- name: blacksmith-postgres-large-prod
+  disk_size: (( grab meta.disk_sizes.blacksmith-postgres-large.prod ))
+  cloud_properties: { type: gp3, encrypted: true }
 
 ################################################################################
 # Networks
 ################################################################################
 networks:
-
-################################################################################
-# Network: Compilation
-################################################################################
+  ##############################################################################
+  # Network: Compilation
+  ##############################################################################
   - name: (( concat $OCFP_ENV_NAME "-compilation" ))
     type: manual
     subnets: 
@@ -458,9 +508,9 @@ networks:
           - (( concat meta.ocfp.iaas.subnets[0].cidr.ip_0 "-" meta.ocfp.iaas.ips.reserved[0].compilation_a ))
           - (( concat meta.ocfp.iaas.ips.reserved[0].compilation_b "-" meta.ocfp.iaas.subnets[0].cidr.ip_n ))
 
-################################################################################
-# Network: Management SHIELD, ips: z{1}/subnet/.10
-################################################################################
+  ##############################################################################
+  # Network: Management SHIELD, ips: z{1}/subnet/.10
+  ##############################################################################
   - name: (( concat $OCFP_ENV_NAME "-shield" ))
     type: manual
     subnets:
@@ -477,9 +527,9 @@ networks:
         static:
           - (( grab meta.ocfp.iaas.ips.reserved[0].shield_ip ))
 
-################################################################################
-# Network: OCF
-################################################################################
+  ##############################################################################
+  # Network: OCF
+  ##############################################################################
   - name: (( concat $OCFP_ENV_NAME "-ocf" ))
     type: manual
     subnets:
