@@ -90,9 +90,9 @@ vm_types:
     ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
 
 ################################################################################
-# Disk Pools
+# Disk Types
 ################################################################################
-disk_pools:
+disk_types:
 - name: default-dev
   disk_size: (( grab meta.disk_sizes.default.dev ))
   cloud_properties: { type: gp3, encrypted: true }
