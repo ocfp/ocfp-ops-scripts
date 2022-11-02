@@ -135,18 +135,39 @@ meta:
     blobstore:
       dev:  (( grab params.disk_types.blobstore.size || 32768 ))
       prod: (( grab params.disk_types.blobstore.size || 524288 ))
-    blacksmith:
-      dev:  (( grab params.disk_types.blacksmith.size || 16384 ))
-      prod: (( grab params.disk_types.blacksmith.size || 65536 ))
     postgres:
       dev:  (( grab params.disk_types.postgres.size || 16384 ))
       prod: (( grab params.disk_types.postgres.size || 81920 ))
-    redis:
-      dev:  (( grab params.disk_types.redis.size || 16384 ))
-      prod: (( grab params.disk_types.redis.size || 81920 ))
-    rabbitmq:
-      dev:  (( grab params.disk_types.rabbitmq.size || 16384 ))
-      prod: (( grab params.disk_types.rabbitmq.size || 81920 ))
+    blacksmith:
+      dev:  (( grab params.disk_types.blacksmith.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith.size || 65536 ))
+    blacksmith-redis-small:
+      dev:  (( grab params.disk_types.blacksmith-redis-small.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-redis-small.size || 81920 ))
+    blacksmith-redis-medium:
+      dev:  (( grab params.disk_types.blacksmith-redis-medium.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-redis-medium.size || 81920 ))
+    blacksmith-redis-large:
+      dev:  (( grab params.disk_types.blacksmith-redis-large.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-redis-large.size || 81920 ))
+    blacksmith-rabbitmq-small:
+      dev:  (( grab params.disk_types.blacksmith-rabbitmq-small.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-rabbitmq-small.size || 81920 ))
+    blacksmith-rabbitmq-medium:
+      dev:  (( grab params.disk_types.blacksmith-rabbitmq-medium.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-rabbitmq-medium.size || 81920 ))
+    blacksmith-rabbitmq-large:
+      dev:  (( grab params.disk_types.blacksmith-rabbitmq-large.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-rabbitmq-large.size || 81920 ))
+    blacksmith-postgres-small:
+      dev:  (( grab params.disk_types.blacksmith-postgres-small.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-postgres-small.size || 81920 ))
+    blacksmith-postgres-medium:
+      dev:  (( grab params.disk_types.blacksmith-postgres-medium.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-postgres-medium.size || 81920 ))
+    blacksmith-postgres-large:
+      dev:  (( grab params.disk_types.blacksmith-postgres-large.size || 16384 ))
+      prod: (( grab params.disk_types.blacksmith-postgres-large.size || 81920 ))
     shield:
       dev:  (( grab params.disk_types.shield.size || 8192 ))
       prod: (( grab params.disk_types.shield.size || 16384 ))
