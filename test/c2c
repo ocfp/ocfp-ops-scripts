@@ -16,6 +16,10 @@ parse::args() {
   while [[ $# > 0 ]]
   do
     case $1 in
+      (fetch|push|test|delete|all|setup)
+        action=${1}
+        shift
+        ;;
       (env)
         env=$2
         shift 2 || _fail "Usage: ...env <name>"
@@ -182,8 +186,7 @@ declare -a spaces
 apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps}
 internal_domain=apps.internal
 org=system
-
-action=$1 ; shift || _usage
+action=
 
 mkdir -p ${apps_path} && cd ${apps_path}
 

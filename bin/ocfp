@@ -295,7 +295,7 @@ __init::config() {
 
 __test() {
   case "$1" in 
-    (c2c) bash "${templates_path/templates*}/test/c2c" env "${OCFP_ENV_NAME}" "${@:2}" ;;
+    (c2c) bash "${templates_path/\/templates*}/test/c2c" "${@:2}" ;;
     (*)   fail "Usage: ${0//*\/} test {c2c}" ;;
   esac
 }
