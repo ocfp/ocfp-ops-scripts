@@ -288,6 +288,12 @@ __init::config() {
   exit $?
 }
 
+__test() {
+  case "$1" in 
+    (c2c) bash "$(basename $0)/test/c2c" env "${OCFP_ENV_NAME}" "${@:2}" ;;
+    (*) fail "Usage: ${0//*\/} test {c2c}" ;;
+  esac
+}
 
 templates_path="${0%\/ocfp}/templates"
 
@@ -308,6 +314,7 @@ case ${cmd} in
   (init-pg)     __init::pg     "$@" ;;
   (init-env)    __init::env    "$@" ;;
   (init-config) __init::config "$@" ;;
+  (test)        __test "$@" ;;
   (*) usage ;;
 esac
 
