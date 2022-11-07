@@ -100,13 +100,15 @@ __parse::args() {
   done
 
   [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
-  [[ -n ${OCFP_REGION} ]]   || fail "'region <region>' must be given"
-  [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' must be given"
+  if [[ ${cmd} != "test" ]]; then
+    [[ -n ${OCFP_REGION} ]]   || fail "'region <region>' must be given"
+    [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' must be given"
+  fi
 
   __set::env::type
 
   # All envs need to know their deployer/bosh_env, mgmt bosh is the exception
-  if ! [[ ${OCFP_KIT} == "bosh" && ${env_type} == "mgmt" ]]
+  if ! [[ ${OCFP_KIT} == "bosh" && ${env_type} == "mgmt" ]] && [[ $cmd != "test" ]]
   then [[ -n ${OCFP_BOSH_ENV} ]] || fail "'bosh <bosh-env-name>' must be given"
   fi
 

@@ -16,7 +16,13 @@ parse::args() {
   while [[ $# > 0 ]]
   do
     case $1 in
+      (env)
+        env=$2
+        shift 2 || _fail "Usage: ...env <name>"
+        ;;
       (space|s)
+        spaces+=("$2")
+        shift 2 || _fail "Usage: ...space <name> [space <name>...]"
         ;;
       (*)
         _fail "Unknown arg: '$1'\nUsage: space <name> [space <name>...]"
