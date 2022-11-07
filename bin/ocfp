@@ -90,7 +90,7 @@ __parse::args() {
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
-      (test)
+      (test) # TODO: Not fully implemented yet
         test_type="${1}"
         shift || fail "${0//*/} ... test <type>"
       (*)
@@ -294,8 +294,8 @@ __init::config() {
 }
 
 __test() {
-  case "${test_type:-}" in 
-    (c2c) bash "${templates_path/templates*})/test/c2c" env "${OCFP_ENV_NAME}" "${@:2}" ;;
+  case "$1" in 
+    (c2c) bash "${templates_path/templates*}/test/c2c" env "${OCFP_ENV_NAME}" "${@:2}" ;;
     (*)   fail "Usage: ${0//*\/} test {c2c}" ;;
   esac
 }
