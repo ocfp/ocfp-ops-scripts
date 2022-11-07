@@ -45,8 +45,7 @@ apps::c2c::fetch() {
     then # TODO:
       true #_do curl -sOL https://.../c2c-feature-tests.tar.gz
     fi
-    _do tar zxf c2c-feature-tests.tar.gz -C ${apps_path}
-    _do rm c2c-feature-tests.tar.gz
+    _do tar zxf c2c-feature-tests.tar.gz -C ${apps_path}/c2c-feature-tests
   fi
 
   cd ${apps_path}/c2c-feature-tests
