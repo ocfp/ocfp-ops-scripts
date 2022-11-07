@@ -183,7 +183,6 @@ apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps}
 internal_domain=apps.internal
 org=system
 
-env=$1    ; shift || _usage
 action=$1 ; shift || _usage
 
 mkdir -p ${apps_path} && cd ${apps_path}
