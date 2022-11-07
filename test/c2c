@@ -179,7 +179,7 @@ apps::c2c::test() {
 }
 
 declare -a spaces
-apps_path=${OCFP_PROJECT_PATH:-${HOME}}
+apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps}
 internal_domain=apps.internal
 org=system
 
