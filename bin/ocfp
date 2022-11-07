@@ -90,9 +90,9 @@ __parse::args() {
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
-      (test) # TODO: Not fully implemented yet
-        test_type="${1}"
-        shift || fail "${0//*/} ... test <type>"
+      (c2c) # Short circuit for tests.
+        return 0
+        ;;
       (*)
         usage
         ;;
