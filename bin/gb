@@ -233,10 +233,12 @@ bosh::dep() {
 }
 
 bosh::manifest() {
-  local _env="${1}" _dep_regex="$2"
+  local _env="${1}" _dep_regex="$2" _dep
 
   shift 2 ||
     fail "${FUNCNAME}: bosh::manifest requires an env regex followed by a deployment regex."
+
+  _dep=$( bosh::dep ${_env} )
 
   bosh::do ${_env} -d ${_dep} manifest "${@}"
 }
