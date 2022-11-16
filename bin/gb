@@ -84,6 +84,8 @@ USAGE
 fail() { echo -e "$*" >&2; exit 1; }
 
 bosh::vaildate::environment() {
+  local _cmd
+
   if [[ -n "${BOSH_DEPLOYMENTS_PATH}" ]]
   then bosh_path="${BOSH_DEPLOYMENTS_PATH}"
   else bosh_path="${HOME}/deployments/bosh"
@@ -92,9 +94,9 @@ bosh::vaildate::environment() {
   [[ -d "${bosh_path}" ]] ||
     fail "BOSH deployments path '${bosh_path}' does not exist"
   
-  for cmd in genesis bosh safe ; do 
-    command -v "${cmd}" &>/dev/null ||
-      fail "ERROR: \`${cmd}\` is not in PATH, please install it and try again."
+  for _cmd in genesis bosh safe ; do 
+    command -v "${_cmd}" &>/dev/null ||
+      fail "ERROR: \`${_cmd}\` is not in PATH, please install it and try again."
   done
 }
 
