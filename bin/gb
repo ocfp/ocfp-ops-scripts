@@ -99,7 +99,7 @@ bosh::vaildate::environment() {
 }
 
 find::env::file() {
-  local _env_regex="${1}"
+  local _env_regex="${1%.yml}"
   local _env_file
   local _yamls=($(
   find ${bosh_path} -maxdepth 1 -iname "*${_env_regex}*.yml" -print | sort -r | head -1
@@ -119,17 +119,15 @@ find::env::file() {
 }
 
 find::env() {
-  local _env_regex="${1}"
+  local _env_regex="${1%.yml}"
   local _env_file
   _env_file=$(find::env::file "${_env_regex}")
   echo ${_env_file%.yml}
 }
 
 bosh::logs::fetch() {
-  local _env_regex="$1" _dep_regex="$2"
+  local _env_regex="${1%.yml}" _dep_regex="$2"
   shift 2 || fail "$(usage)"
-
-  bosh::vaildate::environment
 
   local _logs_path="${LOGS_PATH:-"${HOME}/logs"}"
   local _env=$(find::env "${_env_regex}")
@@ -176,10 +174,8 @@ bosh::logs::fetch() {
 }
 
 bosh::ssh() {
-  local _env_regex="$1" _dep_regex="$2"
+  local _env_regex="${1%.yml}" _dep_regex="$2"
   shift 2 || fail "$(usage)"
-
-  bosh::vaildate::environment
 
   local _logs_path="${LOGS_PATH:-"${HOME}/logs"}"
   local _env=$(find::env "${_env_regex}")
@@ -198,10 +194,8 @@ bosh::ssh() {
 }
 
 bosh::do() {
-  local _env_regex="$1" 
+  local _env_regex="${1%.yml}" 
   shift || fail "$(usage)"
-  
-  bosh::vaildate::environment
   
   _env_file="$(find::env::file "${_env_regex}")"
   (
@@ -214,7 +208,7 @@ bosh::do() {
 bosh::deps() {
   local _env="$1"
   shift || fail "$(usage)"
-  bosh::do "${_env}" deps --json | jq -r '.Tables[].Rows[].name'
+  bosh::do "${_env}" deps --json &>/dev/null | jq -r '.Tables[].Rows[].name'
 }
 
 bosh::vms::do() {
@@ -233,12 +227,28 @@ bosh::vms::do() {
 }
 
 cmd="${1}" ; shift
+
+bosh::vaildate::environment
+  
 case "${cmd}" in
-  (b|bosh) bosh::do "${@}" ;;
-  (l|logs) bosh::logs::fetch "${@}" ;;
-  (d|deps) bosh::deps "${@}" ;;
-  (s|ssh)  bosh::ssh "${@}" ;;
-  (vmsdo)  bosh::vms::do "${@}" ;;
+  (b|bosh)     
+    bosh::do "${@}" 
+    ;;
+  (l|logs)     
+    bosh::logs::fetch "${@}" 
+    ;;
+  (s|ssh)      
+    bosh::ssh "${@}" 
+    ;;
+  (d|deps)     
+    bosh::deps "${@}" 
+    ;;
+  (m|manifest) 
+    bosh::manifest "${@}" 
+    ;;
+  (vmsdo)      
+    bosh::vms::do "${@}" 
+    ;;
   (*)
     usage 
     exit 0
