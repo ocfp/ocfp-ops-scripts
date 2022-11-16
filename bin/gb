@@ -230,6 +230,8 @@ bosh::dep() {
   for _d in $( $(bosh::deps ${_env}) ) 
   do [[ "${_d}" =~ ${_dep_regex} ]] && echo ${_d} && break
   done
+
+  fail "${FUNCNAME}: bosh::dep no deployment found matching regex '${_d}'."
 }
 
 bosh::manifest() {
