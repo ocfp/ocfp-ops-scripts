@@ -139,6 +139,20 @@ find::env() {
   echo ${_env_file%.yml}
 }
 
+bosh::do() {
+  local _env="${1%.yml}" 
+
+  shift ||
+    fail "${FUNCNAME}: bosh::do requires an environment name."
+  
+  _env_file="$(find::env::file "${_env}")"
+  (
+    cd $(dirname "${_env_file}")
+    eval "$(genesis "${_env_file}" bosh -A --connect)"
+    exec bosh "$@"
+  )
+}
+
 bosh::logs::fetch() {
   local _env_regex="${1%.yml}" _dep_regex="$2"
   shift 2 ||
@@ -148,7 +162,7 @@ bosh::logs::fetch() {
   local _env=$(find::env "${_env_regex}")
   local _env_name="${_env//*\/}"
 
-  local _dep=$(bosh::deployment::find ${_env_name} ${_dep_regex})
+  local _dep=$(bosh::deployments::find ${_env_name} ${_dep_regex})
 
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
@@ -183,33 +197,17 @@ bosh::logs::fetch() {
 }
 
 bosh::ssh() {
-  local _env_regex="${1%.yml}" _dep_regex="$2"
+  local _env="${1%.yml}" _dep_regex="$2"
 
   shift 2 ||
     fail "${FUNCNAME}: bosh::ssh requires an env regex followed by a deployment regex."
 
-  local _env=$(find::env "${_env_regex}")
-
-  _dep=$(bosh::deployment::find ${_env} ${_dep_regex})
+  _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
 
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env_name} -d ${_dep} ssh "${@}"
-}
-
-bosh::do() {
-  local _env="${1%.yml}" 
-
-  shift ||
-    fail "${FUNCNAME}: bosh::do requires an environment name."
-  
-  _env_file="$(find::env::file "${_env}")"
-  (
-    cd $(dirname "${_env_file}")
-    eval "$(genesis "${_env_file}" bosh -A --connect)"
-    exec bosh "$@"
-  )
+  bosh::do ${_env_name} -d ${_dep} ssh ${@}
 }
 
 bosh::deployments() {
@@ -218,10 +216,11 @@ bosh::deployments() {
   shift ||
     fail "${FUNCNAME}: bosh::deployments requires an environment name."
 
-  bosh::do ${_env} deps --json &>/dev/null | jq -r '.Tables[].Rows[].name'
+  bosh::do ${_env} deployments --json 2>/dev/null |
+    jq -r '.Tables[].Rows[].name'
 }
 
-bosh::deployment::find() {
+bosh::deployments::find() {
   local _env=${1} _dep_regex=${2} _dep 
   declare -a _deps
 
@@ -230,10 +229,8 @@ bosh::deployment::find() {
 
   _deps=($(bosh::deployments ${_env}))
   for _dep in "${_deps[@]}"
-  do [[ "${_dep}" =~ ${_dep_regex} ]] && echo ${_dep} && break
+  do [[ "${_dep}" =~ ${_dep_regex} ]] && echo ${_dep} && break # return first match
   done
-
-  fail "${FUNCNAME}: bosh::deployment::find no deployment found matching regex '${_dep_regex}'."
 }
 
 bosh::manifest() {
@@ -242,9 +239,26 @@ bosh::manifest() {
   shift 2 ||
     fail "${FUNCNAME}: bosh::manifest requires an env regex followed by a deployment regex."
 
-  _dep=$(bosh::deployment::find ${_env} ${_dep_regex})
+  _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
 
-  bosh::do ${_env} -d ${_dep} manifest "${@}"
+  [[ -n ${_dep} ]] ||
+    fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
+
+  bosh::do ${_env} -d ${_dep} manifest ${@}
+}
+
+bosh::vms() {
+  local _env="${1}" _dep_regex="$2" _dep
+
+  shift 2 ||
+    fail "${FUNCNAME}: bosh::manifest requires an env regex followed by a deployment regex."
+
+  _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
+
+  [[ -n ${_dep} ]] ||
+    fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
+
+  bosh::do ${_env} -d ${_dep} vms ${@}
 }
 
 bosh::vms::do() {
@@ -258,6 +272,11 @@ bosh::vms::do() {
     jq -r '.Tables[].Rows[].instance' | 
     tr -d '"'
   ))
+
+  _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
+
+  [[ -n ${_dep} ]] ||
+    fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
   for _vm in "${vms[@]}"
   do bosh::do "${_env}" -d "${_dep}" ssh "${_vm}" "$@"
@@ -279,7 +298,7 @@ case "${cmd}" in
     bosh::ssh "${@}" 
     ;;
   (d|deps)     
-    bosh::deps "${@}" 
+    bosh::deployments "${@}" 
     ;;
   (m|manifest) 
     bosh::manifest "${@}" 
