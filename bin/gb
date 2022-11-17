@@ -79,6 +79,7 @@ Prerequisites:
   bosh     - cli in the path
 
 USAGE
+  exit 0
 }
 
 fail() { 
@@ -288,33 +289,28 @@ bosh::vms() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} vms ${@} 2>/dev/null |
+  bosh::do ${_env} -d ${_dep} vms ${@} --json 2>/dev/null |
     jq -r '.Tables[].Rows[].vms'
 }
 
 bosh::vms::do() {
-  local _env_regex="$1" _dep_regex="$2"
+  local _env_regex="$1" _dep_regex="$2" _vms _vm
 
   shift 2 ||
     fail "${FUNCNAME}: bosh::vms requires an env regex followed by a deployment regex."
 
-  vms=($(
-    bosh::do "${_env}" -d "${_dep}" vms --json |
-    jq -r '.Tables[].Rows[].instance' | 
-    tr -d '"'
-  ))
-
+  _vms=($(bosh::instances ${_env_regex} ${_dep_regex}))
   _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
 
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  for _vm in "${vms[@]}"
-  do bosh::do "${_env}" -d "${_dep}" ssh "${_vm}" "$@"
+  for _vm in "${_vms[@]}"
+  do bosh::ssh ${_env} ${_dep} ${_vm} ${@}
   done
 }
 
-cmd="${1}" ; shift
+cmd="${1}" ; shift || usage
 
 bosh::vaildate::environment
   
@@ -348,7 +344,6 @@ case "${cmd}" in
     ;;
   (--help|-h|usage|*)
     usage 
-    exit 0
     ;;
 esac
 
