@@ -208,7 +208,7 @@ bosh::ssh() {
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env_name} -d ${_dep} ssh ${@}
+  bosh::do ${_env} -d ${_dep} ssh ${@}
 }
 
 bosh::deployments() {
