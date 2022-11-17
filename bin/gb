@@ -148,7 +148,7 @@ bosh::logs::fetch() {
   local _env=$(find::env "${_env_regex}")
   local _env_name="${_env//*\/}"
 
-  local _dep=$( bosh::dep ${_env_name} )
+  local _dep=$( bosh::dep ${_env_name} ${_dep_regex} )
 
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
@@ -190,7 +190,7 @@ bosh::ssh() {
 
   local _env=$(find::env "${_env_regex}")
 
-  _dep=( $(bosh::dep ${_env}) )
+  _dep=( $(bosh::dep ${_env} ${_dep_regex}) )
 
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
@@ -222,16 +222,16 @@ bosh::deps() {
 }
 
 bosh::dep() {
-  local _env=${1} _d
+  local _env=${1} _dep_regex=${2} _dep
 
-  shift ||
-    fail "${FUNCNAME}: bosh::dep requires an environment name."
+  shift 2 ||
+    fail "${FUNCNAME}: bosh::dep requires an env regex followed by a deployment regex."
 
-  for _d in $( $(bosh::deps ${_env}) ) 
-  do [[ "${_d}" =~ ${_dep_regex} ]] && echo ${_d} && break
+  for _dep in $( $(bosh::deps ${_env}) ) 
+  do [[ "${_dep}" =~ ${_dep_regex} ]] && echo ${_dep} && break
   done
 
-  fail "${FUNCNAME}: bosh::dep no deployment found matching regex '${_d}'."
+  fail "${FUNCNAME}: bosh::dep no deployment found matching regex '${_dep_regex}'."
 }
 
 bosh::manifest() {
@@ -240,7 +240,7 @@ bosh::manifest() {
   shift 2 ||
     fail "${FUNCNAME}: bosh::manifest requires an env regex followed by a deployment regex."
 
-  _dep=$( bosh::dep ${_env} )
+  _dep=$( bosh::dep ${_env} ${_dep_regex} )
 
   bosh::do ${_env} -d ${_dep} manifest "${@}"
 }
