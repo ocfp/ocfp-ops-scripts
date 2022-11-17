@@ -211,14 +211,23 @@ bosh::ssh() {
   bosh::do ${_env} -d ${_dep} ssh ${@}
 }
 
+bosh::deployments::list() {
+  local _env="${1}"
+
+  shift ||
+    fail "${FUNCNAME}: bosh::deployments::list requires an environment name."
+
+  bosh::do ${_env} deployments --json 2>/dev/null |
+    jq -r '.Tables[].Rows[].name'
+}
+
 bosh::deployments() {
   local _env="${1}"
 
   shift ||
     fail "${FUNCNAME}: bosh::deployments requires an environment name."
 
-  bosh::do ${_env} deployments --json 2>/dev/null |
-    jq -r '.Tables[].Rows[].name'
+  bosh::do ${_env} deployments ${@}
 }
 
 bosh::deployments::find() {
@@ -228,7 +237,7 @@ bosh::deployments::find() {
   shift 2 ||
     fail "${FUNCNAME}: bosh::deployment requires an env regex followed by a deployment regex."
 
-  _deps=($(bosh::deployments ${_env}))
+  _deps=($(bosh::deployments::list ${_env}))
   for _dep in "${_deps[@]}"
   do [[ "${_dep}" =~ ${_dep_regex} ]] && echo ${_dep} && break # return first match
   done
@@ -245,7 +254,7 @@ bosh::manifest() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} manifest ${@} 2>/dev/null
+  bosh::do ${_env} -d ${_dep} manifest ${@}
 }
 
 bosh::instances() {
@@ -259,8 +268,8 @@ bosh::instances() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} instances --json ${@} 2>/dev/null |
-    jq -r '.Tables[].Rows[].instance'
+  bosh::do ${_env} -d ${_dep} instances ${@}
+  #--json 2>/dev/null | jq -r '.Tables[].Rows[].instance'
 }
 
 bosh::ips() {
@@ -274,8 +283,8 @@ bosh::ips() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} instances --json ${@} 2>/dev/null |
-    jq -r '.Tables[].Rows[].ips'
+  bosh::do ${_env} -d ${_dep} instances ${@} 
+  #--json 2>/dev/null | jq -r '.Tables[].Rows[].ips'
 }
 
 bosh::vms() {
@@ -289,8 +298,8 @@ bosh::vms() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} vms ${@} --json 2>/dev/null |
-    jq -r '.Tables[].Rows[].vms'
+  bosh::do ${_env} -d ${_dep} vms ${@} 
+  #--json 2>/dev/null | jq -r '.Tables[].Rows[].vms'
 }
 
 bosh::vms::do() {
@@ -342,6 +351,7 @@ case "${cmd}" in
   (vmsdo)      
     bosh::vms::do "${@}" 
     ;;
+  # resurrection on|off
   (--help|-h|usage|*)
     usage 
     ;;
