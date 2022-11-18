@@ -208,7 +208,7 @@ bosh::ssh() {
   [[ -n "${_dep}" ]] ||
     fail "${FUNCNAME}: No bosh deps found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} ssh ${@}
+  bosh::do ${_env} -d ${_dep} ssh "${@}"
 }
 
 bosh::deployments::list() {
@@ -315,7 +315,7 @@ bosh::vms::do() {
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
   for _vm in "${_vms[@]}"
-  do bosh::ssh ${_env} ${_dep} ${_vm} ${@}
+  do bosh::ssh ${_env} ${_dep} ${_vm} "${@}"
   done
 }
 
