@@ -1,96 +1,70 @@
 #!/usr/bin/env bash
-
-# Author: Wayne E. Seguin
+#
+# Author: Wayne E. Seguin <wayneeseguin@gmail.com>
+#
 
 usage() {
   cat <<USAGE
 
-OCFP Genesis BOSH Operations Script
+OCFP Genesis BOSH ('gb') Operations Script
 
 USAGE: ${0//*\/} <sub-command>
 
 WHERE <sub-command> is one of:
 
-  bosh(b) -> Run a bosh cli command against given bosh env
+  bosh(b) <env-re>               - Run BOSH cli commands targeting env
+  logs(l) <env-re> <dep-re>      - Fetch BOSH logs for env/dep to ~/logs
+  ssh(s) <env-re> <dep-re> <job> - SSH to BOSH job
+  deps(d) <env-re>               - List BOSH deployments
+  manifest(m) <env-re> <dep-re>  - Fetch BOSH manifest for env/dep
+  instances(i) <env-re> <dep-re> - List instances for a deployment
+  ips(ips) <env-re> <dep-re>     - list IPs for a given deployment
+  vms(v) <env-re> <dep-re>       - list vms for a deployment
+  vmsdo <env-re> <dep-re> <cmd>  - Run command on each vm in a deployment
+  resurrection(r) on|off <vms>   - Set BOSH resurrection on/off for <vms>
 
-    Usage: ${0//*\/} bosh <bosh-env-regex> <bosh-cli-command>
-    Usage: ${0//*\/} <bosh-env-regex> <deployment-name-regexp> [options] [<job-name> <job-index> <log-file-name>]
+Prerequisites:
+  
+  safe, genesis, bosh - in PATH
+  safe targeting a vault, and authenticated
 
-      Where [options] are:
-  
-            --dir=      Destination directory (default: .)
-        -f, --follow    Follow logs via SSH
-            --num=      Last number of lines
-        -q, --quiet     Suppresses printing of headers when multiple files are being examined
-            --job=      Limit to only specific jobs
-            --only=     Filter logs (comma-separated)
-            --agent     Include only agent logs
-  
-    Examples:
-
-      Show deps for ocfp-mgmt-us-east-1 bosh director:
-      $ ${0//*\/} b mgmt-us-e deps
-  
-      Upload a release to the ocfp-mgmt-us-east-1 bosh director:
-      $ ${0//*\/} b mgmt-us-e upload-release \$PWD/my-bosh-release-0.0.1.tgz
-  
-  logs(l) -> Fetch logs from given bosh env + dep and extrct into ~/logs/<env>/<dep>/
-  
-    Usage: ${0//*\/} logs|l <bosh-env-regex> <bosh-deployment-name-regex>
-
-    Examples:
-
-      Fetch diego-cell logs for cf from ocfp-sbx-us-east-1 bosh director:
-      $ ${0//*\/} l sbx-us-e -cf diego-cell 
-  
-      Fetch gorouter logs from router vms using director ocfp-sbx-us-east-1 cf deployment:
-      $ ${0//*\/} l sbx-us-e -cf router --job gorouter 
-  
-  ssh(s) -> Run bosh ssh against env and deployment
-  
-    Usage: ${0//*\/} ssh|s <bosh-env-regex> <bosh-deployment-name-regex> 
-
-    Examples:
-
-      ssh onto the first router for cf deployment on ocfp-sbx-us-east-1 bosh director:
-      $ ${0//*\/} l sbx-us-e -cf router/0
-
-  deps(d) -> Run bosh ssh against env and deployment
-  
-    Usage: ${0//*\/} deps|d <bosh-env-regex>
-
-    Examples:
-
-      Show deployments for ocfp-sbx-us-east-1
-      $ ${0//*\/} d sbx-us-e
-  
-  
 Environment Variables:
   
   BOSH_DEPLOYMENTS_PATH - Path to the genesis bosh kit deployments directory
-                            Defaults to ~/deployments/bosh
+                          Default: ~/deployments/bosh
   LOGS_PATH             - Logs path to download and process bosh logs into
-                            Defaults to ~/logs
+                          Default: ~/logs
   
-Prerequisites:
-  
-  safe     - cli in the path, targeting a vault, and authenticated
-  genesis  - cli in the path
-  bosh     - cli in the path
+Examples:
 
+  Show deps for ocfp-mgmt-us-east-1 bosh director:
+  $ ${0//*\/} b mgmt-us-e deps
+
+  Upload a release to the ocfp-mgmt-us-east-1 bosh director:
+  $ ${0//*\/} b mgmt-us-e upload-release \$PWD/my-bosh-release-0.0.1.tgz
+
+  Fetch diego-cell logs for cf from ocfp-sbx-us-east-1 bosh director:
+  $ ${0//*\/} l sbx-us-e -cf diego-cell 
+
+  Fetch gorouter logs from router vms using director ocfp-sbx-us-east-1 cf deployment:
+  $ ${0//*\/} l sbx-us-e -cf router --job gorouter 
+
+  ssh onto the first router for cf deployment on ocfp-sbx-us-east-1 bosh director:
+  $ ${0//*\/} s sbx-us-e -cf router/0
+
+  Show deployments for ocfp-sbx-us-east-1
+  $ ${0//*\/} d sbx-us-e
+  
 USAGE
   exit 0
 }
 
-fail() { 
-  echo -e "\e[31mERROR:\e[0m $*" >&2
-  exit 1
-}
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 bosh::vaildate::environment() {
   local _cmd
 
-  if [[ -n "${BOSH_DEPLOYMENTS_PATH}" ]]
+  if [[ -n "${BOSH_DEPLOYMENTS_PATH:-}" ]]
   then bosh_path="${BOSH_DEPLOYMENTS_PATH}"
   else bosh_path="${HOME}/deployments/bosh"
   fi
@@ -227,7 +201,7 @@ bosh::deployments() {
   shift ||
     fail "${FUNCNAME}: bosh::deployments requires an environment name."
 
-  bosh::do ${_env} deployments ${@}
+  bosh::do ${_env} deployments "${@}"
 }
 
 bosh::deployments::find() {
@@ -254,7 +228,7 @@ bosh::manifest() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} manifest ${@}
+  bosh::do ${_env} -d ${_dep} manifest "${@}"
 }
 
 bosh::instances() {
@@ -268,7 +242,7 @@ bosh::instances() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} instances ${@}
+  bosh::do ${_env} -d ${_dep} instances "${@}"
   #--json 2>/dev/null | jq -r '.Tables[].Rows[].instance'
 }
 
@@ -283,7 +257,7 @@ bosh::ips() {
   [[ -n ${_dep} ]] ||
     fail "${FUNCNAME}: No bosh deployments found matching regex '${_dep_regex}' in env '${_env}'"
 
-  bosh::do ${_env} -d ${_dep} instances ${@} 
+  bosh::do ${_env} -d ${_dep} instances "${@}"
   #--json 2>/dev/null | jq -r '.Tables[].Rows[].ips'
 }
 
@@ -319,6 +293,19 @@ bosh::vms::do() {
   done
 }
 
+bosh::resurrection() {
+  local _env_regex="$1" _dep_regex="$2"
+
+  shift 2 ||
+    fail "${FUNCNAME}: bosh::vms requires an env regex followed by a deployment regex."
+
+  _dep=$(bosh::deployments::find ${_env} ${_dep_regex})
+
+  bosh::do ${_env} -d ${_dep} update-resurrection "${@}"
+}
+
+declare bosh_path
+
 cmd="${1}" ; shift || usage
 
 bosh::vaildate::environment
@@ -351,8 +338,10 @@ case "${cmd}" in
   (vmsdo)      
     bosh::vms::do "${@}" 
     ;;
-  # resurrection on|off
-  (--help|-h|usage|*)
+  (r|resurrection)      
+    bosh::resurrection "${@}" 
+    ;;
+  (usage|*)
     usage 
     ;;
 esac
