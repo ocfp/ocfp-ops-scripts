@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
+#
+# ocfp test blacksmith env <name> services-create
+# wait....
+# ocfp test blacksmith env <name> apps-push
+# ocfp test blacksmith env <name> apps-test
+# ocfp test blacksmith env <name> apps-delete
+# ocfp test blacksmith env <name> services-delete
+# party....
+#
 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
-_do() { echo -e "\$ $*"; "$@"; }
+run() { echo -e "\$ $*"; "$@"; }
 
 _debug() { [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2 ; }
 
@@ -57,16 +66,19 @@ apps::fetch() {
       )
     fi
     ( cd ${apps_path}
-      _do unzip /opt/ocfp/apps/${archive}
+      run unzip /opt/ocfp/apps/${archive}
     )
   fi
 }
 
 app::push() {
   local service=$1
-  _do cf push test-${service}-app --random-route \
-    -p ${apps_path}/${archive/.zip} \
-    -f ${apps_path}/${archive/.zip}/manifest.yml \
+  for index in a b
+  do
+    run cf push test-${service}-app-${index} --random-route \
+      -p ${apps_path}/${archive/.zip} \
+      -f ${apps_path}/${archive/.zip}/manifest.yml
+  done
 }
 
 apps::push() {
@@ -77,7 +89,10 @@ apps::push() {
 
 apps::delete() {
   for svc in ${services[@]}
-  do _do cf delete -f test-${svc}-app
+  do 
+    for index in a b
+    do run cf delete -f test-${svc}-app-${index}
+    done
   done
 }
 
@@ -89,7 +104,6 @@ apps::app::uri() {
  
 apps::test() {
   local service=$1 plan=$2
-  local app=test-${service}-app
   local service_instance=test-${service}-${plan}
 
   test::${service} ${service_instance}
@@ -128,7 +142,7 @@ service::plans::create() {
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
   do
-    _do cf create-service ${service} ${plan} test-${service}-${plan}
+    run cf create-service ${service} ${plan} test-${service}-${plan}
   done
 }
 
@@ -137,7 +151,7 @@ service::plans::delete() {
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
   do
-    _do cf delete-service ${service} ${plan} test-${service}-${plan}
+    run cf delete-service ${service} ${plan} test-${service}-${plan}
   done
 }
 
@@ -146,8 +160,8 @@ service::plans::bind() {
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
   do
-    _do cf bind-service test-${service}-app test-${service}-${plan}
-    _do cf restage test-${service}-app
+    run cf bind-service test-${service}-app-a test-${service}-${plan}
+    run cf restage test-${service}-app-a
   done
 }
 
@@ -156,8 +170,8 @@ service::plans::unbind() {
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
   do
-    _do cf unbind-service test-${service}-app test-${service}-${plan}
-    # _do cf restage test-${service}-app # ???
+    run cf unbind-service test-${service}-app-a test-${service}-${plan}
+    # run cf restage test-${service}-app-a # ???
   done
 }
 
@@ -189,33 +203,195 @@ services::unbind() {
   done
 }
 
+autoscaler::policy() {
+  cat <<"EOF"
+    {
+      instance_min_count: 1,
+      instance_max_count: 3,
+      scaling_rules: [
+        {
+          metric_type: "${queue}_messages_ready",
+          threshold: 1,
+          operator: ">",
+          adjustment: "+1"
+        },
+        {
+          metric_type: "${queue}_messages_ready",
+          threshold: 2,
+          operator: "<",
+          adjustment: "-1"
+        }
+      ]
+    }
+EOF
+}
+
 test::rabbitmq() {
   local service_instance=$1
-  local app=$( apps::app::uri test-rabbitmq-app )
+  local app=$( apps::app::uri test-rabbitmq-app-a )
   local queue=test-rabbit-queue 
 
+  echo -e "= RabbiMQ - Testing Queues - Non TLS"
+  printf "%0.s=" {1..80}
+
   echo -e "Pinging the rabbitmq app via the app url..."
-  _do curl ${app}/ping
+  run curl ${app}/ping
+
   echo -e "\nCreating queue ${queue}..."
-  _do curl -X POST ${app}/queues -d "name=${queue}"
+  run curl -X POST ${app}/queues -d "name=${queue}"
+
   echo -e "\nListing queues..."
-  _do curl ${app}/queues
+  run curl ${app}/queues
+
   echo -e "\nInserting a message into queue ${queue}..."
-  _do curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+  run curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+
   echo -e "\nGetting messages from queue ${queue}..."
-  _do curl -X GET ${app}/queue/${queue}
+  run curl -X GET ${app}/queue/${queue}
+
+  printf "%0.s=" {1..80}
+  echo -e "= RabbitMQ - Testing Queues - Enabling TLS for the app"
+  printf "%0.s=" {1..80}
+
+  cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
+  run cf restage test-rabbitmq-app-a
+
+  printf "%0.s=" {1..80}
+  echo -e "= RabbitMQ - Testing Queues - TLS"
+  printf "%0.s=" {1..80}
+
+  echo -e "Pinging the rabbitmq app via the app url..."
+  run curl ${app}/ping
+
+  echo -e "\nCreating queue ${queue}..."
+  run curl -X POST ${app}/queues -d "name=${queue}"
+
+  echo -e "\nListing queues..."
+  run curl ${app}/queues
+
+  echo -e "\nInserting a message into queue ${queue}..."
+  run curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+
+  echo -e "\nGetting messages from queue ${queue}..."
+  run curl -X GET ${app}/queue/${queue}
+
+  printf "%0.s=" {1..80}
+  echo -e "= RabbitMQ - Testing Queues - Dynamic Credentials"
+  printf "%0.s=" {1..80}
+
+  run cf bind-service test-rabbitmq-app-b ${service_instance}
+  run cf restage test-rabbitmq-app-b
+
+  app_a_guid=$(cf app test-rabbitmq-app-a --guid)
+  app_a_username=$( cf curl /v3/apps/${app_a_guid}/env |
+    jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
+  )
+
+  app_b_guid=$(cf app test-rabbitmq-app-b --guid)
+  app_b_username=$( cf curl /v3/apps/${app_b_guid}/env |
+    jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
+  )
+
+  if [[ ${app_a_username} == ${app_b_username} ]]
+  then echo "FAIL: The username for the service instance is the same for both apps!"
+  else echo "PASS: The username for the service instance is not the same for both apps!"
+  fi
+
+  run cf create-service-key ${service_instance} rabbitmq-user-a
+  run cf create-service-key ${service_instance} rabbitmq-user-b
+
+  app_a_username=$( cf curl /v3/apps/${app_a_guid}/env |
+    jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
+  )
+  app_b_username=$( cf curl /v3/apps/${app_b_guid}/env |
+    jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
+  )
+
+  sk_a_guid=$(cf service-key ${service_instance} rabbitmq-user-a --guid)
+  sk_a_username=$(cf curl /v2/service_keys/${sk_a_guid} | jq -r '.entity.credentials.username')
+
+  sk_b_guid=$(cf service-key ${service_instance} rabbitmq-user-b --guid)
+  sk_b_username=$(cf curl /v2/service_keys/${sk_b_guid} | jq -r '.entity.credentials.username')
+
+  if [[ ${sk_a_username} == ${sk_b_username} ]]
+  then echo "FAIL: The username for the service key is the same for both apps!"
+  else echo "PASS: The username for the service key is not the same for both apps!"
+  fi
+
+  printf "%0.s=" {1..80}
+  echo -e "= RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
+  printf "%0.s=" {1..80}
+
+  run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
+
+  run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
+    -c "$( autoscaler::policy )"
+
+  echo -e "Restaging in preparation of testing autoscaling-history..."
+  run cf restage test-rabbitmq-app-a
+
+  echo -e "Starting app state..."
+  run cf app test-rabbitmq-app-a
+
+  echo -e "Inserting 10 messages into the queue '${queue}'..."
+  for i in {1..10}
+  do run curl -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
+  done
+  
+  echo -e "Monitoring autoscaling-history for 5 minutes..."
+  for i in {1..10}
+  do
+    run cf autoscaling-history test-rabbitmq-app-a
+    echo -e "Sleeping for 30 seconds..."
+    sleep 30
+  done
 }
 
 test::redis() {
-  local service_instance=$1
-  app_url=$( apps::app::uri test-redis-app )
+  local service_instance=$1 cmd app_url app_guid
+  declare -a cmds
+
+  printf "\n%0.s=" {1..80}
+  printf "= Redis - Testing - TLS & Non-TLS"
+  printf "%0.s=" {1..80}
+
+  app_url=$( apps::app::uri test-redis-app-a )
+  app_guid=$( cf app ${app} --guid )
 
   echo -e "\nInserting a Key/Value pair into Redis, key 'foo'..."
-  _do curl -X PUT ${app_url}/foo -d "data=bar"
+  run curl -X PUT ${app_url}/foo -d "data=bar"
+
   echo -e "\nRetrieving the value for the key 'foo' non TLS..."
-  _do curl ${app_url}/foo
+  run curl ${app_url}/foo
+
   echo -e "\nRetrieving the value for the key 'foo' via TLS..."
-  _do curl ${app_url}/tls/v1.2/foo
+  run curl ${app_url}/tls/v1.2/foo
+
+  printf "%0.s=" {1..80}
+  echo -e "= Redis - Testing Disabled Commands"
+  printf "%0.s=" {1..80}
+
+  redis_ip=$(
+  cf curl /v3/apps/${app_guid}/env |
+    jq -r '.application_env_json.VCAP_SERVICES.redis[0].credentials.host'
+  )
+
+  redis_password=$(
+  cf curl /v3/apps/${app_guid}/env |
+    jq -r '.application_env_json.VCAP_SERVICES.redis[0].credentials.password'
+  )
+
+  redis-cli AUTH ${redis_password}
+
+  cmds=( CONFIG SAVE BGSAVE DEBUG SHUTDOWN SLAVEOF SYNC ACL )
+  for cmd in ${cmds[@]}
+  do
+    response=$(redis-cli -h ${redis_ip} -p 6379 ${cmd})
+    if [[ ${response} =~ *ERR* ]]
+    then echo -e "\n- Redis ${cmd} command is disabled"
+    else echo -e "\n- Redis ${cmd} command is enabled"
+    fi
+  done
 }
  
 declare -a services apps spaces
@@ -232,7 +408,7 @@ parse::args "$@"
 cf::login ${env}
 apps::fetch
 
-_do cf target -o ${org} -s ${space}
+run cf target -o ${org} -s ${space}
 
 case ${action} in
   (services-create)
