@@ -152,6 +152,7 @@ apps::c2c::test::connectivity() {
 
   run cf add-network-policy \
     test-c2c-frontend-${space_a} \
+    test-c2c-backend-b-${space_b} \
     --protocol tcp \
     --port 7007
 
