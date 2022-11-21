@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+do() { echo -e "\$ $*"; "$@"; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+usage() {
+  fail "Usage: ${0//*\/} env <name>"
+}
+
+args::parse() {
+  local action
+
+  while [[ $# -gt 0 ]]; do
+    action="$1"
+    case "${action}" in
+      (env)
+        env_name="$2"
+        shift 2 || fail "${0//*/} ... env <name>"
+        ;;
+      (-h|--help)
+        usage
+        ;;
+      (-d|--debug)
+        DEBUG=1
+        ;;
+      (-*) 
+        fail "Unknown option: $1"
+        ;;
+      (*) 
+        usage
+        ;;
+    esac
+    shift
+  done
+
+  [[ -n ${env_name:-} ]] || usage
+}
+
+cf::login() {
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+
+bosh::vaildate::environment() {
+  local _cmd
+
+  if [[ -n "${BOSH_DEPLOYMENTS_PATH:-}" ]]
+  then bosh_path="${BOSH_DEPLOYMENTS_PATH}"
+  else bosh_path="${HOME}/deployments/bosh"
+  fi
+  
+  [[ -d "${bosh_path}" ]] ||
+    fail "${FUNCNAME}:  BOSH deployments path '${bosh_path}' does not exist"
+  
+  for _cmd in genesis bosh safe
+  do
+    command -v "${_cmd}" &>/dev/null ||
+      fail "${FUNCNAME}: \`${_cmd}\` was not found in PATH."
+  done
+}
+
+declare env_name env_file
+
+bosh::validate::environment
+
+cf::login "${env_name}"
+
+env_file=".genesis/manifests/${env_name}.yml" 
+[[ -s ${env_file} ]] ||
+  fail "${env_name} needs to be deployed first."
+
+isosegs=($( spruce json ${env_file} |
+  jq -r '.instance_groups[] | select(.jobs[].properties.diego.rep.placement_tags != null) | .name'
+))
+
+debug "env_name: ${env_name}, env_file: ${env_file}, isosegs: ${isosegs[*]}"
+
+for isoseg in ${isosegs[@]}
+do
+  run cf -o system create-space ${isoseg}
+  run cf target -o system -s ${isoseg}
+  run cf create-isolation-segment ${isoseg}
+  run cf enable-org-isolation system ${isoseg}
+  run cf set-space-isolation-segment ${isoseg} ${isoseg} # space name == isoseg name
+done
+
+exit 0

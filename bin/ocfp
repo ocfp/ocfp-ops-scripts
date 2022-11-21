@@ -14,6 +14,8 @@ WHERE <cmd> IN
   init-pg     - Initializes pg database servers from vault data, updates env vault
   init-env    - Generates a kit env file from template via vault data
   init-config - Generates bosh config files for an env from templates via vault data
+  init        - asgs|bastion|domains|isosegs|tcp
+  test        - c2c|blacksmith|nfs|smb
 
 WHERE init-{pg,env,config} <args> IN
 
@@ -40,7 +42,7 @@ exit 0
 
 fail() { echo -e "$*" >&2 ; exit 1 ; }
 
-__parse::args() {
+parse::args() {
   local _action
 
   while [[ $# > 0 ]]
@@ -91,6 +93,9 @@ __parse::args() {
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
+      (asgs|bastion|domains|isosegs|tcp) # Short circuit for init
+        return 0
+        ;;
       (c2c|blacksmith) # Short circuit for tests.
         return 0
         ;;
@@ -106,7 +111,7 @@ __parse::args() {
     [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' must be given"
   fi
 
-  __set::env::type
+  set::env::type
 
   # All envs need to know their deployer/bosh_env, mgmt bosh is the exception
   if ! [[ ${OCFP_KIT} == "bosh" && ${env_type} == "mgmt" ]] && [[ $cmd != "test" ]]
@@ -120,13 +125,13 @@ __parse::args() {
   esac
 }
 
-__set::vault::paths() {
+set::vault::paths() {
   local _env_path="${OCFP_ENV_NAME//-/\/}"
   export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
   export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
 }
 
-__set::env::type() {
+set::env::type() {
   case "${OCFP_ENV_NAME}" in
     (*-mgmt-*) env_type="mgmt" ;;
     (*)        env_type="ocf"  ;;
@@ -134,12 +139,12 @@ __set::env::type() {
   export OCFP_ENV_TYPE="${env_type}"
 }
 
-__init::pg() {
+init::pg() {
   echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
   bash "${templates_path}/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
 }
 
-__init::env() {
+init::env() {
   local _src_path _dst_path
   if [[ -s ${OCFP_ENV_NAME}.yml ]] 
   then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
@@ -169,7 +174,7 @@ __init::env() {
   exit $?
 }
 
-__init::config::cloud() {
+init::config::cloud() {
   local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
   local _meta="${templates_path}/configs/${config_type}/meta.yml"
   local _meta_prune="${templates_path}/configs/meta-prune.yml"
@@ -222,7 +227,7 @@ __init::config::cloud() {
   spruce merge -m "${_merge[@]}" > "${_target}"
 }
 
-__init::config::cpi() {
+init::config::cpi() {
   local _src_path _dst_path
 
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
@@ -271,7 +276,7 @@ __init::config::cpi() {
   spruce merge -m "${_merge[@]}" > "${_target}"
 }
 
-__init::config() {
+init::config() {
   case "${OCFP_KIT}" in
     (bosh)
       case "${OCFP_IAAS}" in
@@ -288,10 +293,10 @@ __init::config() {
 
   case ${config_type} in 
     (cloud)
-      __init::config::cloud "$@"
+      init::config::cloud "$@"
       ;;
     (cpi)
-      __init::config::cpi "$@"
+      init::config::cpi "$@"
       ;;
     (*) fail "Unsupported config type: ${config_type}, valid types are cloud,cpi" ;;
   esac
@@ -299,7 +304,7 @@ __init::config() {
   exit $?
 }
 
-__test() {
+_test() {
   case "$1" in 
     (c2c)
       bash "${templates_path/\/templates*}/test/c2c" "${@:2}"
@@ -307,8 +312,37 @@ __test() {
     (blacksmith)
       bash "${templates_path/\/templates*}/test/blacksmith" "${@:2}"
       ;;
+    (nfs)
+      bash "${templates_path/\/templates*}/test/nfs" "${@:2}"
+      ;;
+    (smb)
+      bash "${templates_path/\/templates*}/test/smb" "${@:2}"
+      ;;
     (*)
       fail "Usage: ${0//*\/} test {c2c}"
+      ;;
+  esac
+}
+
+init() {
+  case "$1" in 
+    (asgs)
+      bash "${templates_path/\/templates*}/test/asgs" "${@:2}"
+      ;;
+    (bastion)
+      bash "${templates_path/\/templates*}/test/bastion" "${@:2}"
+      ;;
+    (domains)
+      bash "${templates_path/\/templates*}/test/domains" "${@:2}"
+      ;;
+    (isosegs)
+      bash "${templates_path/\/templates*}/test/isosegs" "${@:2}"
+      ;;
+    (tcp)
+      bash "${templates_path/\/templates*}/test/tcp" "${@:2}"
+      ;;
+    (*)
+      fail "Usage: ${0//*\/} init asgs|bastion|domains|isosegs|tcp"
       ;;
   esac
 }
@@ -319,20 +353,21 @@ cmd=$1 ; shift || usage
 
 declare -a deps
 
-__parse::args "$@"
+parse::args "$@"
 
-__set::env::type
+set::env::type
 
-__set::vault::paths # Sets vault paths for the main script level
+set::vault::paths # Sets vault paths for the main script level
 
 if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
 if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
-  (init-pg)     __init::pg     "$@" ;;
-  (init-env)    __init::env    "$@" ;;
-  (init-config) __init::config "$@" ;;
-  (test)        __test "$@" ;;
+  (init-pg)     init::pg     "$@" ;;
+  (init-env)    init::env    "$@" ;;
+  (init-config) init::config "$@" ;;
+  (test)        _test        "$@" ;;
+  (init)        init         "$@" ;;
   (*) usage ;;
 esac
 
