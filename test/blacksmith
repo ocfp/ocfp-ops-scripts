@@ -1,0 +1,256 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+_do() { echo -e "\$ $*"; "$@"; }
+
+_debug() { [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2 ; }
+
+_usage() {
+  fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
+}
+
+parse::args() {
+  while [[ $# > 0 ]]
+  do
+    case $1 in
+      (services-create|services-delete|apps-push|apps-test|apps-delete)
+        action=${1}
+        shift
+        ;;
+      (e|env)
+        env=$2
+        shift 2 || fail "Usage: ...env <name>"
+        ;;
+      (rabbitmq|redis|postgres)
+        services+=( ${1} ) ; shift 1
+        ;;
+      (*)
+        fail "Unknown arg: '$1'\nUsage: env <name> space <name> [space <name>...] <cmd>"
+        ;;
+    esac
+  done
+
+  [[ ${#services} > 0 ]] ||
+    services=($( ls -1 ${apps_path} |
+      grep -E 'cf-.*-example-app-master.zip' |
+      sed -E 's/cf-(.*)-example-app-master.zip/\1/'
+      ))
+}
+
+cf::login() {
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+ 
+apps::fetch() {
+  local service=$1
+  local archive="cf-${service}-example-app-master.zip"
+  if [[ ! -d ${apps_path}/${archive/.zip} ]]
+  then
+    if ! [[ -s ${apps_path}/${archive} ]]
+    then
+      ( cd ${apps_path}
+        # curl -sOL ${RMQ_APP_URL}/${archive}
+      )
+    fi
+    ( cd ${apps_path}
+      _do unzip /opt/ocfp/apps/${archive}
+    )
+  fi
+}
+
+app::push() {
+  local service=$1
+  _do cf push test-${service}-app --random-route \
+    -p ${apps_path}/${archive/.zip} \
+    -f ${apps_path}/${archive/.zip}/manifest.yml \
+}
+
+apps::push() {
+  for svc in ${services[@]}
+  do app::push ${svc}
+  done
+}
+
+apps::delete() {
+  for svc in ${services[@]}
+  do _do cf delete -f test-${svc}-app
+  done
+}
+
+apps::app::uri() {
+  local app=$1 guid=$( cf app ${app} --guid )
+  cf curl /v3/apps/${app_guid}/env |
+    jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
+}
+ 
+apps::test() {
+  local service=$1 plan=$2
+  local app=test-${service}-app
+  local service_instance=test-${service}-${plan}
+
+  test::${service} ${service_instance}
+}
+ 
+apps::test::spaces() {
+  local service=$1
+  local plans=($( service::plans ${service} ))
+  for plans in ${plans[@]}
+  do apps::test ${space} ${service} ${plan}
+  done
+}
+
+service::plans() {
+  local service=$1
+  #cf marketplace -s ${service} | awk '/^plan/ {print $2}'
+  cf curl "/v3/service_plans?names=${service}" |
+    jq -r '.resources[].name'
+}
+
+service::instances() {
+  local service=$1 plan=$2
+  local guid=$(service::plan::guid ${service} ${plan})
+  cf curl "/v3/service_instances" | 
+    jq -r '.resources[] | select(.relationships.service_plan.data.guid == "'${guid}'") | .name'
+}
+
+service::plan::guid() {
+  local service=$1 plan=$2
+  cf curl "/v3/service_plans?names=${service}" |
+    jq -r '.resources[] | select(.name == "${plan}") | .guid'
+}
+
+service::plans::create() {
+  local service=$1 plan
+  local -a plans=($( service::plans ${service} ))
+  for plan in ${plans[@]}
+  do
+    _do cf create-service ${service} ${plan} test-${service}-${plan}
+  done
+}
+
+service::plans::delete() {
+  local service=$1 plan
+  local -a plans=($( service::plans ${service} ))
+  for plan in ${plans[@]}
+  do
+    _do cf delete-service ${service} ${plan} test-${service}-${plan}
+  done
+}
+
+service::plans::bind() {
+  local service=$1 plan
+  local -a plans=($( service::plans ${service} ))
+  for plan in ${plans[@]}
+  do
+    _do cf bind-service test-${service}-app test-${service}-${plan}
+    _do cf restage test-${service}-app
+  done
+}
+
+service::plans::unbind() {
+  local service=$1 plan
+  local -a plans=($( service::plans ${service} ))
+  for plan in ${plans[@]}
+  do
+    _do cf unbind-service test-${service}-app test-${service}-${plan}
+    # _do cf restage test-${service}-app # ???
+  done
+}
+
+services::create() {
+  local svc
+  for svc in ${services[@]}
+  do service::plans::create ${svc}
+  done
+}
+
+services::delete() {
+  local svc
+  for svc in ${services[@]}
+  do service::plans::delete ${svc}
+  done
+}
+
+services::bind() {
+  local svc
+  for svc in ${services[@]}
+  do service::plans::bind ${svc}
+  done
+}
+
+services::unbind() {
+  local svc
+  for svc in ${services[@]}
+  do service::plans::unbind ${svc}
+  done
+}
+
+test::rabbitmq() {
+  local service_instance=$1
+  local app=$( apps::app::uri test-rabbitmq-app )
+  local queue=test-rabbit-queue 
+
+  echo -e "Pinging the rabbitmq app via the app url..."
+  _do curl ${app}/ping
+  echo -e "\nCreating queue ${queue}..."
+  _do curl -X POST ${app}/queues -d "name=${queue}"
+  echo -e "\nListing queues..."
+  _do curl ${app}/queues
+  echo -e "\nInserting a message into queue ${queue}..."
+  _do curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+  echo -e "\nGetting messages from queue ${queue}..."
+  _do curl -X GET ${app}/queue/${queue}
+}
+
+test::redis() {
+  local service_instance=$1
+  app_url=$( apps::app::uri test-redis-app )
+
+  echo -e "\nInserting a Key/Value pair into Redis, key 'foo'..."
+  _do curl -X PUT ${app_url}/foo -d "data=bar"
+  echo -e "\nRetrieving the value for the key 'foo' non TLS..."
+  _do curl ${app_url}/foo
+  echo -e "\nRetrieving the value for the key 'foo' via TLS..."
+  _do curl ${app_url}/tls/v1.2/foo
+}
+ 
+declare -a services apps spaces
+declare \
+  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
+  org=system \
+  space=test-blacksmith-services \
+  action
+
+mkdir -p ${apps_path} && cd ${apps_path}
+
+parse::args "$@"
+
+cf::login ${env}
+apps::fetch
+
+_do cf target -o ${org} -s ${space}
+
+case ${action} in
+  (services-create)
+    service::plans::create
+    ;;
+  (services-delete)
+    service::plans::delete
+    ;;
+  (apps-push)
+    apps::push
+    ;;
+  (apps-test)
+    apps::test
+    ;;
+  (apps-delete)
+    apps::delete
+    ;;
+  (*) _usage ;;
+esac
+ 
+exit 0
