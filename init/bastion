@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+[[ "${EUID}" == 0 ]] ||
+  fail "$0 must be run as root (sudo)." >&2 
+
+packages=(
+  apt-rdepends
+  awscli
+  build-essential
+  ca-certificates
+  gnupg
+  golang-go
+  gpg
+  htop
+  libreadline-dev
+  libssl-dev
+  libtool
+  libyaml-dev
+  python3-dev
+  python3-pip
+  python3-setuptools
+  python-dev
+  python-pip
+  python-setuptools
+  rsync
+  tig
+  tmux
+  tree
+  vim
+  vim-common
+)
+
+filename="ocfp-usr-local.tar.gz"
+if [[ -s ${PWD}/${filename} ]]
+then
+  echo "Extracting ${filename} to /usr/local"
+  tar -xzf ${filename} -C /usr/local 
+fi
+
+echo "Installing apt-packages"
+apt-get install -y --no-install-recommends ${packages[@]}
+
+echo "Creating /opt directory structure"
+mkdir -p \
+  /opt/ocfp/{bosh,buildpacks,cf,apps,genesis} \
+  /opt/ocfp/bosh/{bin,releases,stemcells} \
+  /opt/ocfp/genesis/{kits,bin} \
+  /opt/ocfp/cf/{scs,apps,plugins} \
+  /usr/local \
+
+echo "Ensuring /opt/ocfp and /usr/local are shared paths for ops users."
+
+for path in /opt/ocfp /usr/local
+do
+  for dir in $(find ${path} -type d)
+  do chmod 0755 ${dir}
+  done
+  chgrp -R users ${path}
+done
+
+profile="/etc/profile.d/Z999-ocfp.sh"
+
+if [[ ! -s ${profile} ]]
+then
+  echo "Creating ${profile}"
+  cat > ${profile} <<-'EOF'
+# Used by OCFP Scripts
+export OCFP_PATH="${HOME}"
+export PATH="${OCFP_PATH}/bin:${PATH}"
+! [[ -d "${OCFP_PATH}" ]] || cd "${OCFP_PATH}"
+
+# Account Environment Variables
+export OCFP_ACCT_TYPE= # Ex: prod | dev
+export OCFP_ACCT_NAME= # Ex: mgmt | np | pd | sbx | mvp | dr | lab | ...
+export OCFP_TRUST=     # Ex: int | ext (internal or external facing network)
+export OCFP_REGION=    # Ex: us-east-1 | us-west-2
+export OCFP_BASTION_INDEX=a
+export VAULT_NAMEPACE= # If using Vault Enterprise
+export VAULT_VERSION=2 # If using Vault Enterprise
+export OCFP_VAULT_PREFIX="secret/" # Can override default of secret/
+export GENESIS_SECRETS_MOUNT="${OCFP_VAULT_PREFIX}/"
+
+_rst="\e[0m"; _bld="\e[1m"; _und="\e[4m"; _red="\e[31m"; _grn="\e[32m"; _ylw="\e[33m"; _blu="\e[34m"; _mag="\e[35m"; _cyn="\e[36m"; _wht="\e[37m"
+
+PS1="${_cyn}\u${_rst}@${_bld}ocfp-${_rst}-${rst}${_red}${OCFP_ACCT_TYPE}${_rst}${_bld}${OCFP_TRUST}${_rst}-${_red}${OCFP_ACCT_NAME}${_rst}-${_red}${OCFP_REGION}${_rst}-${OCFP_BASTION_INDEX}${_bld}\n\w${_rst} \$ "
+
+# Infinite history appending
+export HISTFILESIZE= HISTSIZE= HISTTIMEFORMAT="[%F %T] "
+set -o history
+shopt -s histappend
+
+EOF
+fi
+
+echo -e "Ensuring ${profile} is editable by ops users."
+chmod 0755 ${profile}
+chgrp users ${profile}
+
+
+exit 0

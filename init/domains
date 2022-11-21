@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+do() { echo -e "\$ $*"; "$@"; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+usage() {
+  fail "Usage: ${0//*\/} env <name> vault-prefix <path>\nNOTE: vault-prefix defaults to secret/"
+}
+
+args::parse() {
+  local action
+
+  while [[ $# -gt 0 ]]; do
+    action="$1"
+    case "${action}" in
+      (env)
+        env_name="$2"
+        shift 2 || fail "${0//*/} ... env <name> # ex: secret/a/b"
+        ;;
+      (vault-prefix)
+        vault_prefix="$2"
+        shift 2 || fail "${0//*/} ... vault-prefix <path> # ex: secret/a/b"
+        ;;
+      (-h|--help)
+        usage
+        ;;
+      (-d|--debug)
+        DEBUG=1
+        ;;
+      (-*) 
+        fail "Unknown option: $1"
+        ;;
+      (*) 
+        usage
+        ;;
+    esac
+    shift
+  done
+
+  [[ -n ${env_name:-} ]] || usage
+}
+
+cf::login() {
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+
+vault::handshake() {
+  local handshake="$(safe get ${vault_prefix}/handshake:knock)"
+  [[ -n ${handshake} ]] ||
+  fail "Vault handshake failed (${vault_prefix}/handshake:knock), is the 'vault-prefix' correct?"
+}
+ 
+declare  \
+  env_name \
+  apps_domain \
+  handshake \
+  vault_path \
+  vault_prefix="secret/"
+
+args::parse "$@"
+
+vault::handshake
+
+vault_path="${vault_prefix}/exodus/${env_name}/cf:apps_domain"
+apps_domain="$(safe get ${vault_path})"
+# TODO: Can we fetch apps domain from logged in cf instead of vault?
+
+[[ -n ${apps_domain} ]] ||
+  fail "apps_domain not found in vault at ${vault_path}"
+
+debug "env_name: ${env_name}, vault_prefix: ${vault_prefix}, vault_path: ${vault_path}"
+
+cf::login ${env_name}
+
+cf domains
+
+cf create-shared-domain apps.internal --internal
+
+cf domains
+
+cf create-shared-domain "tcp.${apps_domain}" --router-group default-tcp
+
+cf domains
+
+exit 0

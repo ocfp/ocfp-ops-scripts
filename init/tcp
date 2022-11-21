@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+do() { echo -e "\$ $*"; "$@"; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+usage() {
+  fail "Usage: ${0//*\/} env <name>"
+}
+
+args::parse() {
+  local action
+
+  while [[ $# -gt 0 ]]; do
+    action="$1"
+    case "${action}" in
+      (env)
+        env_name="$2"
+        shift 2 || fail "${0//*/} ... env <name>"
+        ;;
+      (ports)
+        ports="$2"
+        shift 2 || fail "${0//*/} ... ports <start-end> # ex: 1024-65535 (default)"
+        ;;
+      (-h|--help)
+        usage
+        ;;
+      (-d|--debug)
+        DEBUG=1
+        ;;
+      (-*) 
+        fail "Unknown option: $1"
+        ;;
+      (*) 
+        usage
+        ;;
+    esac
+    shift
+  done
+
+  [[ -n ${env_name:-} ]] || usage
+}
+
+cf::login() {
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+
+declare  \
+  env_name \
+  handshake \
+  ports="1024-65535"
+
+args::parse "$@"
+
+debug "env_name: ${env_name}"
+
+cf::login ${env_name}
+
+guid=$(cf curl /routing/v1/router_groups | jq -r ".[0].guid")
+
+cf curl -X PUT -d '{"reservable_ports": "'${ports}'"}' /routing/v1/router_groups/${guid}
+
+echo "cf router-groups"
+
+cf router-groups
+
+exit 0

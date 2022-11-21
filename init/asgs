@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+do() { echo -e "\$ $*"; "$@"; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+usage() {
+  fail "Usage: ${0//*\/} env <name>"
+}
+
+args::parse() {
+  local action
+
+  while [[ $# -gt 0 ]]; do
+    action="$1"
+    case "${action}" in
+      (env)
+        env_name="$2"
+        shift 2 || fail "${0//*/} ... env <name> # ex: secret/a/b"
+        ;;
+      (-h|--help)
+        usage
+        ;;
+      (-d|--debug)
+        DEBUG=1
+        ;;
+      (-*) 
+        fail "Unknown option: $1"
+        ;;
+      (*) 
+        usage
+        ;;
+    esac
+    shift
+  done
+
+  [[ -n ${env_name:-} ]] || usage
+}
+
+cf::login() {
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+
+ 
+declare  \
+  env_name \
+  handshake
+
+args::parse "$@"
+
+debug "env_name: ${env_name}"
+
+cf::login ${env_name}
+
+echo -e 'Creating ASGs...'
+cf create-security-group all_open /dev/stdin <<-'EOF'
+[
+  {
+    "protocol": "all",
+    "destination": "0.0.0.0-255.255.255.255"
+  }
+]
+EOF
+
+cf create-security-group default_running /dev/stdin <<-'EOF'
+[
+  {
+    "protocol": "tcp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "1-110",
+    "description": "Enable and log all TCP traffic except for NFS on port 111 and 2049 (1/3).",
+    "log": true
+  },
+  {
+    "protocol": "tcp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "112-2048",
+    "description": "Enable and log all TCP traffic except for NFS on port 111 and 2049 (2/3).",
+    "log": true
+  },
+  {
+    "protocol": "tcp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "2050-65535",
+    "description": "Enable and log all TCP traffic except for NFS on port 111 and 2049 (3/3).",
+    "log": true
+  },
+  {
+    "protocol": "udp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "1-110",
+    "description": "Enable all UDP traffic except for NFS on port 111 and 2049 (1/3)."
+  },
+  {
+    "protocol": "udp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "112-2048",
+    "description": "Enable all UDP traffic except for NFS on port 111 and 2049 (2/3)."
+  },
+  {
+    "protocol": "udp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "ports": "2050-65535",
+    "description": "Enable all UDP traffic except for NFS on port 111 and 2049 (3/3)."
+  },
+  {
+    "protocol": "icmp",
+    "destination": "0.0.0.0-255.255.255.255",
+    "type": -1,
+    "code": -1,
+    "description": "Allow all types and codes for ICMP traffic."
+  }
+]
+EOF
+
+echo -e 'Binding ASGs to running and staging...'
+cf bind-running-security-group default_running
+cf bind-staging-security-group all_open
+
+echo -e 'Unbinding default ASGs: public_networks, dns from staging & running...'
+
+cf unbind-staging-security-group public_networks
+cf unbind-staging-security-group dns
+
+cf unbind-running-security-group public_networks
+cf unbind-running-security-group dns
+
+echo -e "Deleting default ASGs: public_networks, dns..."
+cf delete-security-group public_networks -f
+cf delete-security-group dns -f
+
+exit 0
