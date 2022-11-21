@@ -351,7 +351,7 @@ test::redis() {
   local service_instance=$1 cmd app_url app_guid
   declare -a cmds
 
-  printf "\n%0.s=" {1..80}
+  printf "%0.s=" {1..80}
   printf "= Redis - Testing - TLS & Non-TLS"
   printf "%0.s=" {1..80}
 

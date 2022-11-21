@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-_fail() { echo -e "$*" >&2; exit 1; }
+fail() { echo -e "$*" >&2; exit 1; }
 
-_do() { echo -e "\$ $*"; "$@"; }
+run() { echo -e "\$ $*"; "$@"; }
 
-_debug() {
+debug() {
   [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2
 }
 
-_usage() {
-  _fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
+usage() {
+  fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
 parse::args() {
@@ -22,24 +22,24 @@ parse::args() {
         ;;
       (env)
         env=$2
-        shift 2 || _fail "Usage: ...env <name>"
+        shift 2 || fail "Usage: ...env <name>"
         ;;
       (space|s)
         spaces+=("$2")
-        shift 2 || _fail "Usage: ...space <name> [space <name>...]"
+        shift 2 || fail "Usage: ...space <name> [space <name>...]"
         ;;
       (*)
-        _fail "Unknown arg: '$1'\nUsage: space <name> [space <name>...]"
+        fail "Unknown arg: '$1'\nUsage: space <name> [space <name>...]"
         ;;
     esac
   done
-  [[ ${#spaces[@]} > 0 ]] || _fail "Usage: ${action} space <name> [space <name>...]"
+  [[ ${#spaces[@]} > 0 ]] || fail "Usage: ${action} space <name> [space <name>...]"
 }
 
 apps::c2c::login() {
   local env=$1
   cd ~/deployments/cf
-  genesis ${env} do login || _fail "Failed to login to ${env}!"
+  genesis ${env} do login || fail "Failed to login to ${env}!"
 }
 
 apps::c2c::fetch() {
@@ -48,18 +48,17 @@ apps::c2c::fetch() {
     if [[ ! -s c2c-feature-tests.tar.gz ]]
     then # TODO:
       echo "Missing c2c-feature-tests.tar.gz, please download and try again."
-      true #_do curl -sOL https://.../c2c-feature-tests.tar.gz
+      true #run curl -sOL https://.../c2c-feature-tests.tar.gz
     fi
-    _do tar zxf c2c-feature-tests.tar.gz -C ${apps_path}
+    run tar zxf c2c-feature-tests.tar.gz -C ${apps_path}
   fi
 
   cd ${apps_path}/c2c-feature-tests
 
   for a in frontend backend-b
   do
-    d=${apps_path}/c2c-feature-tests/${a}
-
-    [[ -d ${d} ]] || _fail "Missing app ${a} directory ${d}"
+    d="${apps_path}/c2c-feature-tests/${a}"
+    [[ -d ${d} ]] || fail "Missing app ${a} directory ${d}"
   done
 }
 
@@ -70,20 +69,21 @@ apps::c2c::push() {
     frontend=test-c2c-frontend-${space}
     domain=apps.internal # TODO: can we fetch this from cf api?
 
-    _do cf target -o ${org} -s ${space}
+    run cf target -o ${org} -s ${space}
 
-    _do cf push ${frontend} --random-route \
+    run cf push ${frontend} --random-route \
       -p ${apps_path}/c2c-feature-tests/frontend \
       -f ${apps_path}/c2c-feature-tests/frontend/manifest.yml \
 
-    _do cf push ${backend} --no-start --no-route \
+    run cf push ${backend} --no-start --no-route \
       -p ${apps_path}/c2c-feature-tests/backend-b \
       -f ${apps_path}/c2c-feature-tests/backend-b/manifest.yml \
 
-    cf set-env CATS_PORTS 7007,7008
-    cf set-env UDP_PORTS 9001,9002
-    _do cf map-route ${backend} ${domain} -n ${backend}
-    _do cf start ${backend}
+    cf set-env ${backend} CATS_PORTS "7007,7008"
+    cf set-env ${backend} UDP_PORTS "9001,9002"
+
+    run cf map-route ${backend} ${domain} -n ${backend}
+    run cf start ${backend}
   done
 }
 
@@ -93,29 +93,30 @@ apps::c2c::delete() {
     backend=test-c2c-backend-b-${space}
     frontend=test-c2c-frontend-${space}
 
-    _do cf target -o ${org} -s ${space}
+    run cf target -o ${org} -s ${space}
 
-    _do cf delete -f ${frontend}
-    _do cf delete -f ${backend}
+    run cf delete -f ${frontend}
+    run cf delete -f ${backend}
   done
 }
 
 apps::app::curl() {
   local app=$1
   local guid=$(cf app ${app} --guid)
-  cf curl /v3/apps/${app_guid}/env | jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
+  cf curl /v3/apps/${app_guid}/env |
+    jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
 }
 
 apps::c2c::test::curl() {
   local app=$1 target=$2 port=${3:-7007} status=
   local app_url=$(apps::app::curl ${app})
-  local url=http://${app_url}/proxy/?url=${target}.internal_domain:${port}
+  local url=http://${app_url}/proxy/?url=${target}.internalrunmain:${port}
 
-  _debug "curl -sk -o /dev/null -w \"${%http_code}\" "${url}" \| tr -d \'\"\'"
+  debug "curl -sk -o /dev/null -w \"%{http_code}\" "${url}" \| tr -d \'\"\'"
 
   if [[ ${app_url} == "nil" ]]
   then status=nil
-  else status=$(curl -sk -o /dev/null -w "${%http_code}" "${url}" | tr -d '"')
+  else status=$(curl -sk -o /dev/null -w "%{http_code}" "${url}" | tr -d '"')
   fi
 
   case ${status} in
@@ -128,11 +129,11 @@ apps::c2c::test::curl() {
 
 apps::c2c::test::cf_ssh_curl() {
   local app=$1 target=$2 port=${3:-7007} status=
-  local url=http://${target}.internal_domain:${port}
+  local url=http://${target}.internalrunmain:${port}
 
-  _debug "cf ssh ${app} -c \"curl -sk -o /dev/null -w \"${%http_code}\" ${url}\" \| tr -d \'\"\'"
+  debug "cf ssh ${app} -c \"curl -sk -o /dev/null -w \"%{http_code}\" ${url}\" \| tr -d \'\"\'"
 
-  status=$(cf ssh ${app} -c "curl -sk -o /dev/null -w \"${%http_code}\" ${url}" | tr -d '"')
+  status=$(cf ssh ${app} -c "curl -sk -o /dev/null -w \"%{http_code}\" ${url}" | tr -d '"')
 
   case ${status} in
     (200) echo -e "\e[32mPASS - ${status} OK\e[0m" ;;
@@ -143,20 +144,24 @@ apps::c2c::test::cf_ssh_curl() {
 
 apps::c2c::test::connectivity() {
   local space_a=$1 space_b=$2
-  printf "\n=%.0s" {1..80}
+  printf "=%.0s" {1..80}
   echo -e "TEST org: ${org}, space ${space_a} -> space ${space_b}"
-  printf "\n=%.0s" {1..80}
+  printf "=%.0s" {1..80}
 
-  cf target -o ${org} -s ${space_a} &>/dev/null
+  run cf target -o ${org} -s ${space_a} &>/dev/null
 
-  cf add-network-policy test-c2c-frontend-${space_a} \
-    --destination-app test-c2c-backend-b-${space_b} \
+  run cf add-network-policy \
+    test-c2c-frontend-${space_a} \
     --protocol tcp \
     --port 7007
 
-  apps::c2c::test::cf_ssh_curl test-c2c-frontend-${space_a} test-c2c-backend-b-${space_b} 7007
+  apps::c2c::test::cf_ssh_curl \
+    test-c2c-frontend-${space_a} \
+    test-c2c-backend-b-${space_b} 7007
 
-  apps::c2c::test::curl test-c2c-frontend-${space_a} test-c2c-backend-b-${space_b} 7007
+  apps::c2c::test::curl \
+    test-c2c-frontend-${space_a} \
+    test-c2c-backend-b-${space_b} 7007
 }
 
 apps::c2c::test::connectivity::between() {
@@ -185,7 +190,7 @@ apps::c2c::test() {
 
 declare -a spaces
 apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps}
-internal_domain=apps.internal
+internalrunmain=apps.internal
 org=system
 action=
 
@@ -212,7 +217,7 @@ case ${action} in
     apps::c2c::fetch
     apps::c2c::push
     ;;
-  (*) _usage ;;
+  (*) usage ;;
 esac
 
 exit 0
