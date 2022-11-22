@@ -408,6 +408,11 @@ test::redis() {
   done
 }
 
+cf::space::create() {
+  run cf create-space -o ${org} ${space}
+  run cf target -o ${org} -s ${space}
+}
+
 ################################################################################
 # Variables
 ################################################################################
@@ -429,11 +434,11 @@ parse::args "$@"
 
 cf::login ${env}
 
+cf::space::create
+
 for service in ${services[@]}
 do apps::fetch ${service}
 done
-
-run cf target -o ${org} -s ${space}
 
 case ${action} in
   (services-create)
