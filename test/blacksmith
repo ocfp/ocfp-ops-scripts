@@ -9,6 +9,10 @@
 # party....
 #
 
+################################################################################
+# Functions
+################################################################################
+ 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 run() { echo -e "\$ $*"; "$@"; }
@@ -40,11 +44,13 @@ parse::args() {
     esac
   done
 
-  [[ ${#services} > 0 ]] ||
+  if [[ ${#services[@]} == 0 ]]
+  then
     services=($( ls -1 ${apps_path} |
       grep -E 'cf-.*-example-app-master.zip' |
       sed -E 's/cf-(.*)-example-app-master.zip/\1/'
-      ))
+          ))
+  fi
 }
 
 cf::login() {
@@ -397,6 +403,10 @@ test::redis() {
     fi
   done
 }
+
+################################################################################
+# Variables
+################################################################################
  
 declare -a services apps spaces
 declare \
@@ -407,22 +417,26 @@ declare \
 
 mkdir -p ${apps_path} && cd ${apps_path}
 
+################################################################################
+# Main
+################################################################################
+
 parse::args "$@"
 
 cf::login ${env}
 
-# TODO: let this be dynamically defined.
-apps::fetch redis
-apps::fetch rabbitmq
+for service in ${services[@]}
+do apps::fetch ${service}
+done
 
 run cf target -o ${org} -s ${space}
 
 case ${action} in
   (services-create)
-    service::plans::create
+    services::create
     ;;
   (services-delete)
-    service::plans::delete
+    services::delete
     ;;
   (apps-push)
     apps::push
