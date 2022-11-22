@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+
+# Author: Haochen Hu
+
+usage() {
+  echo -e "$(cat <<EOT
+
+USAGE
+
+  ${0//*/} <task> <args>
+
+WHERE <task> IN
+
+  create-bind-service - creates a service intance and binds it to an app
+  test-service        - checks if the mounting shares exist in the vm
+
+WHERE create-bind-service <args> IN
+
+  -a|--app  <app-name>          # Required
+  -s|--service <service-name>   # Required 
+  -m|--mount <mounting targets> # Required
+  -p|--password <password>      # Required
+  -u|--username <username>      # Required
+
+WHERE test-service <args> IN
+  -e|--env <env-name>    # Required 
+  -a|--app  <app-name>   # Required
+
+PRE-REQUISITES
+
+  APP has already been pushed
+  
+  login cf
+ 
+  targeting at an org and a space e.g., cf target -o <org_name> -s <space_name>
+
+  For services in isolation-segments, segments have been created, enabled segments to orgs and spaces.
+
+EOT
+)"
+exit 0
+}
+
+
+fail() { 
+  echo -e "\e[31mERROR:\e[0m $*" >&2
+  exit 1
+}
+
+parse::args() {
+  local _action
+  while [[ $# > 0 ]]
+  do
+    _action="${1}" ; shift
+    case ${_action} in
+      (-p|--password)
+        password="${1}"
+        shift || fail "password cannot be empty"
+        ;;
+      (-u|--username)
+        username="${1}" 
+        shift || fail "username cannot be empty"
+        ;;
+      (-s|--service)
+        service_name="${1}"
+        shift || fail "service name cannot be empty"
+        ;;
+      (-a|--app)
+        app_name="${1}"
+        shift || fail "app name cannot be empty"
+        ;;
+      (-e|--env)
+        env_name=( "${1//.yml}" )
+        shift || fail "environment name cannot be empty"
+        ;;
+      (-m|--mount)
+        mount_path="${1}"
+        shift || fail "mounting target cannot be empty"
+        ;;
+      (--help|-h|*)
+        usage
+        ;;
+    esac
+  done
+}
+
+create::smb() {
+  echo " creating smb service ${service_name} and mounting ${mount_path} "
+
+  mkdir -p ~/tmp/test/smb
+
+  echo "{\"share\":\"${mount_path}\"}" >
+    ~/tmp/test/smb/${service_name}-config.json
+
+  cf create-service smb Existing ${service_name} -c ~/tmp/test/smb/${service_name}-config.json
+
+  echo " binding service ${service_name} to ${app_name} "
+
+  echo "{\"username\":\"${username}\",\"password\":\"${password}\"}" >
+    ~/tmp/test/smb/${service_name}-creds.json
+
+  cf bind-service ${app_name} ${service_name} -c ~/tmp/test/smb/${service_name}-creds.json
+
+  rm -rf ~/tmp/test/smb/
+
+  echo " restaging app ${app_name}"
+
+  cf restage ${app_name}
+}
+
+test::service() {
+  declare -a instances ips
+  local app_guid app_process_0 cell_ip
+
+  app_guid=$(cf app ${app_name} --guid)
+
+  app_process_0=$(cf curl /v3/apps/${app_guid}/processes |
+    jq -r '.resources[].guid'
+  )
+
+  cell_ip=$( cf curl /v3/processes/${app_process_0}/stats |
+    jq -r '.resources[0].host'
+  )
+
+  instances=($(
+    gb i ${env_name} -cf --json | jq -r '.Tables[].Rows[] | .instance,.ips'
+  ))
+
+  ips=($(
+    gb ips ${env_name} -cf --json | jq -r '.Tables[].Rows[].ips'
+  ))
+
+  for (( i=0; i<${#ips[@]}; i++ ))
+  do
+    el=${ips[$i]}
+    if [[ "${el}" == "${cell_ip}" ]]
+    then
+      cell_name=${instances[i]}
+      break
+    fi
+  done
+
+  echo " checking if ${smb_mount_path} exists in ${cell_name} "
+
+  gb s ${env_name} -cf ${cell_name} -c "cat ${smb_mount_path}/*/*"
+}
+
+declare smb_mount_path=/var/vcap/data/volumes/smb
+
+task=$1 ; shift || usage
+
+parse::args "$@"
+
+case ${task} in 
+  (create-bind-service) 
+    create::smb
+    ;;
+  (test-service)
+    test::service
+    ;;
+  (*)
+		usage
+		;;
+esac
+
+exit 0
