@@ -235,7 +235,7 @@ services::unbind() {
 }
 
 autoscaler::policy() {
-  cat <<"EOF"
+  cat > ${queue}-autoscaler-policy.json <<"EOF"
     {
       instance_min_count: 1,
       instance_max_count: 3,
@@ -261,7 +261,7 @@ test::rabbitmq() {
   debug "${FUNCNAME} $*"
   local service_instance=$1
   local app=$( apps::app::uri test-rabbitmq-app-a )
-  local queue=test-rabbit-queue 
+  local queue=test_rabbit_queue 
 
   printf "%0.s=" {1..80}
   echo -e "\n= RabbiMQ - Testing Queues - Non TLS"
@@ -363,13 +363,16 @@ test::rabbitmq() {
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
 
   run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
-    -c "$( autoscaler::policy )"
+    -c ${queue}-autoscaler-policy.json
 
   echo -e "Restaging in preparation of testing autoscaling-history..."
   run cf restage test-rabbitmq-app-a
 
   echo -e "Starting app state..."
   run cf app test-rabbitmq-app-a
+
+  echo -e "Creating the queue..."
+  run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
   echo -e "Inserting 10 messages into the queue '${queue}'..."
   for i in {1..10}
