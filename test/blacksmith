@@ -100,7 +100,7 @@ apps::delete() {
 }
 
 apps::app::uri() {
-  local app=$1 guid=$( cf app ${app} --guid )
+  local app=$1 app_guid=$( cf app ${app} --guid )
   cf curl /v3/apps/${app_guid}/env |
     jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
 }
