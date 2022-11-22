@@ -15,7 +15,7 @@
  
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
-run() { echo -e "\$ $*"; "$@"; }
+run() { echo -e "\$ $*" >&2; "$@"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
@@ -263,8 +263,10 @@ test::rabbitmq() {
   local app=$( apps::app::uri test-rabbitmq-app-a )
   local queue=test-rabbit-queue 
 
-  echo -e "= RabbiMQ - Testing Queues - Non TLS"
   printf "%0.s=" {1..80}
+  echo -e "\n= RabbiMQ - Testing Queues - Non TLS"
+  printf "%0.s=" {1..80}
+  echo
 
   echo -e "Pinging the rabbitmq app via the app url..."
   run curl ${app}/ping
@@ -282,15 +284,17 @@ test::rabbitmq() {
   run curl -X GET ${app}/queue/${queue}
 
   printf "%0.s=" {1..80}
-  echo -e "= RabbitMQ - Testing Queues - Enabling TLS for the app"
+  echo -e "\n= RabbitMQ - Testing Queues - Enabling TLS for the app"
   printf "%0.s=" {1..80}
+  echo
 
   cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
   run cf restage test-rabbitmq-app-a
 
   printf "%0.s=" {1..80}
-  echo -e "= RabbitMQ - Testing Queues - TLS"
+  echo -e "\n= RabbitMQ - Testing Queues - TLS"
   printf "%0.s=" {1..80}
+  echo
 
   echo -e "Pinging the rabbitmq app via the app url..."
   run curl ${app}/ping
@@ -308,8 +312,9 @@ test::rabbitmq() {
   run curl -X GET ${app}/queue/${queue}
 
   printf "%0.s=" {1..80}
-  echo -e "= RabbitMQ - Testing Queues - Dynamic Credentials"
+  echo -e "\n= RabbitMQ - Testing Queues - Dynamic Credentials"
   printf "%0.s=" {1..80}
+  echo
 
   run cf bind-service test-rabbitmq-app-b ${service_instance}
   run cf restage test-rabbitmq-app-b
@@ -351,8 +356,9 @@ test::rabbitmq() {
   fi
 
   printf "%0.s=" {1..80}
-  echo -e "= RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
+  echo -e "\n= RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
   printf "%0.s=" {1..80}
+  echo
 
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
 
@@ -385,8 +391,9 @@ test::redis() {
   declare -a cmds
 
   printf "%0.s=" {1..80}
-  printf "= Redis - Testing - TLS & Non-TLS"
+  printf "\n= Redis - Testing - TLS & Non-TLS"
   printf "%0.s=" {1..80}
+  echo
   
   local app=test-redis-app-a
   
@@ -397,17 +404,30 @@ test::redis() {
   app_guid=$( cf app ${app} --guid )
 
   echo -e "\nInserting a Key/Value pair into Redis, key 'foo'..."
-  run curl -k -X PUT ${app_url}/foo -d "data=bar"
+  result=$(run curl -k -X PUT ${app_url}/foo -d "data=bar")
+  if [[ ${result} =~ "success" ]]
+  then echo -e "PASS: Key/Value pair inserted successfully!"
+  else echo -e "FAIL: Key/Value pair not inserted successfully!"
+  fi
 
   echo -e "\nRetrieving the value for the key 'foo' non TLS..."
-  run curl -k ${app_url}/foo
+  result=$(run curl -k ${app_url}/foo)
+  if [[ ${result} =~ "bar" ]]
+  then echo -e "PASS: Value fetched successfully!"
+  else echo -e "FAIL: Value not fetched successfully!"
+  fi
 
   echo -e "\nRetrieving the value for the key 'foo' via TLS..."
-  run curl -k ${app_url}/tls/v1.2/foo
+  result=$(run curl -k ${app_url}/tls/v1.2/foo)
+  if [[ ${result} =~ "bar" ]]
+  then echo -e "PASS: Value fetched successfully via TLS!"
+  else echo -e "FAIL: Value not fetched successfully via TLS!"
+  fi
 
   printf "%0.s=" {1..80}
-  echo -e "= Redis - Testing Disabled Commands"
+  echo -e "\n= Redis - Testing Disabled Commands"
   printf "%0.s=" {1..80}
+  echo
 
   redis_ip=$(
   cf curl /v3/apps/${app_guid}/env |
@@ -440,6 +460,7 @@ cf::space::create() {
 # Variables & Init
 ################################################################################
 declare -a services apps spaces
+
 declare \
   apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
   org=system \

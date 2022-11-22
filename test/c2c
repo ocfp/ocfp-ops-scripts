@@ -109,7 +109,7 @@ apps::c2c::delete() {
 apps::app::curl() {
   debug "${FUNCNAME} $*"
   local app=$1
-  local guid=$(cf app ${app} --guid)
+  local app_guid=$(cf app ${app} --guid)
   cf curl /v3/apps/${app_guid}/env |
     jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
 }
