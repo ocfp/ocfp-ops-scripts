@@ -124,7 +124,7 @@ apps::test::plans() {
   done
 }
 
-apps:test::services() {
+apps::test::services() {
   for service in ${services[@]}
   do apps::test::plans ${service}
   done
