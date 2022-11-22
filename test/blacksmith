@@ -120,7 +120,7 @@ apps::test::plans() {
   local service=$1
   local plans=($( service::plans ${service} ))
   for plans in ${plans[@]}
-  do apps::test ${space} ${service} ${plan}
+  do apps::test ${service} ${plan}
   done
 }
 
