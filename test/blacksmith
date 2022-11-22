@@ -355,18 +355,20 @@ test::redis() {
   printf "%0.s=" {1..80}
   printf "= Redis - Testing - TLS & Non-TLS"
   printf "%0.s=" {1..80}
+  
+  # TODO: missing binding between app and service.
 
-  app_url=$( apps::app::uri test-redis-app-a )
-  app_guid=$( cf app ${app} --guid )
+  app_url="https://$( apps::app::uri test-redis-app-a )"
+  app_guid=$( cf app test-redis-app-a --guid )
 
   echo -e "\nInserting a Key/Value pair into Redis, key 'foo'..."
-  run curl -X PUT ${app_url}/foo -d "data=bar"
+  run curl -k -X PUT ${app_url}/foo -d "data=bar"
 
   echo -e "\nRetrieving the value for the key 'foo' non TLS..."
-  run curl ${app_url}/foo
+  run curl -k ${app_url}/foo
 
   echo -e "\nRetrieving the value for the key 'foo' via TLS..."
-  run curl ${app_url}/tls/v1.2/foo
+  run curl -k ${app_url}/tls/v1.2/foo
 
   printf "%0.s=" {1..80}
   echo -e "= Redis - Testing Disabled Commands"
