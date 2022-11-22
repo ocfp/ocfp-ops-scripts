@@ -89,14 +89,12 @@ app::push() {
 }
 
 apps::push() {
-  local services=(redis rabbitmq) # TODO: let this be dynamically defined.
   for svc in ${services[@]}
   do app::push ${svc}
   done
 }
 
 apps::delete() {
-  local services=(redis rabbitmq) # TODO: let this be dynamically defined.
   for svc in ${services[@]}
   do 
     for index in a b
