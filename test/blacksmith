@@ -269,19 +269,19 @@ test::rabbitmq() {
   echo
 
   echo -e "Pinging the rabbitmq app via the app url..."
-  run curl ${app}/ping
+  run curl -sk ${app}/ping
 
   echo -e "\nCreating queue ${queue}..."
-  run curl -X POST ${app}/queues -d "name=${queue}"
+  run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
   echo -e "\nListing queues..."
   run curl ${app}/queues
 
   echo -e "\nInserting a message into queue ${queue}..."
-  run curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+  run curl -sk -X PUT ${app}/queue/${queue} -d 'data=hello'
 
   echo -e "\nGetting messages from queue ${queue}..."
-  run curl -X GET ${app}/queue/${queue}
+  run curl -sk -X GET ${app}/queue/${queue}
 
   printf "%0.s=" {1..80}
   echo -e "\n= RabbitMQ - Testing Queues - Enabling TLS for the app"
@@ -297,19 +297,19 @@ test::rabbitmq() {
   echo
 
   echo -e "Pinging the rabbitmq app via the app url..."
-  run curl ${app}/ping
+  run curl -sk ${app}/ping
 
   echo -e "\nCreating queue ${queue}..."
-  run curl -X POST ${app}/queues -d "name=${queue}"
+  run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
   echo -e "\nListing queues..."
-  run curl ${app}/queues
+  run curl -sk ${app}/queues
 
   echo -e "\nInserting a message into queue ${queue}..."
-  run curl -X PUT ${app}/queue/${queue} -d 'data=hello'
+  run curl -sk -X PUT ${app}/queue/${queue} -d 'data=hello'
 
   echo -e "\nGetting messages from queue ${queue}..."
-  run curl -X GET ${app}/queue/${queue}
+  run curl -sk -X GET ${app}/queue/${queue}
 
   printf "%0.s=" {1..80}
   echo -e "\n= RabbitMQ - Testing Queues - Dynamic Credentials"
