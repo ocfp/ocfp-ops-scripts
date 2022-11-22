@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# ocfp test blacksmith env <name> services-create
+# ocfp test blacksmith env <name> services-create [redis|rabbitmq]
 # wait....
-# ocfp test blacksmith env <name> apps-push
-# ocfp test blacksmith env <name> apps-test
-# ocfp test blacksmith env <name> apps-delete
-# ocfp test blacksmith env <name> services-delete
+# ocfp test blacksmith env <name> apps-push [redis|rabbitmq]
+# ocfp test blacksmith env <name> apps-test [redis|rabbitmq]
+# ocfp test blacksmith env <name> apps-delete [redis|rabbitmq]
+# ocfp test blacksmith env <name> services-delete [redis|rabbitmq]
 # party....
 #
 
@@ -119,9 +119,7 @@ apps::test::spaces() {
 
 service::plans() {
   local service=$1
-  #cf marketplace -s ${service} | awk '/^plan/ {print $2}'
-  cf curl "/v3/service_plans?names=${service}" |
-    jq -r '.resources[].name'
+  cf curl "/v3/service_plans?names=${service}" | jq -r '.resources[].name'
 }
 
 service::instances() {
@@ -406,6 +404,7 @@ mkdir -p ${apps_path} && cd ${apps_path}
 parse::args "$@"
 
 cf::login ${env}
+
 apps::fetch
 
 run cf target -o ${org} -s ${space}
