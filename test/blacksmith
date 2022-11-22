@@ -376,12 +376,12 @@ test::redis() {
 
   redis_ip=$(
   cf curl /v3/apps/${app_guid}/env |
-    jq -r '.application_env_json.VCAP_SERVICES.redis[0].credentials.host'
+    jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.host'
   )
 
   redis_password=$(
   cf curl /v3/apps/${app_guid}/env |
-    jq -r '.application_env_json.VCAP_SERVICES.redis[0].credentials.password'
+    jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.password'
   )
 
   redis-cli AUTH ${redis_password}
