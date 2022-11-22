@@ -13,6 +13,11 @@ usage() {
   fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
+header() {
+  local token="=" line=$(printf "${token}%.0s" {1..80})
+  echo -e "\n${line}\n${token} $*\n${line}"
+}
+
 parse::args() {
   debug "${FUNCNAME} $*"
   while [[ $# > 0 ]]
@@ -62,7 +67,8 @@ apps::c2c::fetch() {
   for a in frontend backend-b
   do
     d="${apps_path}/c2c-feature-tests/${a}"
-    [[ -d ${d} ]] || fail "Missing app ${a} directory ${d}"
+    [[ -d ${d} ]] ||
+      fail "Missing app ${a} directory ${d}"
   done
 }
 
@@ -154,9 +160,7 @@ apps::c2c::test::cf_ssh_curl() {
 apps::c2c::test::connectivity() {
   debug "${FUNCNAME} $*"
   local space_a=$1 space_b=$2
-  printf "=%.0s" {1..80}
-  echo -e "TEST org: ${org}, space ${space_a} -> space ${space_b}"
-  printf "=%.0s" {1..80}
+  header "TEST org: ${org}, space ${space_a} -> space ${space_b}"
 
   run cf target -o ${org} -s ${space_a} &>/dev/null
 

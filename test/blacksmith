@@ -23,6 +23,11 @@ usage() {
   fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
+header() {
+  local token="=" line=$(printf "${token}%.0s" {1..80})
+  echo -e "\n${line}\n${token} $*\n${line}"
+}
+
 parse::args() {
   debug "${FUNCNAME} $*"
   while [[ $# > 0 ]]
@@ -259,14 +264,12 @@ EOF
 
 test::rabbitmq() {
   debug "${FUNCNAME} $*"
-  local service_instance=$1
-  local app=$( apps::app::uri test-rabbitmq-app-a )
-  local queue=test_rabbit_queue 
+  local \
+    service_instance=$1 \
+    app=$( apps::app::uri test-rabbitmq-app-a ) \
+    queue=test_rabbit_queue 
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= RabbiMQ - Testing Queues - Non TLS"
-  printf "%0.s=" {1..80}
-  echo
+  header "RabbiMQ - Testing Queues - Non TLS"
 
   echo -e "Pinging the rabbitmq app via the app url..."
   run curl -sk ${app}/ping
@@ -283,18 +286,12 @@ test::rabbitmq() {
   echo -e "\nGetting messages from queue ${queue}..."
   run curl -sk -X GET ${app}/queue/${queue}
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= RabbitMQ - Testing Queues - Enabling TLS for the app"
-  printf "%0.s=" {1..80}
-  echo
+  header "RabbitMQ - Testing Queues - Enabling TLS for the app"
 
   cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
   run cf restage test-rabbitmq-app-a
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= RabbitMQ - Testing Queues - TLS"
-  printf "%0.s=" {1..80}
-  echo
+  header "RabbitMQ - Testing Queues - TLS"
 
   echo -e "Pinging the rabbitmq app via the app url..."
   run curl -sk ${app}/ping
@@ -311,10 +308,7 @@ test::rabbitmq() {
   echo -e "\nGetting messages from queue ${queue}..."
   run curl -sk -X GET ${app}/queue/${queue}
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= RabbitMQ - Testing Queues - Dynamic Credentials"
-  printf "%0.s=" {1..80}
-  echo
+  header "RabbitMQ - Testing Queues - Dynamic Credentials"
 
   run cf bind-service test-rabbitmq-app-b ${service_instance}
   run cf restage test-rabbitmq-app-b
@@ -355,10 +349,7 @@ test::rabbitmq() {
   else echo "PASS: The username for the service key is not the same for both apps!"
   fi
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
-  printf "%0.s=" {1..80}
-  echo
+  header "RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
 
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
 
@@ -393,10 +384,7 @@ test::redis() {
   local service_instance=$1 cmd app_url app_guid
   declare -a cmds
 
-  printf "%0.s=" {1..80}
-  printf "\n= Redis - Testing - TLS & Non-TLS"
-  printf "%0.s=" {1..80}
-  echo
+  header "Redis - Testing - TLS & Non-TLS"
   
   local app=test-redis-app-a
   
@@ -427,10 +415,7 @@ test::redis() {
   else echo -e "FAIL: Value not fetched successfully via TLS!"
   fi
 
-  printf "%0.s=" {1..80}
-  echo -e "\n= Redis - Testing Disabled Commands"
-  printf "%0.s=" {1..80}
-  echo
+  header "Redis - Testing Disabled Commands"
 
   redis_ip=$(
   cf curl /v3/apps/${app_guid}/env |

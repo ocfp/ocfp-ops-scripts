@@ -6,6 +6,11 @@ fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
+header() {
+  local token="=" line=$(printf "${token}%.0s" {1..80})
+  echo -e "\n${line}\n${token} $*\n${line}"
+}
+
 usage() {
   echo -e "$(cat <<EOT
 
@@ -46,6 +51,7 @@ exit 0
 }
 
 parse::args() {
+  debug "${FUNCNAME} $*"
   local _action
   while [[ $# > 0 ]]
   do
@@ -83,6 +89,7 @@ parse::args() {
 }
 
 create::smb() {
+  debug "${FUNCNAME} $*"
   echo " creating smb service ${service_name} and mounting ${mount_path} "
 
   mkdir -p ~/tmp/test/smb
@@ -107,6 +114,9 @@ create::smb() {
 }
 
 test::service() {
+  debug "${FUNCNAME} $*"
+  header "Testing SMB"
+
   declare -a instances ips
   local app_guid app_process_0 cell_ip
 
