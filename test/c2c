@@ -118,7 +118,7 @@ apps::c2c::test::curl() {
   debug "${FUNCNAME} $*"
   local app=$1 target=$2 port=${3:-7007} status=
   local app_url=$(apps::app::curl ${app})
-  local url="http://${app_url}/proxy/?url=${target}.${internal_domain}:${port}"
+  local url="https://${app_url}/proxy/?url=${target}.${internal_domain}:${port}"
 
   debug "curl -sk -o /dev/null -w \"%{http_code}\" "${url}" \| tr -d \'\"\'"
 
