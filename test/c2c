@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
+################################################################################
+# Functions
+################################################################################
 fail() { echo -e "$*" >&2; exit 1; }
 
 run() { echo -e "\$ $*"; "$@"; }
 
-debug() {
-  [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2
-}
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
 usage() {
   fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
 parse::args() {
+  debug "${FUNCNAME} $*"
   while [[ $# > 0 ]]
   do
     case $1 in
@@ -37,12 +39,14 @@ parse::args() {
 }
 
 apps::c2c::login() {
+  debug "${FUNCNAME} $*"
   local env=$1
   cd ~/deployments/cf
   genesis ${env} do login || fail "Failed to login to ${env}!"
 }
 
 apps::c2c::fetch() {
+  debug "${FUNCNAME} $*"
   if [[ ! -d ${apps_path}/c2c-feature-tests ]]
   then
     if [[ ! -s c2c-feature-tests.tar.gz ]]
@@ -63,6 +67,7 @@ apps::c2c::fetch() {
 }
 
 apps::c2c::push() {
+  debug "${FUNCNAME} $*"
   for space in ${spaces[@]}
   do
     backend=test-c2c-backend-b-${space}
@@ -88,6 +93,7 @@ apps::c2c::push() {
 }
 
 apps::c2c::delete() {
+  debug "${FUNCNAME} $*"
   for space in ${spaces[@]}
   do
     backend=test-c2c-backend-b-${space}
@@ -101,6 +107,7 @@ apps::c2c::delete() {
 }
 
 apps::app::curl() {
+  debug "${FUNCNAME} $*"
   local app=$1
   local guid=$(cf app ${app} --guid)
   cf curl /v3/apps/${app_guid}/env |
@@ -108,9 +115,10 @@ apps::app::curl() {
 }
 
 apps::c2c::test::curl() {
+  debug "${FUNCNAME} $*"
   local app=$1 target=$2 port=${3:-7007} status=
   local app_url=$(apps::app::curl ${app})
-  local url=http://${app_url}/proxy/?url=${target}.internalrunmain:${port}
+  local url="http://${app_url}/proxy/?url=${target}.${internal_domain}:${port}"
 
   debug "curl -sk -o /dev/null -w \"%{http_code}\" "${url}" \| tr -d \'\"\'"
 
@@ -128,8 +136,9 @@ apps::c2c::test::curl() {
 }
 
 apps::c2c::test::cf_ssh_curl() {
+  debug "${FUNCNAME} $*"
   local app=$1 target=$2 port=${3:-7007} status=
-  local url=http://${target}.internalrunmain:${port}
+  local url=http://${target}.${internal_domain}:${port}
 
   debug "cf ssh ${app} -c \"curl -sk -o /dev/null -w \"%{http_code}\" ${url}\" \| tr -d \'\"\'"
 
@@ -143,6 +152,7 @@ apps::c2c::test::cf_ssh_curl() {
 }
 
 apps::c2c::test::connectivity() {
+  debug "${FUNCNAME} $*"
   local space_a=$1 space_b=$2
   printf "=%.0s" {1..80}
   echo -e "TEST org: ${org}, space ${space_a} -> space ${space_b}"
@@ -166,6 +176,7 @@ apps::c2c::test::connectivity() {
 }
 
 apps::c2c::test::connectivity::between() {
+  debug "${FUNCNAME} $*"
   local space_a=$1 space_b=$2
 
   apps::c2c::test::connectivity ${space_a} ${space_b}
@@ -175,6 +186,7 @@ apps::c2c::test::connectivity::between() {
 }
 
 apps::c2c::test() {
+  debug "${FUNCNAME} $*"
   for space in ${spaces[@]}
   do apps::c2c::test::connectivity::between ${space} ${space}
   done
@@ -189,14 +201,21 @@ apps::c2c::test() {
   done
 }
 
+################################################################################
+# Variables & Init
+################################################################################
 declare -a spaces
-apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps}
-internalrunmain=apps.internal
-org=system
-action=
+declare \
+  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
+  internal_domain=apps.internal \
+  org=system \
+  action= \
 
 mkdir -p ${apps_path} && cd ${apps_path}
 
+################################################################################
+# Main
+################################################################################
 parse::args "$@"
 
 apps::c2c::login ${env}

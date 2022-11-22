@@ -2,6 +2,10 @@
 
 # Author: Haochen Hu
 
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
 usage() {
   echo -e "$(cat <<EOT
 
@@ -39,12 +43,6 @@ PRE-REQUISITES
 EOT
 )"
 exit 0
-}
-
-
-fail() { 
-  echo -e "\e[31mERROR:\e[0m $*" >&2
-  exit 1
 }
 
 parse::args() {

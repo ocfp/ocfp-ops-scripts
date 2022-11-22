@@ -2,6 +2,12 @@
 
 # Author: Haochen Hu
 
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+run() { echo -e "\e[32m$*\e[0m" ; "$@" ; }
+
 usage() {
   echo -e "$(cat <<EOT
 
@@ -41,10 +47,6 @@ EOT
 )"
 exit 0
 }
-
-fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
-
-run() { echo -e "\e[32m$*\e[0m" ; "$@" ; }
 
 parse::args() {
   local _action

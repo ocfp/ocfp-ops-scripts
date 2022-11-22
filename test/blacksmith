@@ -17,13 +17,14 @@ fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 run() { echo -e "\$ $*"; "$@"; }
 
-debug() { [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2 ; }
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
 usage() {
   fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
 parse::args() {
+  debug "${FUNCNAME} $*"
   while [[ $# > 0 ]]
   do
     case $1 in
@@ -54,6 +55,7 @@ parse::args() {
 }
 
 cf::login() {
+  debug "${FUNCNAME} $*"
   local env=$1
   ( cd ~/deployments/cf
     genesis ${env} do login
@@ -61,6 +63,7 @@ cf::login() {
 }
  
 apps::fetch() {
+  debug "${FUNCNAME} $*"
   local service=$1
   local archive="cf-${service}-example-app-master.zip"
   if [[ ! -d ${apps_path}/${archive/.zip} ]]
@@ -78,6 +81,7 @@ apps::fetch() {
 }
 
 app::push() {
+  debug "${FUNCNAME} $*"
   local service=$1
   for index in a b
   do
@@ -89,12 +93,14 @@ app::push() {
 }
 
 apps::push() {
+  debug "${FUNCNAME} $*"
   for service in ${services[@]}
   do app::push ${service}
   done
 }
 
 apps::delete() {
+  debug "${FUNCNAME} $*"
   for service in ${services[@]}
   do 
     for index in a b
@@ -104,38 +110,43 @@ apps::delete() {
 }
 
 apps::app::uri() {
+  debug "${FUNCNAME} $*"
   local app=$1 app_guid=$( cf app ${app} --guid )
   cf curl /v3/apps/${app_guid}/env |
     jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
 }
  
 apps::test() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan=$2
   local service_instance=test-${service}-${plan}
-
   test::${service} ${service_instance}
 }
  
 apps::test::plans() {
+  debug "${FUNCNAME} $*"
   local service=$1
   local plans=($( service::plans ${service} ))
-  for plans in ${plans[@]}
+  for plan in ${plans[@]}
   do apps::test ${service} ${plan}
   done
 }
 
 apps::test::services() {
+  debug "${FUNCNAME} $*"
   for service in ${services[@]}
   do apps::test::plans ${service}
   done
 }
 
 service::plans() {
+  debug "${FUNCNAME} $*"
   local service=$1
   cf curl "/v3/service_plans?service_offering_names=${service}" | jq -r '.resources[].name'
 }
 
 service::instances() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan=$2
   local guid=$(service::plan::guid ${service} ${plan})
   cf curl "/v3/service_instances" | 
@@ -143,12 +154,14 @@ service::instances() {
 }
 
 service::plan::guid() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan=$2
   cf curl "/v3/service_plans?service_offering_names=${service}" |
     jq -r '.resources[] | select(.name == "${plan}") | .guid'
 }
 
 service::plans::create() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
@@ -158,6 +171,7 @@ service::plans::create() {
 }
 
 service::plans::delete() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
@@ -167,6 +181,7 @@ service::plans::delete() {
 }
 
 service::plans::bind() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
@@ -177,6 +192,7 @@ service::plans::bind() {
 }
 
 service::plans::unbind() {
+  debug "${FUNCNAME} $*"
   local service=$1 plan
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
@@ -187,6 +203,7 @@ service::plans::unbind() {
 }
 
 services::create() {
+  debug "${FUNCNAME} $*"
   local service
   for service in ${services[@]}
   do service::plans::create ${service}
@@ -194,6 +211,7 @@ services::create() {
 }
 
 services::delete() {
+  debug "${FUNCNAME} $*"
   local service
   for service in ${services[@]}
   do service::plans::delete ${service}
@@ -201,6 +219,7 @@ services::delete() {
 }
 
 services::bind() {
+  debug "${FUNCNAME} $*"
   local service
   for service in ${services[@]}
   do service::plans::bind ${service}
@@ -208,6 +227,7 @@ services::bind() {
 }
 
 services::unbind() {
+  debug "${FUNCNAME} $*"
   local service
   for service in ${services[@]}
   do service::plans::unbind ${service}
@@ -238,6 +258,7 @@ EOF
 }
 
 test::rabbitmq() {
+  debug "${FUNCNAME} $*"
   local service_instance=$1
   local app=$( apps::app::uri test-rabbitmq-app-a )
   local queue=test-rabbit-queue 
@@ -359,6 +380,7 @@ test::rabbitmq() {
 }
 
 test::redis() {
+  debug "${FUNCNAME} $*"
   local service_instance=$1 cmd app_url app_guid
   declare -a cmds
 
@@ -409,14 +431,14 @@ test::redis() {
 }
 
 cf::space::create() {
+  debug "${FUNCNAME} $*"
   run cf create-space -o ${org} ${space}
   run cf target -o ${org} -s ${space}
 }
 
 ################################################################################
-# Variables
+# Variables & Init
 ################################################################################
- 
 declare -a services apps spaces
 declare \
   apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
@@ -429,7 +451,6 @@ mkdir -p ${apps_path} && cd ${apps_path}
 ################################################################################
 # Main
 ################################################################################
-
 parse::args "$@"
 
 cf::login ${env}
