@@ -119,7 +119,7 @@ apps::test::spaces() {
 
 service::plans() {
   local service=$1
-  cf curl "/v3/service_plans?names=${service}" | jq -r '.resources[].name'
+  cf curl "/v3/service_plans?service_offering_names=${service}" | jq -r '.resources[].name'
 }
 
 service::instances() {
@@ -131,7 +131,7 @@ service::instances() {
 
 service::plan::guid() {
   local service=$1 plan=$2
-  cf curl "/v3/service_plans?names=${service}" |
+  cf curl "/v3/service_plans?service_offering_names=${service}" |
     jq -r '.resources[] | select(.name == "${plan}") | .guid'
 }
 
