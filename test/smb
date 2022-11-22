@@ -53,27 +53,27 @@ parse::args() {
   do
     _action="${1}" ; shift
     case ${_action} in
-      (-p|--password)
-        password="${1}"
-        shift || fail "password cannot be empty"
-        ;;
-      (-u|--username)
+      (-u|--username|username)
         username="${1}" 
         shift || fail "username cannot be empty"
         ;;
-      (-s|--service)
+      (-p|--password|password)
+        password="${1}"
+        shift || fail "password cannot be empty"
+        ;;
+      (-s|--service|service)
         service_name="${1}"
         shift || fail "service name cannot be empty"
         ;;
-      (-a|--app)
+      (-a|--app|app)
         app_name="${1}"
         shift || fail "app name cannot be empty"
         ;;
-      (-e|--env)
+      (-e|--env|env)
         env_name=( "${1//.yml}" )
         shift || fail "environment name cannot be empty"
         ;;
-      (-m|--mount)
+      (-m|--mount|mount)
         mount_path="${1}"
         shift || fail "mounting target cannot be empty"
         ;;
