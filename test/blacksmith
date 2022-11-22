@@ -17,9 +17,9 @@ fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 run() { echo -e "\$ $*"; "$@"; }
 
-_debug() { [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2 ; }
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "$*" >&2 ; }
 
-_usage() {
+usage() {
   fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
@@ -89,16 +89,16 @@ app::push() {
 }
 
 apps::push() {
-  for svc in ${services[@]}
-  do app::push ${svc}
+  for service in ${services[@]}
+  do app::push ${service}
   done
 }
 
 apps::delete() {
-  for svc in ${services[@]}
+  for service in ${services[@]}
   do 
     for index in a b
-    do run cf delete -f test-${svc}-app-${index}
+    do run cf delete -f test-${service}-app-${index}
     done
   done
 }
@@ -116,11 +116,17 @@ apps::test() {
   test::${service} ${service_instance}
 }
  
-apps::test::spaces() {
+apps::test::plans() {
   local service=$1
   local plans=($( service::plans ${service} ))
   for plans in ${plans[@]}
   do apps::test ${space} ${service} ${plan}
+  done
+}
+
+apps:test::services() {
+  for service in ${services[@]}
+  do apps::test::plans ${service}
   done
 }
 
@@ -181,30 +187,30 @@ service::plans::unbind() {
 }
 
 services::create() {
-  local svc
-  for svc in ${services[@]}
-  do service::plans::create ${svc}
+  local service
+  for service in ${services[@]}
+  do service::plans::create ${service}
   done
 }
 
 services::delete() {
-  local svc
-  for svc in ${services[@]}
-  do service::plans::delete ${svc}
+  local service
+  for service in ${services[@]}
+  do service::plans::delete ${service}
   done
 }
 
 services::bind() {
-  local svc
-  for svc in ${services[@]}
-  do service::plans::bind ${svc}
+  local service
+  for service in ${services[@]}
+  do service::plans::bind ${service}
   done
 }
 
 services::unbind() {
-  local svc
-  for svc in ${services[@]}
-  do service::plans::unbind ${svc}
+  local service
+  for service in ${services[@]}
+  do service::plans::unbind ${service}
   done
 }
 
@@ -440,12 +446,12 @@ case ${action} in
     apps::push
     ;;
   (apps-test)
-    apps::test
+    apps::test::services
     ;;
   (apps-delete)
     apps::delete
     ;;
-  (*) _usage ;;
+  (*) usage ;;
 esac
  
 exit 0
