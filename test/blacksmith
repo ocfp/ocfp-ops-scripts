@@ -9,6 +9,9 @@
 # party....
 #
 
+# TODO: move commands output to logs file.
+# TODO: print report of passed / failed tests.
+
 ################################################################################
 # Functions
 ################################################################################
@@ -274,6 +277,8 @@ test::rabbitmq() {
   run cf bind-service test-rabbitmq-app-a ${service_instance}
   run cf restage test-rabbitmq-app-a
 
+  # TODO: verify the actual output of the following curl calls.
+
   header "RabbiMQ - Testing Queues - Non TLS"
 
   echo -e "Pinging the rabbitmq app via the app url..."
@@ -361,8 +366,6 @@ test::rabbitmq() {
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
   run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
     -c ${queue}-autoscaler-policy.json
-  
-  rm ${queue}-autoscaler-policy.json
 
   echo -e "Restaging in preparation of testing autoscaling-history..."
   run cf restage test-rabbitmq-app-a
@@ -377,6 +380,8 @@ test::rabbitmq() {
   for i in {1..10}
   do run curl -sk -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
   done
+
+  # TODO: verify the actual output of the following autoscaling-history calls.
   
   echo -e "Monitoring autoscaling-history for 5 minutes..."
   for i in {1..10}
@@ -388,6 +393,8 @@ test::rabbitmq() {
 
   # Cleanup before next test.
   run cf delete-service -f test-rabbitmq-autoscaler
+  
+  rm ${queue}-autoscaler-policy.json
 
   run cf unbind-service test-rabbitmq-app-a ${service_instance}
   run cf unbind-service test-rabbitmq-app-b ${service_instance}
@@ -492,6 +499,8 @@ cf::space::create
 for service in ${services[@]}
 do apps::fetch ${service}
 done
+
+# TODO: maybe add support to create and destroy org space.
 
 case ${action} in
   (services-create)
