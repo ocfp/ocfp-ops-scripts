@@ -242,7 +242,7 @@ services::unbind() {
 
 autoscaler::policy() {
   local queue=$1
-  cat > ${queue}-autoscaler-policy.json <<"EOF"
+  cat > ${queue}-autoscaler-policy.json <<EOF
     {
       "instance_min_count": 1,
       "instance_max_count": 3,
