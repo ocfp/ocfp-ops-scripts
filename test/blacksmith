@@ -386,6 +386,8 @@ test::rabbitmq() {
   done
 
   # Cleanup before next test.
+  run cf delete-service -f test-rabbitmq-autoscaler
+
   run cf unbind-service test-rabbitmq-app-a ${service_instance}
   run cf unbind-service test-rabbitmq-app-b ${service_instance}
 
