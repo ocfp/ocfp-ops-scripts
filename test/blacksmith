@@ -384,6 +384,10 @@ test::rabbitmq() {
     echo -e "Sleeping for 30 seconds..."
     sleep 30
   done
+
+  # Cleanup before next test.
+  run cf unbind-service test-rabbitmq-app-a ${service_instance}
+  run cf unbind-service test-rabbitmq-app-b ${service_instance}
 }
 
 test::redis() {
@@ -446,6 +450,9 @@ test::redis() {
   #   else echo -e "\n- Redis ${cmd} command is enabled"
   #   fi
   # done
+
+  # Cleanup before next test.
+  run cf unbind-service ${app} ${service_instance}
 }
 
 cf::space::create() {
