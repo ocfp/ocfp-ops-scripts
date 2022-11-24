@@ -182,7 +182,7 @@ service::plans::delete() {
   local -a plans=($( service::plans ${service} ))
   for plan in ${plans[@]}
   do
-    run cf delete-service ${service} ${plan} test-${service}-${plan}
+    run cf delete-service -f test-${service}-${plan}
   done
 }
 
@@ -388,6 +388,9 @@ test::rabbitmq() {
   # Cleanup before next test.
   run cf unbind-service test-rabbitmq-app-a ${service_instance}
   run cf unbind-service test-rabbitmq-app-b ${service_instance}
+
+  run cf delete-service-key ${service_instance} rabbitmq-user-a
+  run cf delete-service-key ${service_instance} rabbitmq-user-b
 }
 
 test::redis() {
