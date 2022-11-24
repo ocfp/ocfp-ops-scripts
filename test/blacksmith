@@ -116,7 +116,8 @@ apps::delete() {
 
 apps::app::uri() {
   debug "${FUNCNAME} $*"
-  local app=$1 app_guid=$( cf app ${app} --guid )
+  local app_name=$1
+  local app_guid=$( cf app ${app_name} --guid )
   cf curl /v3/apps/${app_guid}/env |
     jq -r '.application_env_json.VCAP_APPLICATION.application_uris[0]'
 }
@@ -242,20 +243,20 @@ services::unbind() {
 autoscaler::policy() {
   cat > ${queue}-autoscaler-policy.json <<"EOF"
     {
-      instance_min_count: 1,
-      instance_max_count: 3,
-      scaling_rules: [
+      "instance_min_count": 1,
+      "instance_max_count": 3,
+      "scaling_rules": [
         {
-          metric_type: "${queue}_messages_ready",
-          threshold: 1,
-          operator: ">",
-          adjustment: "+1"
+          "metric_type": "${queue}_messages_ready",
+          "threshold": 1,
+          "operator": ">",
+          "adjustment": "+1"
         },
         {
-          metric_type: "${queue}_messages_ready",
-          threshold: 2,
-          operator: "<",
-          adjustment: "-1"
+          "metric_type": "${queue}_messages_ready",
+          "threshold": 2,
+          "operator": "<",
+          "adjustment": "-1"
         }
       ]
     }
@@ -266,8 +267,11 @@ test::rabbitmq() {
   debug "${FUNCNAME} $*"
   local \
     service_instance=$1 \
-    app=$( apps::app::uri test-rabbitmq-app-a ) \
-    queue=test_rabbit_queue 
+    app="https://$( apps::app::uri test-rabbitmq-app-a )" \
+    queue=test_rabbit_queue
+  
+  run cf bind-service test-rabbitmq-app-a ${service_instance}
+  run cf restage test-rabbitmq-app-a
 
   header "RabbiMQ - Testing Queues - Non TLS"
 
@@ -278,7 +282,7 @@ test::rabbitmq() {
   run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
   echo -e "\nListing queues..."
-  run curl ${app}/queues
+  run curl -sk ${app}/queues
 
   echo -e "\nInserting a message into queue ${queue}..."
   run curl -sk -X PUT ${app}/queue/${queue} -d 'data=hello'
@@ -288,7 +292,7 @@ test::rabbitmq() {
 
   header "RabbitMQ - Testing Queues - Enabling TLS for the app"
 
-  cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
+  run cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
   run cf restage test-rabbitmq-app-a
 
   header "RabbitMQ - Testing Queues - TLS"
@@ -351,10 +355,13 @@ test::rabbitmq() {
 
   header "RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
 
+  autoscaler::policy
+  
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
-
   run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
     -c ${queue}-autoscaler-policy.json
+  
+  rm ${queue}-autoscaler-policy.json
 
   echo -e "Restaging in preparation of testing autoscaling-history..."
   run cf restage test-rabbitmq-app-a
@@ -367,7 +374,7 @@ test::rabbitmq() {
 
   echo -e "Inserting 10 messages into the queue '${queue}'..."
   for i in {1..10}
-  do run curl -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
+  do run curl -sk -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
   done
   
   echo -e "Monitoring autoscaling-history for 5 minutes..."
@@ -417,25 +424,28 @@ test::redis() {
 
   header "Redis - Testing Disabled Commands"
 
-  redis_ip=$(
-  cf curl /v3/apps/${app_guid}/env |
-    jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.host'
-  )
+  # TODO: bypass the network limitations with direct SSH commands.
+  echo -e "SKIP: Test disabled due to network connectivity limitations."
 
-  redis_password=$(
-  cf curl /v3/apps/${app_guid}/env |
-    jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.password'
-  )
+  # redis_ip=$(
+  # cf curl /v3/apps/${app_guid}/env |
+  #   jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.host'
+  # )
 
-  cmds=( CONFIG SAVE BGSAVE DEBUG SHUTDOWN SLAVEOF SYNC ACL )
-  for cmd in ${cmds[@]}
-  do
-    response=$(redis-cli -h ${redis_ip} -p 6379 ${cmd} -a ${redis_password})
-    if [[ ${response} =~ *ERR* ]]
-    then echo -e "\n- Redis ${cmd} command is disabled"
-    else echo -e "\n- Redis ${cmd} command is enabled"
-    fi
-  done
+  # redis_password=$(
+  # cf curl /v3/apps/${app_guid}/env |
+  #   jq -r '.system_env_json.VCAP_SERVICES.redis[0].credentials.password'
+  # )
+
+  # cmds=( CONFIG SAVE BGSAVE DEBUG SHUTDOWN SLAVEOF SYNC ACL )
+  # for cmd in ${cmds[@]}
+  # do
+  #   response=$(redis-cli -h ${redis_ip} -p 6379 ${cmd} -a ${redis_password})
+  #   if [[ ${response} =~ *ERR* ]]
+  #   then echo -e "\n- Redis ${cmd} command is disabled"
+  #   else echo -e "\n- Redis ${cmd} command is enabled"
+  #   fi
+  # done
 }
 
 cf::space::create() {
