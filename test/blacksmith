@@ -241,6 +241,7 @@ services::unbind() {
 }
 
 autoscaler::policy() {
+  local queue=$1
   cat > ${queue}-autoscaler-policy.json <<"EOF"
     {
       "instance_min_count": 1,
@@ -355,7 +356,7 @@ test::rabbitmq() {
 
   header "RabbitMQ - Testing Queues - Autoscaling based on Queue Depth"
 
-  autoscaler::policy
+  autoscaler::policy ${queue}
   
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
   run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
