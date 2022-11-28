@@ -11,11 +11,12 @@ USAGE
 
 WHERE <cmd> IN
 
-  init-pg     - Initializes pg database servers from vault data, updates env vault
-  init-env    - Generates a kit env file from template via vault data
-  init-config - Generates bosh config files for an env from templates via vault data
-  init        - asgs|bastion|domains|isosegs|tcp
-  test        - c2c|blacksmith|nfs|smb
+  init pg     - Initializes pg database servers from vault data, updates env vault
+  init env    - Generates a kit env file from template via vault data
+  init config - Generates bosh config files for an env from templates via vault data
+
+  init <asgs|bastion|domains|isosegs|tcp> - Initializes specific features
+  test <c2c|blacksmith|nfs|smb>           - Tests specific features
 
 WHERE init-{pg,env,config} <args> IN
 
@@ -323,6 +324,15 @@ _test() {
 
 init() {
   case "$1" in 
+    (pg)
+      init::pg "$@"
+      ;;
+    (env)
+      init::env "$@"
+      ;;
+    (config)
+      init::config "$@"
+      ;;
     (asgs)
       bash "${scripts_path}/init/asgs" "${@:2}"
       ;;
@@ -360,11 +370,8 @@ if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
 if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
-  (init-pg)     init::pg     "$@" ;;
-  (init-env)    init::env    "$@" ;;
-  (init-config) init::config "$@" ;;
-  (test)        _test        "$@" ;;
-  (init)        init         "$@" ;;
-  (*) usage ;;
+  (test) _test "$@" ;;
+  (init) init  "$@" ;;
+  (*)    usage      ;;
 esac
 

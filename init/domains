@@ -2,7 +2,7 @@
 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
-do() { echo -e "\$ $*"; "$@"; }
+run()  { echo -e "\e[32m\$\e[0m $*"; "$@"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
@@ -79,7 +79,7 @@ debug "env_name: ${env_name}, vault_prefix: ${vault_prefix}, vault_path: ${vault
 cf::login ${env_name}
 
 echo -e "[BEFORE] Domains for ${env_name}:"
-cf domains
+run cf domains
 
 echo -e "Checking apps.internal..."
 apps_internal_domain=$(
@@ -92,7 +92,7 @@ then
   echo -e "[\e[32mOK\e[0m] apps.internal exists for ${env_name}!"
 else
   echo -e "Creating apps.internal for ${env_name}..."
-  cf create-shared-domain apps.internal --internal
+  run cf create-shared-domain apps.internal --internal
 fi
 
 echo -e "Checking tcp.${apps_domain}..."
@@ -105,10 +105,10 @@ then
   echo -e "[\e[32mOK\e[0m] apps.internal exists for ${env_name}!"
 else
   echo -e "Creating tcp.${apps_domain} for ${env_name}..."
-  cf create-shared-domain "tcp.${apps_domain}" --router-group default-tcp
+  run cf create-shared-domain "tcp.${apps_domain}" --router-group default-tcp
 fi
 
 echo -e "[AFTER] Domains for ${env_name}:"
-cf domains
+run cf domains
 
 exit 0
