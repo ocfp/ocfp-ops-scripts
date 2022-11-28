@@ -49,6 +49,7 @@ cf::login() {
   ( cd ~/deployments/cf
     genesis ${env} do login
   ) || fail "Failed to login to ${env}!"
+  run cf target -o system
 }
 
 vault::handshake() {
