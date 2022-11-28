@@ -34,7 +34,6 @@ args::parse() {
         usage
         ;;
     esac
-    shift
   done
 
   [[ -n ${env_name:-} ]] || usage
