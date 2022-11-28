@@ -31,11 +31,8 @@ args::parse() {
       (-d|--debug)
         DEBUG=1
         ;;
-      (-*) 
-        fail "Unknown option: $1"
-        ;;
       (*) 
-        usage
+        fail "Unknown option: $1"
         ;;
     esac
   done
