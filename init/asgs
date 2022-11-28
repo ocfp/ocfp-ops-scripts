@@ -11,6 +11,7 @@ usage() {
 }
 
 args::parse() {
+  debug "${FUNCNAME[0]}: $*"
   local action
 
   while [[ $# -gt 0 ]]; do
@@ -40,6 +41,7 @@ args::parse() {
 }
 
 cf::login() {
+  debug "${FUNCNAME[0]}: $*"
   local env=$1
   ( cd ~/deployments/cf
     genesis ${env} do login

@@ -40,7 +40,10 @@ exit 0
 
 fail() { echo -e "$*" >&2 ; exit 1 ; }
 
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
 parse::args() {
+  debug "${FUNCNAME[0]}: $*"
   local _action
 
   while [[ $# > 0 ]]
@@ -124,12 +127,14 @@ parse::args() {
 }
 
 set::vault::paths() {
+  debug "${FUNCNAME[0]}: $*"
   local _env_path="${OCFP_ENV_NAME//-/\/}"
   export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
   export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
 }
 
 set::env::type() {
+  debug "${FUNCNAME[0]}: $*"
   case "${OCFP_ENV_NAME}" in
     (*-mgmt-*) env_type="mgmt" ;;
     (*)        env_type="ocf"  ;;
@@ -138,11 +143,13 @@ set::env::type() {
 }
 
 init::pg() {
+  debug "${FUNCNAME[0]}: $*"
   echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
   bash "${scripts_path}/templates/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
 }
 
 init::env() {
+  debug "${FUNCNAME[0]}: $*"
   local _src_path _dst_path
   if [[ -s ${OCFP_ENV_NAME}.yml ]] 
   then fail "ERROR: ${OCFP_ENV_NAME}.yml already exists, rename it and re-run."
@@ -173,6 +180,7 @@ init::env() {
 }
 
 init::config::cloud() {
+  debug "${FUNCNAME[0]}: $*"
   local _config_path="${scripts_path}/templates/configs/${config_type}/${OCFP_IAAS}"
   local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
   local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
@@ -226,6 +234,7 @@ init::config::cloud() {
 }
 
 init::config::cpi() {
+  debug "${FUNCNAME[0]}: $*"
   local _src_path _dst_path
 
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
@@ -275,6 +284,7 @@ init::config::cpi() {
 }
 
 init::config() {
+  debug "${FUNCNAME[0]}: $*"
   case "${OCFP_KIT}" in
     (bosh)
       case "${OCFP_IAAS}" in
@@ -303,6 +313,7 @@ init::config() {
 }
 
 _test() {
+  debug "${FUNCNAME[0]}: $*"
   case "$1" in 
     (c2c)
       bash "${scripts_path}/test/c2c" "${@:2}"
@@ -323,6 +334,7 @@ _test() {
 }
 
 init() {
+  debug "${FUNCNAME[0]}: $*"
   case "$1" in 
     (pg)
       init::pg "$@"
@@ -354,6 +366,8 @@ init() {
   esac
 }
 
+export DEBUG
+
 scripts_path="$(dirname "${0}")"
 
 cmd=$1 ; shift || usage
@@ -367,7 +381,7 @@ set::env::type
 set::vault::paths # Sets vault paths for the main script level
 
 if [[ -n ${VAULT_NAMESPACE} ]] ; then export VAULT_NAMESPACE ; fi
-if [[ -n ${VAULT_VERSION} ]] ; then export VAULT_VERSION ; fi
+if [[ -n ${VAULT_VERSION} ]]   ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
   (test) _test "$@" ;;
