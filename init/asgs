@@ -119,11 +119,14 @@ cf create-security-group default_running /dev/stdin <<-'EOF'
 ]
 EOF
 
-echo -e 'Binding ASGs to running and staging...'
+echo -e "\n[BEFORE] Application Security Groups (ASGS)..."
+run cf security-groups
+
+echo -e "\nBinding ASGs to running and staging..."
 run cf bind-running-security-group default_running
 run cf bind-staging-security-group all_open
 
-echo -e 'Unbinding default ASGs: public_networks, dns from staging & running...'
+echo -e "\nUnbinding default ASGs: public_networks, dns from staging & running..."
 
 run cf unbind-staging-security-group public_networks
 run cf unbind-staging-security-group dns
@@ -131,8 +134,11 @@ run cf unbind-staging-security-group dns
 run cf unbind-running-security-group public_networks
 run cf unbind-running-security-group dns
 
-echo -e "Deleting default ASGs: public_networks, dns..."
+echo -e "\nDeleting default ASGs: public_networks, dns..."
 run cf delete-security-group public_networks -f
 run cf delete-security-group dns -f
+
+echo -e '\n[AFTER] Application Security Groups (ASGS)...'
+run cf security-groups
 
 exit 0
