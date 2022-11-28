@@ -2,7 +2,7 @@
 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
-do() { echo -e "\$ $*"; "$@"; }
+run() { echo -e "\$ $*"; "$@"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 

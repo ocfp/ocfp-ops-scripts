@@ -2,7 +2,7 @@
 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
-do() { echo -e "\$ $*"; "$@"; }
+run() { echo -e "\$ $*"; "$@"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
@@ -120,19 +120,19 @@ cf create-security-group default_running /dev/stdin <<-'EOF'
 EOF
 
 echo -e 'Binding ASGs to running and staging...'
-cf bind-running-security-group default_running
-cf bind-staging-security-group all_open
+run cf bind-running-security-group default_running
+run cf bind-staging-security-group all_open
 
 echo -e 'Unbinding default ASGs: public_networks, dns from staging & running...'
 
-cf unbind-staging-security-group public_networks
-cf unbind-staging-security-group dns
+run cf unbind-staging-security-group public_networks
+run cf unbind-staging-security-group dns
 
-cf unbind-running-security-group public_networks
-cf unbind-running-security-group dns
+run cf unbind-running-security-group public_networks
+run cf unbind-running-security-group dns
 
 echo -e "Deleting default ASGs: public_networks, dns..."
-cf delete-security-group public_networks -f
-cf delete-security-group dns -f
+run cf delete-security-group public_networks -f
+run cf delete-security-group dns -f
 
 exit 0
