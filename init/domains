@@ -78,14 +78,37 @@ debug "env_name: ${env_name}, vault_prefix: ${vault_prefix}, vault_path: ${vault
 
 cf::login ${env_name}
 
+echo -e "[BEFORE] Domains for ${env_name}:"
 cf domains
 
-cf create-shared-domain apps.internal --internal
+echo -e "Checking apps.internal..."
+apps_internal_domain=$(
+  cf curl /v3/domains |
+    jq -r '.resources[] | select(.name | contains("apps.internal")) | .name'
+)
 
-cf domains
+if [[ ${apps_internal_domain} == "apps.internal" ]]
+then
+  echo -e "[\e[32mOK\e[0m] apps.internal exists for ${env_name}!"
+else
+  echo -e "Creating apps.internal for ${env_name}..."
+  cf create-shared-domain apps.internal --internal
+fi
 
-cf create-shared-domain "tcp.${apps_domain}" --router-group default-tcp
+echo -e "Checking tcp.${apps_domain}..."
+tcp_domain=$(
+  cf curl /v3/domains |
+    jq -r '.resources[] | select(.name | contains("tcp.'${apps_domain}'")) | .name'
+)
+if [[ ${apps_internal_domain} == "apps.internal" ]]
+then
+  echo -e "[\e[32mOK\e[0m] apps.internal exists for ${env_name}!"
+else
+  echo -e "Creating tcp.${apps_domain} for ${env_name}..."
+  cf create-shared-domain "tcp.${apps_domain}" --router-group default-tcp
+fi
 
+echo -e "[AFTER] Domains for ${env_name}:"
 cf domains
 
 exit 0
