@@ -19,10 +19,10 @@ WHERE <cmd> IN
 
 WHERE init-{pg,env,config} <args> IN
 
-  region <region> # Required
+  region <region> # Required (except test|init)
   kit <kit-name>  # Required, bosh, vault, jumpbox, cf, blacksmith, shield,
                               autoscaler, scheduler, concourse
-  name <env-name> # Required, Ex: ocfp-demo-mgmt-us-east-1, ocfp-demo-us-east-1
+  env <env-name> # Required, Ex: ocfp-demo-mgmt-us-east-1, ocfp-demo-us-east-1
   vault-prefix "secret/...." # Optional, overrides default 'secret/'
 
 NOTES
@@ -31,9 +31,6 @@ NOTES
     -> ${0#ocfp}.
 
   Default templates can be enhanced/replaced for environment specific context.
-
-  Ex: A bosh kit env template will be located at:
-    -> ${templates_path}/env/bosh
 
 EOT
 )"
@@ -141,7 +138,7 @@ set::env::type() {
 
 init::pg() {
   echo -e "Initializing PG databases for env...\n\t-> ${OCFP_ENV_NAME}.yml"
-  bash "${templates_path}/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
+  bash "${scripts_path}/templates/pg/init" env "${OCFP_ENV_NAME}" kit "${OCFP_KIT}" region "${OCFP_REGION}"
 }
 
 init::env() {
@@ -170,14 +167,14 @@ init::env() {
   fi
 
   echo -e "Generating Genesis Env File From Kit Template...\n\t-> ${OCFP_ENV_NAME}.yml"
-  bash "${templates_path}/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
+  bash "${scripts_path}/templates/env/${OCFP_KIT}" > ${OCFP_ENV_NAME}.yml
   exit $?
 }
 
 init::config::cloud() {
-  local _config_path="${templates_path}/configs/${config_type}/${OCFP_IAAS}"
-  local _meta="${templates_path}/configs/${config_type}/meta.yml"
-  local _meta_prune="${templates_path}/configs/meta-prune.yml"
+  local _config_path="${scripts_path}/templates/configs/${config_type}/${OCFP_IAAS}"
+  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
+  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
 
   echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
@@ -188,7 +185,7 @@ init::config::cloud() {
 
   _merge=(
     "${_meta}"
-    "${templates_path}/configs/cloud/meta/${env_type}.yml"
+    "${scripts_path}/templates/configs/cloud/meta/${env_type}.yml"
     "${_config_path}/scale/${env_type}.yml"
     "${_config_path}/${env_type}.yml"
   )
@@ -212,7 +209,7 @@ init::config::cloud() {
 
       _m=(
       "${_meta}"
-      "${templates_path}/configs/cloud/meta/ocf.yml"
+      "${scripts_path}/templates/configs/cloud/meta/ocf.yml"
       "${_config_path}/azs/ocf.yml"
       "${_config_path}/networks/ocf-bosh.yml"
       "${_meta_prune}"
@@ -234,10 +231,10 @@ init::config::cpi() {
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
 
   local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-  local _config_path="${templates_path}/configs/${config_type}"
+  local _config_path="${scripts_path}/templates/configs/${config_type}"
   local _template="${_config_path}/${env_type}.yml"
-  local _meta="${templates_path}/configs/${config_type}/meta.yml"
-  local _meta_prune="${templates_path}/configs/meta-prune.yml"
+  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
+  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
 
   echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
 
@@ -307,16 +304,16 @@ init::config() {
 _test() {
   case "$1" in 
     (c2c)
-      bash "${templates_path/\/templates*}/test/c2c" "${@:2}"
+      bash "${scripts_path}/test/c2c" "${@:2}"
       ;;
     (blacksmith)
-      bash "${templates_path/\/templates*}/test/blacksmith" "${@:2}"
+      bash "${scripts_path}/test/blacksmith" "${@:2}"
       ;;
     (nfs)
-      bash "${templates_path/\/templates*}/test/nfs" "${@:2}"
+      bash "${scripts_path}/test/nfs" "${@:2}"
       ;;
     (smb)
-      bash "${templates_path/\/templates*}/test/smb" "${@:2}"
+      bash "${scripts_path}/test/smb" "${@:2}"
       ;;
     (*)
       fail "Usage: ${0//*\/} test {c2c}"
@@ -327,19 +324,19 @@ _test() {
 init() {
   case "$1" in 
     (asgs)
-      bash "${templates_path/\/templates*}/test/asgs" "${@:2}"
+      bash "${scripts_path}/init/asgs" "${@:2}"
       ;;
     (bastion)
-      bash "${templates_path/\/templates*}/test/bastion" "${@:2}"
+      bash "${scripts_path}/init/bastion" "${@:2}"
       ;;
     (domains)
-      bash "${templates_path/\/templates*}/test/domains" "${@:2}"
+      bash "${scripts_path}/init/domains" "${@:2}"
       ;;
     (isosegs)
-      bash "${templates_path/\/templates*}/test/isosegs" "${@:2}"
+      bash "${scripts_path}/init/isosegs" "${@:2}"
       ;;
     (tcp)
-      bash "${templates_path/\/templates*}/test/tcp" "${@:2}"
+      bash "${scripts_path}/init/tcp" "${@:2}"
       ;;
     (*)
       fail "Usage: ${0//*\/} init asgs|bastion|domains|isosegs|tcp"
@@ -347,7 +344,7 @@ init() {
   esac
 }
 
-templates_path="${0%\/ocfp}/templates"
+scripts_path="$(dirname "${0}")"
 
 cmd=$1 ; shift || usage
 
