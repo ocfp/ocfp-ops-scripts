@@ -68,8 +68,6 @@ bosh::vaildate::environment() {
 
 declare env_name env_file
 
-bosh::validate::environment
-
 cf::login "${env_name}"
 
 env_file=".genesis/manifests/${env_name}.yml" 
