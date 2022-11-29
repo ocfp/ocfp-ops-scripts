@@ -97,7 +97,7 @@ parse::args() {
       (asgs|bastion|domains|isosegs|tcp) # Short circuit for init
         return 0
         ;;
-      (c2c|blacksmith) # Short circuit for tests.
+      (c2c|blacksmith|nfs|smb) # Short circuit for tests.
         return 0
         ;;
       (*)
