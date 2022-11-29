@@ -127,10 +127,10 @@ test::smb::service() {
 
   cell_name=$(
     gb ips ${env_name} -cf --json 2>/dev/null |
-      jq -r '.Tables[].Rows[] | select(.ips | contains("'${cell_ip}'")) | .name'
+      jq -r '.Tables[].Rows[] | select(.ips | contains("'${cell_ip}'")) | .instance'
   )
 
-  echo "\nChecking if ${smb_mount_path} exists in ${cell_name}..."
+  echo -e "\nChecking if ${smb_mount_path} exists in ${cell_name}..."
 
   gb s ${env_name} -cf ${cell_name} -c "cat ${smb_mount_path}/*/*"
 }
