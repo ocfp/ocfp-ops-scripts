@@ -33,7 +33,7 @@ parse::args() {
         ;;
       (vault-prefix)
         export OCFP_VAULT_PREFIX="${1}" # override default of secret/
-        shift || fail "${0//*/} ... vault-prefix \"secret/...\""
+        shift 2 || fail "${0//*/} ... vault-prefix \"secret/...\""
         ;;
       (*)
         fail "Unknown arg: '$1'\nUsage: env <name> space <name> [space <name>...] <cmd>"
