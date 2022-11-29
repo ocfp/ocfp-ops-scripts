@@ -166,7 +166,7 @@ case ${action} in
     app::test
     ;;
   (app-delete)
-    apps::delete
+    app::delete
     ;;
   (*) usage ;;
 esac
