@@ -81,6 +81,9 @@ parse::args() {
         ;;
     esac
   done
+
+  [[ -n ${env_name} ]]   || fail "... env <name>"
+  [[ -n ${#spaces[@]} ]] || fail "At least one space must be given."
 }
 
 app::create::bind::smb() {
@@ -145,7 +148,7 @@ clean::up() {
 
     run cf target -o system -s ${space}
 
-    run cf delete-service ${service_name}
+    run cf delete-service ${service_name} -f
 
     run cf delete ${app_name} -f
   done
