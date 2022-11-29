@@ -76,7 +76,7 @@ bosh::validate::environment
 
 cf::login "${env_name}"
 
-env_file=".genesis/manifests/${env_name}.yml" 
+env_file="${bosh_path}/.genesis/manifests/${env_name}.yml" 
 [[ -s ${env_file} ]] ||
   fail "${env_name} needs to be deployed first."
 
