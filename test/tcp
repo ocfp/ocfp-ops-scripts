@@ -27,6 +27,10 @@ parse::args() {
   while [[ $# > 0 ]]
   do
     case $1 in
+      (app-push|app-test|app-delete)
+        action=$1
+        shift
+        ;;
       (e|env)
         env=$2
         shift 2 || fail "Usage: ...env <name>"
