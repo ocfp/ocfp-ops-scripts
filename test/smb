@@ -112,6 +112,7 @@ test::smb::service() {
   header "Testing SMB"
 
   declare -a instances ips
+
   local app_guid app_process_0 cell_ip
 
   app_guid=$(cf app ${app_name} --guid)
@@ -155,7 +156,7 @@ test::spaces() {
 
   run cd ${apps_path}/${archive/.zip}/assets/pora
 
-  sed -i 's/go_buildpack/go_buildpack_current/' manifest.yml
+  sed -i 's/ go_buildpack$/ go_buildpack_current/' manifest.yml
 
   for space in ${spaces[@]}
   do
