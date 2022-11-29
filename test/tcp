@@ -106,6 +106,7 @@ app::test() {
   debug "${FUNCNAME} $*"
 
   apps_domain=$(apps::domain test-${service}-app)
+  debug "apps_domain: ${apps_domain}"
 
   run cf map-route test-${service}-app tcp.${apps_domain}
 
