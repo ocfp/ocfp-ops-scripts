@@ -165,7 +165,7 @@ test::spaces() {
 
   apps::fetch 
 
-  run cd ${apps_path}/${archive/.zip}
+  run cd ${apps_path}/${archive/.zip}/assets/pora
 
   sed -i 's/go_buildpack/go_buildpack_current/' manifest.yml
 
