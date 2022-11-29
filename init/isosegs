@@ -41,9 +41,12 @@ args::parse() {
 
 cf::login() {
   debug "${FUNCNAME[0]}: $*"
+
   ( cd ~/deployments/cf
     genesis ${env_name} do login
   ) || fail "Failed to login to ${env_name}!"
+
+  cf target -o system -s ops
 }
 
 bosh::validate::environment() {
