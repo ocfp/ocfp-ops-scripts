@@ -87,22 +87,20 @@ app::create::bind::smb() {
   debug "${FUNCNAME} $*"
   echo " creating smb service ${service_name} and mounting ${mount_path} "
 
-  mkdir -p ~/tmp/test/smb
-
-  echo "{\"share\":\"${mount_path}\"}" >
-    ~/tmp/test/smb/${service_name}-config.json
+  echo "{\"share\":\"${mount_path}\"}" \
+    > ${service_name}-config.json
 
   cf create-service smb Existing ${service_name} \
-    -c ~/tmp/test/smb/${service_name}-config.json
+    -c ${service_name}-config.json
 
   echo " binding service ${service_name} to ${app_name} "
 
-  echo "{\"username\":\"${username}\",\"password\":\"${password}\"}" >
-    ~/tmp/test/smb/${service_name}-creds.json
+  echo "{\"username\":\"${username}\",\"password\":\"${password}\"}" \
+    > ${service_name}-creds.json
 
-  cf bind-service ${app_name} ${service_name} -c ~/tmp/test/smb/${service_name}-creds.json
+  cf bind-service ${app_name} ${service_name} -c ${service_name}-creds.json
 
-  rm -rf ~/tmp/test/smb/
+  rm -f ${service_name}-creds.json
 
   echo " restaging app ${app_name}"
 
@@ -213,7 +211,6 @@ declare \
   apps_path="${OCFP_PROJECT_PATH:-${HOME}/apps}" \
   org=system \
   action
-
 
 mkdir -p ${apps_path} && cd ${apps_path}
 
