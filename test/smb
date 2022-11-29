@@ -35,8 +35,8 @@ WHERE test-service <args> IN
   -e|--env <name>          # Required 
   -s|--space <name>        # Required 
   -m|--mount <targets>     # Required
-  -p|--password <password> # Required for nfs-ldap
-  -u|--username <username> # Required for nfs-ldap
+  -p|--password <password> # Required for smb
+  -u|--username <username> # Required for smb
 
 PRE-REQUISITES
 
@@ -140,6 +140,9 @@ clean::up() {
 
   for space in ${spaces[@]}
   do
+    service_name="smb-${space}"
+    app_name="pora-smb-${space}"
+
     run cf target -o system -s ${space}
 
     run cf delete-service ${service_name}

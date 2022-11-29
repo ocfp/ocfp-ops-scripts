@@ -152,6 +152,9 @@ clean::up() {
 
   for space in ${spaces[@]}
   do
+    service_name="nfs-ldap-${space}"
+    app_name="pora-nfs-ldap-${space}"
+
     run cf target -o system -s ${space}
 
     run cf delete-service ${service_name}
