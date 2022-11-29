@@ -6,6 +6,8 @@ fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
+run() { echo -e "\e[32m$*\e[0m" ; "$@" ; }
+
 header() {
   local token="=" line=$(printf "${token}%.0s" {1..80})
   echo -e "\n${line}\n${token} $*\n${line}"
@@ -20,28 +22,22 @@ USAGE
 
 WHERE <task> IN
 
-  create-bind-service - creates a service intance and binds it to an app
-  test-service        - checks if the mounting shares exist in the vm
+  test-space - loop over the spaces provided
+  clean-up   - clean up service, app, and space created during testing
 
-WHERE create-bind-service <args> IN
+WHERE clean-up <args> IN
 
-  -a|--app  <app-name>          # Required
-  -s|--service <service-name>   # Required 
-  -m|--mount <mounting targets> # Required
-  -p|--password <password>      # Required
-  -u|--username <username>      # Required
+  -s|--space <name>  # Required 
 
 WHERE test-service <args> IN
-  -e|--env <env-name>    # Required 
-  -a|--app  <app-name>   # Required
+
+  -e|--env <name>          # Required 
+  -s|--space <name>        # Required 
+  -m|--mount <targets>     # Required
+  -p|--password <password> # Required for nfs-ldap
+  -u|--username <username> # Required for nfs-ldap
 
 PRE-REQUISITES
-
-  APP has already been pushed
-  
-  login cf
- 
-  targeting at an org and a space e.g., cf target -o <org_name> -s <space_name>
 
   For services in isolation-segments, segments have been created, enabled segments to orgs and spaces.
 
@@ -57,6 +53,17 @@ parse::args() {
   do
     _action="${1}" ; shift
     case ${_action} in
+      (-e|--env|env)
+        env_name=( "${1//.yml}" )
+        shift || fail "environment name cannot be empty" ;;
+      (-s|--space|space)
+        spaces+=("${1}")
+        shift || fail "service name cannot be empty"
+        ;;
+      (-m|--mount|mount)
+        mount_path="${1}"
+        shift || fail "mount target cannot be empty"
+        ;;
       (-u|--username|username)
         username="${1}" 
         shift || fail "username cannot be empty"
@@ -65,30 +72,17 @@ parse::args() {
         password="${1}"
         shift || fail "password cannot be empty"
         ;;
-      (-s|--service|service)
-        service_name="${1}"
-        shift || fail "service name cannot be empty"
-        ;;
-      (-a|--app|app)
-        app_name="${1}"
-        shift || fail "app name cannot be empty"
-        ;;
-      (-e|--env|env)
-        env_name=( "${1//.yml}" )
-        shift || fail "environment name cannot be empty"
-        ;;
-      (-m|--mount|mount)
-        mount_path="${1}"
-        shift || fail "mounting target cannot be empty"
-        ;;
-      (--help|-h|*)
+      (--help|-h)
         usage
+        ;;
+      (*)
+        fail "Unknown option: ${_action}"
         ;;
     esac
   done
 }
 
-create::smb() {
+app::create::bind::smb() {
   debug "${FUNCNAME} $*"
   echo " creating smb service ${service_name} and mounting ${mount_path} "
 
@@ -113,7 +107,7 @@ create::smb() {
   cf restage ${app_name}
 }
 
-test::service() {
+test::smb::service() {
   debug "${FUNCNAME} $*"
   header "Testing SMB"
 
@@ -130,41 +124,114 @@ test::service() {
     jq -r '.resources[0].host'
   )
 
-  instances=($(
-    gb i ${env_name} -cf --json | jq -r '.Tables[].Rows[] | .instance,.ips'
-  ))
+  cell_name=$(
+    gb ips ${env_name} -cf --json |
+      jq -r '.Tables[].Rows[] | select(".ips" | contains("'${cell_ip}'")) | .name'
+  )
 
-  ips=($(
-    gb ips ${env_name} -cf --json | jq -r '.Tables[].Rows[].ips'
-  ))
-
-  for (( i=0; i<${#ips[@]}; i++ ))
-  do
-    el=${ips[$i]}
-    if [[ "${el}" == "${cell_ip}" ]]
-    then
-      cell_name=${instances[i]}
-      break
-    fi
-  done
-
-  echo " checking if ${smb_mount_path} exists in ${cell_name} "
+  echo "\nChecking if ${smb_mount_path} exists in ${cell_name}..."
 
   gb s ${env_name} -cf ${cell_name} -c "cat ${smb_mount_path}/*/*"
 }
 
-declare smb_mount_path=/var/vcap/data/volumes/smb
+clean::up() {
+  debug "${FUNCNAME} $*"
+
+  for space in ${spaces[@]}
+  do
+    run cf target -o system -s ${space}
+
+    run cf delete-service ${service_name}
+
+    run cf delete ${app_name} -f
+  done
+}
+
+# NOTE: archive must be in place before the script is called
+test::spaces() {
+  debug "${FUNCNAME} $*"
+
+  local archive="cf-volume-services-acceptance-tests-master.zip"
+
+  apps::fetch 
+
+  cd ${apps_path}/${archive/.zip}
+
+  sed -i 's/go_buildpack/go_buildpack_current/' manifest.yml
+
+  for space in ${spaces[@]}
+  do
+    service_name="smb-${space}"
+    app_name="pora-smb-${space}"
+
+    app::push
+
+    app::create::bind::smb
+
+    test::smb::service
+  done
+
+  clean::up
+}
+
+cf::login() {
+  debug "${FUNCNAME} $*"
+
+  local env=$1
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+}
+ 
+apps::fetch() {
+  debug "${FUNCNAME} $*"
+
+  local archive="cf-volume-services-acceptance-tests-master.zip"
+
+  if [[ ! -d ${apps_path}/${archive/.zip} ]]
+  then
+    if ! [[ -s ${apps_path}/${archive} ]]
+    then
+      ( cd ${apps_path}
+        # curl -sOL ${RMQ_APP_URL}/${archive}
+      )
+    fi
+    ( cd ${apps_path}
+      run unzip /opt/ocfp/apps/${archive}
+    )
+  fi
+}
+
+app::push() {
+  debug "${FUNCNAME} $*"
+
+  run cf target -o system -s ${space}
+
+  run cf push ${app_name} -f manifest.yml
+}
+
+declare -a spaces
+
+declare \
+  smb_mount_path=/var/vcap/data/volumes/smb \
+  org=system \
+  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
+  action
+
+mkdir -p ${apps_path} && cd ${apps_path}
 
 task=$1 ; shift || usage
 
 parse::args "$@"
 
+cf::login ${env}
+
 case ${task} in 
-  (create-bind-service) 
-    create::smb
+  (test-spaces)
+    test::spaces
     ;;
-  (test-service)
-    test::service
+  (clean-up)
+    clean::up
     ;;
   (*)
 		usage
