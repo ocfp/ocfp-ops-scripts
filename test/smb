@@ -188,17 +188,15 @@ apps::fetch() {
 
   local archive="cf-volume-services-acceptance-tests-master.zip"
 
+  cd ${apps_path}
+
   if [[ ! -d ${apps_path}/${archive/.zip} ]]
   then
     if ! [[ -s ${apps_path}/${archive} ]]
-    then
-      ( cd ${apps_path}
-        # curl -sOL ${RMQ_APP_URL}/${archive}
-      )
+    then true # TODO: curl -sOL ${RMQ_APP_URL}/${archive}
     fi
-    ( cd ${apps_path}
-      unzip ${apps_path}/${archive}
-    ) || fail "Unable to unarchive /opt/ocfp/apps/${archive}"
+    unzip ${apps_path}/${archive} ||
+      fail "Unable to unarchive /opt/ocfp/apps/${archive}"
   fi
 }
 
