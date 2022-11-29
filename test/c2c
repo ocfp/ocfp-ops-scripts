@@ -14,7 +14,8 @@ usage() {
 }
 
 header() {
-  local token="=" line=$(printf "${token}%.0s" {1..80})
+  local token="="
+  local line=$(printf "${token}%.0s" {1..80})
   echo -e "\n${line}\n${token} $*\n${line}"
 }
 
