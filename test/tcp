@@ -32,7 +32,7 @@ parse::args() {
         shift
         ;;
       (e|env)
-        env=$2
+        env_name=$2
         shift 2 || fail "Usage: ...env <name>"
         ;;
       (*)
@@ -44,6 +44,8 @@ parse::args() {
 
 cf::login() {
   debug "${FUNCNAME} $*"
+
+  local env=$1
   ( cd ~/deployments/cf
     genesis ${env} do login
   ) || fail "Failed to login to ${env}!"
@@ -150,7 +152,7 @@ mkdir -p ${apps_path} && cd ${apps_path}
 
 parse::args "$@"
 
-cf::login ${env}
+cf::login ${env_name}
 
 cf::space::create
 
