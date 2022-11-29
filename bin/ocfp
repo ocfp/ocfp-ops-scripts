@@ -16,7 +16,7 @@ WHERE <cmd> IN
   init config - Generates bosh config files for an env from templates via vault data
 
   init <asgs|bastion|domains|isosegs|tcp> - Initializes specific features
-  test <c2c|blacksmith|nfs|smb>           - Tests specific features
+  test <c2c|blacksmith|nfs|smb|tcp>       - Tests specific features
 
 WHERE init-{pg,env,config} <args> IN
 
@@ -97,7 +97,7 @@ parse::args() {
       (asgs|bastion|domains|isosegs|tcp) # Short circuit for init
         return 0
         ;;
-      (c2c|blacksmith|nfs|smb) # Short circuit for tests.
+      (c2c|blacksmith|nfs|smb|tcp) # Short circuit for tests.
         return 0
         ;;
       (*)
@@ -314,18 +314,10 @@ init::config() {
 
 _test() {
   debug "${FUNCNAME[0]}: $*"
+
   case "$1" in 
-    (c2c)
-      bash "${scripts_path}/test/c2c" "${@:2}"
-      ;;
-    (blacksmith)
-      bash "${scripts_path}/test/blacksmith" "${@:2}"
-      ;;
-    (nfs)
-      bash "${scripts_path}/test/nfs" "${@:2}"
-      ;;
-    (smb)
-      bash "${scripts_path}/test/smb" "${@:2}"
+    (c2c|blacksmith|nfs|smb|tcp)
+      bash "${scripts_path}/test/${1}" "${@:2}"
       ;;
     (*)
       fail "Usage: ${0//*\/} test {c2c}"
@@ -336,29 +328,11 @@ _test() {
 init() {
   debug "${FUNCNAME[0]}: $*"
   case "$1" in 
-    (pg)
-      init::pg "$@"
+    (pg|env|config)
+      init::${1} "$@"
       ;;
-    (env)
-      init::env "$@"
-      ;;
-    (config)
-      init::config "$@"
-      ;;
-    (asgs)
-      bash "${scripts_path}/init/asgs" "${@:2}"
-      ;;
-    (bastion)
-      bash "${scripts_path}/init/bastion" "${@:2}"
-      ;;
-    (domains)
-      bash "${scripts_path}/init/domains" "${@:2}"
-      ;;
-    (isosegs)
-      bash "${scripts_path}/init/isosegs" "${@:2}"
-      ;;
-    (tcp)
-      bash "${scripts_path}/init/tcp" "${@:2}"
+    (asgs|bastion|domains|isosegs|tcp)
+      bash "${scripts_path}/init/${1}" "${@:2}"
       ;;
     (*)
       fail "Usage: ${0//*\/} init asgs|bastion|domains|isosegs|tcp"

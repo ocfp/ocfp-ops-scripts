@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+
+# ocfp test tcp env <name>
+# TODO: collect and print report of passed / failed tests.
+
+################################################################################
+# Functions
+################################################################################
+fail()  { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+run()   { echo -e "\e[32m\$\e[0m $*"; "$@"; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+usage() {
+  fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
+}
+
+header() {
+  local token="="
+  local line=$(printf "${token}%.0s" {1..80})
+  echo -e "\n${line}\n${token} $*\n${line}"
+}
+
+parse::args() {
+  debug "${FUNCNAME} $*"
+  while [[ $# > 0 ]]
+  do
+    case $1 in
+      (e|env)
+        env=$2
+        shift 2 || fail "Usage: ...env <name>"
+        ;;
+      (vault-prefix)
+        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        shift || fail "${0//*/} ... vault-prefix \"secret/...\""
+        ;;
+      (*)
+        fail "Unknown arg: '$1'\nUsage: env <name> space <name> [space <name>...] <cmd>"
+        ;;
+    esac
+  done
+}
+
+cf::login() {
+  debug "${FUNCNAME} $*"
+  ( cd ~/deployments/cf
+    genesis ${env} do login
+  ) || fail "Failed to login to ${env}!"
+  cf target -o system
+}
+ 
+apps::fetch() {
+  debug "${FUNCNAME} $*"
+
+  cd ${apps_path}
+
+  if [[ ! -d ${apps_path}/${archive/.tar.gz} ]]
+  then
+    if ! [[ -s ${apps_path}/${archive} ]]
+    then true # TODO: curl -sOL ${RMQ_APP_URL}/${archive}
+    fi
+    unzip ${apps_path}/${archive} ||
+      fail "Unable to unarchive ${aps_path}/${archive}"
+  fi
+}
+
+app::push() {
+  debug "${FUNCNAME} $*"
+
+  cd ${apps_path}/${archive/.tar.gz}
+
+  run cf push test-${service}-app --random-route \
+    -p ${apps_path}/${archive/.tar.gz} \
+    -f ${apps_path}/${archive/.tar.gz}/manifest.yml
+}
+
+app::delete() {
+  debug "${FUNCNAME} $*"
+
+  run cf delete -f test-${service}-app
+}
+
+app::port() {
+  debug "${FUNCNAME} $*"
+
+  local app_name=$1
+  local app_guid=$( cf app ${app_name} --guid )
+
+  cf curl /v3/apps/${app_guid}/routes |
+    jq -r '.resources[] | select(.port != null and (.url | contains("tcp"))) | .port'
+}
+ 
+app::test() {
+  debug "${FUNCNAME} $*"
+
+  run cf map-route test-${service}-app tcp.${app_domain}
+
+  port=$(app::port test-${service}-app)
+  debug "port: ${port}"
+
+  response=$(curl -sk tcp.${app_domain}:${port})
+  debug "response: ${response}"
+
+  if [[ ${response} =~ "Cloud Foundry Environment" ]]
+  then echo -e "\e[32m[PASS]\e[0m: Environment received!, test-${service}-app is listening on tcp port ${port}"
+  else echo -e "\e[31m[FAIL]\e[0m: Environment not received! test-${service}-app is NOT listening on tcp port ${port}"
+  fi
+}
+ 
+cf::space::create() {
+  debug "${FUNCNAME} $*"
+  run cf create-space -o ${org} ${space}
+  run cf target -o ${org} -s ${space}
+}
+
+################################################################################
+# Variables & Init
+################################################################################
+declare -a services apps spaces
+
+declare \
+  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
+  org=system \
+  space=ops \
+  archive="cf-env.tar.gz" \
+  service=test-tcp-app \
+  action \
+  apps_domain
+
+mkdir -p ${apps_path} && cd ${apps_path}
+
+################################################################################
+# Main
+################################################################################
+
+apps_domain=$(safe get ${OCFP_VAULT_PREFIX:-"secret/"}/exodus/${env}/cf:apps_domain)
+
+parse::args "$@"
+
+cf::login ${env}
+
+cf::space::create
+
+apps::fetch ${service}
+
+case ${action} in
+  (app-push)
+    app::push
+    ;;
+  (app-test)
+    app::test
+    ;;
+  (app-delete)
+    apps::delete
+    ;;
+  (*) usage ;;
+esac
+ 
+exit 0
