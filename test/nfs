@@ -226,7 +226,7 @@ task=$1 ; shift || usage
 
 parse::args "$@"
 
-cf::login ${env}
+cf::login ${env_name}
 
 case ${task} in 
   (test-spaces)
