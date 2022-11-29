@@ -135,9 +135,9 @@ declare -a services apps spaces
 declare \
   apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
   org=system \
-  space=ops \
+  space=test-tcp-app \
   archive="cf-env.tar.gz" \
-  service=test-tcp-app \
+  service=tcp \
   action \
   apps_domain
 
