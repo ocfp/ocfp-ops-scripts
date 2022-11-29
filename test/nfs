@@ -111,7 +111,7 @@ app::create::bind::nfs() {
   debug "${FUNCNAME} $*"
 
   echo -e "\nCreating nfs service ${service_name} with ldap and mounting ${mount_path}..."
-  run cf create-service nfs Existing nfs-ldap -c "$( nfs::config )"
+  run cf create-service nfs Existing ${service_name} -c "$( nfs::config )"
 
   echo -e "\nBinding service ${service_name} to ${app_name}..."
   run cf bind-service ${app_name} ${service_name}

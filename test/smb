@@ -92,7 +92,8 @@ app::create::bind::smb() {
   echo "{\"share\":\"${mount_path}\"}" >
     ~/tmp/test/smb/${service_name}-config.json
 
-  cf create-service smb Existing ${service_name} -c ~/tmp/test/smb/${service_name}-config.json
+  cf create-service smb Existing ${service_name} \
+    -c ~/tmp/test/smb/${service_name}-config.json
 
   echo " binding service ${service_name} to ${app_name} "
 
