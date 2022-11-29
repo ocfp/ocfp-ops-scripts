@@ -148,9 +148,9 @@ clean::up() {
 
     run cf target -o system -s ${space}
 
-    run cf delete-service -f ${service_name}
-
     run cf delete ${app_name} -f
+
+    run cf delete-service -f ${service_name}
   done
 }
 
