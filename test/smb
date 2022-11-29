@@ -151,8 +151,6 @@ clean::up() {
 test::spaces() {
   debug "${FUNCNAME} $*"
 
-  local archive="cf-volume-services-acceptance-tests-master.zip"
-
   apps::fetch 
 
   cd ${apps_path}/${archive/.zip}
@@ -186,8 +184,6 @@ cf::login() {
 apps::fetch() {
   debug "${FUNCNAME} $*"
 
-  local archive="cf-volume-services-acceptance-tests-master.zip"
-
   cd ${apps_path}
 
   if [[ ! -d ${apps_path}/${archive/.zip} ]]
@@ -205,16 +201,20 @@ app::push() {
 
   run cf target -o system -s ${space}
 
+  cd ${apps_path}/${archive/.zip}/assets/pora
+
   run cf push ${app_name} -f manifest.yml
 }
 
 declare -a spaces
 
 declare \
-  smb_mount_path=/var/vcap/data/volumes/smb \
+  smb_mount_path="/var/vcap/data/volumes/smb" \
+  archive="cf-volume-services-acceptance-tests-master.zip" \
+  apps_path="${OCFP_PROJECT_PATH:-${HOME}/apps}" \
   org=system \
-  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
   action
+
 
 mkdir -p ${apps_path} && cd ${apps_path}
 

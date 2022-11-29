@@ -101,6 +101,8 @@ app::push() {
 
   run cf target -o system -s ${space}
 
+  cd ${apps_path}/${archive/.zip}/assets/pora
+
   run cf push ${app_name} -f manifest.yml
 }
 
@@ -161,8 +163,6 @@ clean::up() {
 test::spaces() {
   debug "${FUNCNAME} $*"
 
-  local archive="cf-volume-services-acceptance-tests-master.zip"
-
   apps::fetch 
 
   run cd ${apps_path}/${archive/.zip}
@@ -196,8 +196,6 @@ cf::login() {
 apps::fetch() {
   debug "${FUNCNAME} $*"
 
-  local archive="cf-volume-services-acceptance-tests-master.zip"
-
   cd ${apps_path}
 
   if [[ ! -d ${apps_path}/${archive/.zip} ]]
@@ -213,9 +211,10 @@ apps::fetch() {
 declare -a spaces
 
 declare \
-  nfs_mount_path=/var/vcap/data/volumes/nfs \
+  nfs_mount_path="/var/vcap/data/volumes/nfs" \
+  apps_path="${OCFP_PROJECT_PATH:-${HOME}/apps}" \
+  archive="cf-volume-services-acceptance-tests-master.zip" \
   org=system \
-  apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
   action
 
 mkdir -p ${apps_path} && cd ${apps_path}
