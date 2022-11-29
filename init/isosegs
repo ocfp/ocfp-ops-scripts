@@ -83,7 +83,7 @@ env_file=".genesis/manifests/${env_name}.yml"
   fail "${env_name} needs to be deployed first."
 
 isosegs=($( spruce json ${env_file} |
-  jq -r '.instance_groups[] | select(.jobs[].properties.diego.rep.placement_tags != null) | .name'
+  jq -r '.instance_groups[] | select(.jobs[].properties.diego.rep.placement_tags != null and .instances > 0) | .name'
 ))
 
 debug "env_name: ${env_name}, env_file: ${env_file}, isosegs: ${isosegs[*]}"
