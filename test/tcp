@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-# ocfp test tcp env <name>
+# ocfp test tcp app-push env <name>
+# ocfp test tcp app-test env <name>
+# ocfp test tcp app-delete env <name>
+
 # TODO: collect and print report of passed / failed tests.
 
 ################################################################################
@@ -115,6 +118,7 @@ app::test() {
   port=$(app::port test-${service}-app)
   debug "port: ${port}"
 
+  echo -e "curl -sk tcp.${apps_domain}:${port}"
   response=$(curl -sk tcp.${apps_domain}:${port})
   debug "response: ${response}"
 
