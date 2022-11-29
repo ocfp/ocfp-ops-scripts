@@ -2,7 +2,7 @@
 
 # Author: Haochen Hu
 
-fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+fail() { echo -e "\n\e[31mERROR:\e[0m $*\n" >&2 ; exit 1 ; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
