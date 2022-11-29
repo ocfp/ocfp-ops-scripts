@@ -137,7 +137,7 @@ test::nfs::service() {
   )
 
   cell_name=$( 
-    gb ips ${env_name} -cf --json |
+    gb ips ${env_name} ${env_name}-cf --json 2>/dev/null |
       jq -r '.Tables[].Rows[] | select(.ips | contains("'${cell_ip}'")) | .name'
   )
 
