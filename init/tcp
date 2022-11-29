@@ -43,10 +43,9 @@ args::parse() {
 }
 
 cf::login() {
-  local env=$1
   ( cd ~/deployments/cf
-    genesis ${env} do login
-  ) || fail "Failed to login to ${env}!"
+    genesis ${env_name} do login
+  ) || fail "Failed to login to ${env_name}!"
 }
 
 declare  \

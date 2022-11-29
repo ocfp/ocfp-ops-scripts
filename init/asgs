@@ -38,16 +38,12 @@ args::parse() {
 
 cf::login() {
   debug "${FUNCNAME[0]}: $*"
-  local env=$1
   ( cd ~/deployments/cf
-    genesis ${env} do login
-  ) || fail "Failed to login to ${env}!"
+    genesis ${env_name} do login
+  ) || fail "Failed to login to ${env_name}!"
 }
-
  
-declare  \
-  env_name \
-  handshake
+declare env_name handshake
 
 args::parse "$@"
 

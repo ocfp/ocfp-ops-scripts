@@ -19,7 +19,7 @@ args::parse() {
     case "${action}" in
       (env)
         env_name="$2"
-        shift 2 || fail "${0//*/} ... env <name> # ex: secret/a/b"
+        shift 2 || fail "${0//*/} ... env <name>"
         ;;
       (vault-prefix)
         vault_prefix="$2"
@@ -42,10 +42,9 @@ args::parse() {
 
 cf::login() {
   debug "${FUNCNAME[0]}: $*"
-  local env=$1
   ( cd ~/deployments/cf
-    genesis ${env} do login
-  ) || fail "Failed to login to ${env}!"
+    genesis ${env_name} do login
+  ) || fail "Failed to login to ${env_name}!"
   run cf target -o system
 }
 
