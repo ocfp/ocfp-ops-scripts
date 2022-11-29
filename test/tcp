@@ -72,7 +72,7 @@ app::push() {
 
   cd ${apps_path}/${archive/.tar.gz}
 
-  run cf push test-${service}-app --random-route \
+  run cf push test-${service}-app \
     -p ${apps_path}/${archive/.tar.gz} \
     -f ${apps_path}/${archive/.tar.gz}/manifest.yml
 }
