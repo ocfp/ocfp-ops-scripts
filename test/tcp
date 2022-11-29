@@ -98,7 +98,7 @@ apps::domain() {
   local app_guid=$( cf app ${app_name} --guid )
 
   cf curl /v3/apps/${app_guid}/routes |
-    jq -r '.resources[] | select(.url | contains("'${1}'"))) | .url' |
+    jq -r '.resources[] | select(.url | contains("'${1}'")) | .url' |
       sed -e "s/${1}\.//"
 }
 
