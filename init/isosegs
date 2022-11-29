@@ -46,7 +46,7 @@ cf::login() {
   ) || fail "Failed to login to ${env_name}!"
 }
 
-bosh::vaildate::environment() {
+bosh::validate::environment() {
   debug "${FUNCNAME[0]}: $*"
   local _cmd
 
@@ -66,6 +66,10 @@ bosh::vaildate::environment() {
 }
 
 declare env_name env_file
+
+args::parse "$@"
+
+bosh::validate::environment
 
 cf::login "${env_name}"
 

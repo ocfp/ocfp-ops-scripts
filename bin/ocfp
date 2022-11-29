@@ -366,7 +366,7 @@ init() {
   esac
 }
 
-export DEBUG
+[[ -n ${DEBUG:-} ]] && export DEBUG
 
 scripts_path="$(dirname "${0}")"
 
