@@ -156,8 +156,6 @@ test::spaces() {
 
   run cd ${apps_path}/${archive/.zip}/assets/pora
 
-  sed -i 's/ go_buildpack$/ go_buildpack_current/' manifest.yml
-
   for space in ${spaces[@]}
   do
     service_name="smb-${space}"
