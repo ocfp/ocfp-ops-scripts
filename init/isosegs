@@ -90,7 +90,7 @@ debug "env_name: ${env_name}, env_file: ${env_file}, isosegs: ${isosegs[*]}"
 
 for isoseg in ${isosegs[@]}
 do
-  run cf -o system create-space ${isoseg}
+  run cf create-space ${isoseg}
   run cf target -o system -s ${isoseg}
   run cf create-isolation-segment ${isoseg}
   run cf enable-org-isolation system ${isoseg}
