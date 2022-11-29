@@ -31,10 +31,6 @@ parse::args() {
         env=$2
         shift 2 || fail "Usage: ...env <name>"
         ;;
-      (vault-prefix)
-        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
-        shift 2 || fail "${0//*/} ... vault-prefix \"secret/...\""
-        ;;
       (*)
         fail "Unknown arg: '$1'\nUsage: env <name> space <name> [space <name>...] <cmd>"
         ;;
@@ -91,15 +87,28 @@ app::port() {
     jq -r '.resources[] | select(.port != null and (.url | contains("tcp"))) | .port'
 }
  
+apps::domain() {
+  debug "${FUNCNAME} $*"
+
+  local app_name=$1
+  local app_guid=$( cf app ${app_name} --guid )
+
+  cf curl /v3/apps/${app_guid}/routes |
+    jq -r '.resources[] | select(.url | contains("'${1}'"))) | .url' |
+      sed -e "s/${1}\.//"
+}
+
 app::test() {
   debug "${FUNCNAME} $*"
 
-  run cf map-route test-${service}-app tcp.${app_domain}
+  apps_domain=$(apps::domain test-${service}-app)
+
+  run cf map-route test-${service}-app tcp.${apps_domain}
 
   port=$(app::port test-${service}-app)
   debug "port: ${port}"
 
-  response=$(curl -sk tcp.${app_domain}:${port})
+  response=$(curl -sk tcp.${apps_domain}:${port})
   debug "response: ${response}"
 
   if [[ ${response} =~ "Cloud Foundry Environment" ]]
@@ -133,8 +142,6 @@ mkdir -p ${apps_path} && cd ${apps_path}
 ################################################################################
 # Main
 ################################################################################
-
-apps_domain=$(safe get ${OCFP_VAULT_PREFIX:-"secret/"}/exodus/${env}/cf:apps_domain)
 
 parse::args "$@"
 
