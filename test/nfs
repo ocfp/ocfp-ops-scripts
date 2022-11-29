@@ -178,8 +178,6 @@ test::spaces() {
 
     test::nfs::service
   done
-
-  clean::up
 }
 
 cf::login() {

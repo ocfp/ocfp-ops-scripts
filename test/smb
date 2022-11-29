@@ -167,8 +167,6 @@ test::spaces() {
 
     test::smb::service
   done
-
-  clean::up
 }
 
 cf::login() {
