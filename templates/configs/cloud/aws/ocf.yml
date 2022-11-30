@@ -597,4 +597,8 @@ vm_extensions:
     cloud_properties:
       elbs:
         - ocfp-ocf-cf-tcp-lb
+  - name: cf-nats-lb # For monitoring BOSH directors
+    cloud_properties:
+      lb_target_groups:
+        - ocfp-ocf-cf-nats-lb-tg # NLB uses target-groups
 
