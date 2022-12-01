@@ -69,7 +69,8 @@ args::parse() {
         case ${OCFP_KIT} in
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
           (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
-        esac ;;
+        esac
+        ;;
       (env)
         export OCFP_ENV_NAME=${1//.yml}
         shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"

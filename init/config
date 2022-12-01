@@ -26,6 +26,10 @@ args::parse() {
   do
     _action="${1}" ; shift
     case ${_action} in
+      (kit) # Unused, but we won't error if it's given
+        export OCFP_KIT=$1
+        shift || fail "${0//*/} ... kit <name>"
+        ;;
       (type) 
         config_type="${1}"
         shift || fail "${0//*/} ... config <type>"
@@ -62,10 +66,6 @@ args::parse() {
       (scale) 
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
-        ;;
-      (kit) # Unused, but we won't error if it's given
-        export OCFP_KIT=$1
-        shift || fail "${0//*/} ... kit <name>"
         ;;
       (*)
         usage
