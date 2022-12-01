@@ -394,4 +394,12 @@ vm_extensions:
     cloud_properties:
       lb_target_groups:
         - ocfp-mgmt-concourse-lb-tg
+  - name: bosh-lb
+    cloud_properties:
+      lb_target_groups:
+        - ocfp-mgmt-bosh-lb-tg
+  - name: doomsday-lb
+    cloud_properties:
+      lb_target_groups:
+        - ocfp-mgmt-doomsday-lb-tg
 

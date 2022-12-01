@@ -12,7 +12,7 @@ run()   { cmdinfo "$*"; "$@"; }
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
 usage() {
-  fail "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
+  echo -e "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
 header() {
