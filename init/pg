@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-
+#
 # Author: Wayne E. Seguin
+#
 
+################################################################################
+# Functions
+################################################################################
 usage() {
   cat <<USAGE
 
@@ -29,11 +33,16 @@ Requirements:
 USAGE
 }
 
-fail() { echo -e "$*" >&2 ; exit 1 ; }
+cmdinfo() { echo -e "\e[32m$*\e[0m" >&2; }
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+run() { cmdinfo "$*"; "$@"; }
 
 pg::psql() {
-  local _db="$1"
-  shift
+  local _db="$1" ; shift
+
+  cmdinfo "psql ${_db} > $*"
   \psql "${PG_URI}/${_db}?sslmode=require" "$*"
 }
 
@@ -68,6 +77,7 @@ pg::set::contract::secrets() {
 pg::prepare() {
   local src_path="${OCFP_VAULT_TF_PATH}/dbs/${kit//cf-app-}" # TODO: Fix autoscaler...
   local dst_path="${OCFP_VAULT_ENV_PATH}/${kit}"
+  local _db
 
   PG_HOSTNAME="$(safe get "${src_path}:hostname")"
   PG_USERNAME="$(safe get "${src_path}:postgres_username")"
@@ -84,7 +94,6 @@ pg::prepare() {
 
   PG_URI="postgresql://${PG_USERNAME}:${PG_PASSWORD}@${PG_HOSTNAME}:5432"
 
-  local _db
   for _db in ${@}; do
     local _u="$(safe get "${src_path}:${_db}_username")"
     local _p="$(safe get "${src_path}:${_db}_password")"
@@ -110,7 +119,7 @@ pg::prepare() {
   done
 }
 
-__parse::args() {
+parse::args() {
   while [[ $# > 0 ]]
   do
     action=$1 ; shift
@@ -149,6 +158,9 @@ __parse::args() {
   [[ -n ${OCFP_VAULT_TF_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
 }
 
+################################################################################
+# Main
+################################################################################
 timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
 logs_path="$HOME/.ocfp/logs"
 mkdir -p ${logs_path}
@@ -156,7 +168,7 @@ exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
 
 [[ $# > 1 ]] || fail "$(usage)"
 
-__parse::args "$@"
+parse::args "$@"
 
 case "${kit}" in
   (bosh)
