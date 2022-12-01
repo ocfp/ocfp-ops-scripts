@@ -76,6 +76,19 @@ parse::args() {
   esac
 }
 
+set::env::type() {
+  debug "${FUNCNAME[0]}: $*"
+
+  case "${OCFP_ENV_NAME}" in
+    (*-mgmt-*) env_type="mgmt" ;;
+    (*)        env_type="ocf"  ;;
+  esac
+  export OCFP_ENV_TYPE="${env_type}"
+}
+
+################################################################################
+# Main
+################################################################################
 declare env kit vault_prefix secrets_path src_path dst_path
  
 scripts_path="$(dirname "${0}")"

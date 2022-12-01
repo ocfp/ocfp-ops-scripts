@@ -42,7 +42,7 @@ fail() { echo -e "$*" >&2 ; exit 1 ; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
-parse::args() {
+args::parse() {
   debug "${FUNCNAME[0]}: $*"
   local _action
 
@@ -69,7 +69,7 @@ parse::args() {
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
           (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
         esac ;;
-      (env|name)
+      (env)
         export OCFP_ENV_NAME=${1//.yml}
         shift || fail "${0//*/} ... name <env-name> # ex: ocfp-codex-mgmt-us-east-1 / ocfp-codex-us-east-1"
         ;;
@@ -94,9 +94,7 @@ parse::args() {
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
-      (config)
-        ;;
-      (asgs|bastion|domains|isosegs|tcp) # Short circuit for init
+      (config|pg|env|asgs|bastion|domains|isosegs|tcp) # Short circuit for init
         return 0
         ;;
       (c2c|blacksmith|nfs|smb|tcp) # Short circuit for tests.
@@ -109,23 +107,11 @@ parse::args() {
   done
 
   [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
-  if [[ ${cmd} != "test" ]]; then
-    [[ -n ${OCFP_REGION} ]]   || fail "'region <region>' must be given"
-    [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' must be given"
+  if [[ ${cmd} != "test" ]]
+  then
+    [[ -n ${OCFP_REGION} ]] || fail "'region <region>' must be given"
+    [[ -n ${OCFP_KIT} ]]    || fail "'kit <name>' must be given"
   fi
-
-  set::env::type
-
-  # All envs need to know their deployer/bosh_env, mgmt bosh is the exception
-  if ! [[ ${OCFP_KIT} == "bosh" && ${env_type} == "mgmt" ]] && [[ $cmd != "test" ]]
-  then [[ -n ${OCFP_BOSH_ENV} ]] || fail "'bosh <bosh-env-name>' must be given"
-  fi
-
-  case ${OCFP_KIT} in
-    (bosh)
-      [[ -n ${OCFP_IAAS} ]] || fail "'iaas <aws|gcp|azure>' must be given"
-      ;;
-  esac
 }
 
 set::vault::paths() {
@@ -133,148 +119,6 @@ set::vault::paths() {
   local _env_path="${OCFP_ENV_NAME//-/\/}"
   export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
   export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
-}
-
-set::env::type() {
-  debug "${FUNCNAME[0]}: $*"
-  case "${OCFP_ENV_NAME}" in
-    (*-mgmt-*) env_type="mgmt" ;;
-    (*)        env_type="ocf"  ;;
-  esac
-  export OCFP_ENV_TYPE="${env_type}"
-}
-
-init::config::cloud() {
-  debug "${FUNCNAME[0]}: $*"
-  local _config_path="${scripts_path}/templates/configs/${config_type}/${OCFP_IAAS}"
-  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
-  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
-  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-
-  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
-
-  export OCFP_ENV_SCALE=${config_scale:-"dev"}
-
-  declare -a _merge
-
-  _merge=(
-    "${_meta}"
-    "${scripts_path}/templates/configs/cloud/meta/${env_type}.yml"
-    "${_config_path}/scale/${env_type}.yml"
-    "${_config_path}/${env_type}.yml"
-  )
-
-  _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
-
-  for dep in "${deps[@]}" ; do
-    _dep_env="${dep%%@*}" # vault mount override via @<vault-mount>
-    ( # Subshell so as to not clobber parents env vars
-      case ${dep} in
-        (*\@*) _vault_prefix="${dep##*\@}" ;;
-        (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
-      esac
-
-      # Override vault paths for dependent env
-      OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
-      OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
-      OCFP_ENV_NAME="${_dep_env}"
-      OCFP_ENV_TYPE="ocf"
-      VAULT_PREFIX="${_vault_prefix}"
-
-      _m=(
-      "${_meta}"
-      "${scripts_path}/templates/configs/cloud/meta/ocf.yml"
-      "${_config_path}/azs/ocf.yml"
-      "${_config_path}/networks/ocf-bosh.yml"
-      "${_meta_prune}"
-      )
-      spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
-    )
-    _merge+=( "${_tmp_path}/${_dep_env}.yml" ) 
-  done
-
-  _merge+=( "${_meta_prune}")
-
-  spruce merge -m "${_merge[@]}" > "${_target}"
-}
-
-init::config::cpi() {
-  debug "${FUNCNAME[0]}: $*"
-  local _src_path _dst_path
-
-  _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
-  _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
-
-  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-  local _config_path="${scripts_path}/templates/configs/${config_type}"
-  local _template="${_config_path}/${env_type}.yml"
-  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
-  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
-
-  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
-
-  export OCFP_ENV_SCALE=${config_scale:-"dev"}
-
-  declare -a _merge
-
-  _merge=( "${_meta}" "${_template}" )
-
-  local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
-
-  for dep in "${deps[@]}" ; do
-    _dep_env="${dep%%@*}" # vault mount override via @<vault-mount>
-    ( # Subshell so as to not clobber parents env vars
-      case ${dep} in
-        (*\@*) _vault_prefix="${dep##*\@}" ;;
-        (*)    _vault_prefix="${OCFP_VAULT_PREFIX}" ;;
-      esac
-      # Override vault paths for dependent env
-      OCFP_VAULT_ENV_PATH="${_vault_prefix}/${_dep_env//-/\/}"
-      OCFP_VAULT_TF_PATH="${_vault_prefix}/tf/${_dep_env//-/\/}"
-      OCFP_ENV_NAME="${_dep_env}"
-      VAULT_PREFIX="${_vault_prefix}"
-      local _m=(
-        "${_meta}"
-        "${_config_path}/ocf.yml"
-        "${_meta_prune}"
-      )
-      spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
-    )
-    _merge+=( "${_tmp_path}/${_dep_env}.yml" ) 
-  done
-
-  _merge+=( "${_meta_prune}")
-
-  spruce merge -m "${_merge[@]}" > "${_target}"
-}
-
-init::config() {
-  debug "${FUNCNAME[0]}: $*"
-  case "${OCFP_KIT}" in
-    (bosh)
-      case "${OCFP_IAAS}" in
-        (aws)
-          #safe cp "${_src_path}/bosh" "${_dst_path}/aws"
-          #safe cp "${_src_path}/s3" "${_dst_path}/blobstore/s3"
-          ;;
-        (*) fail "Not Yet Implemented" ;;
-      esac
-      ;;
-  esac
-
-  mkdir -p "configs/${config_type}"
-
-  case ${config_type} in 
-    (cloud)
-      init::config::cloud "$@"
-      ;;
-    (cpi)
-      init::config::cpi "$@"
-      ;;
-    (*) fail "Unsupported config type: ${config_type}, valid types are cloud,cpi" ;;
-  esac
-
-  exit $?
 }
 
 _test() {
@@ -297,7 +141,7 @@ init() {
     (config)
       init::${1} "$@"
       ;;
-    (asgs|bastion|domains|isosegs|tcp|pg|env)
+    (pg|env|asgs|bastion|domains|isosegs|tcp)
       bash "${scripts_path}/init/${1}" "${@:2}"
       ;;
     (*)
@@ -314,9 +158,7 @@ cmd=$1 ; shift || usage
 
 declare -a deps
 
-parse::args "$@"
-
-set::env::type
+args::parse "$@"
 
 set::vault::paths # Sets vault paths for the main script level
 
