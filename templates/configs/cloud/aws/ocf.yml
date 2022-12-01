@@ -597,7 +597,7 @@ vm_extensions:
     cloud_properties:
       elbs:
         - ocfp-ocf-cf-tcp-lb
-  - name: cf-bosh-lb
+  - name: bosh-lb
     cloud_properties:
       lb_target_groups:
         - ocfp-ocf-bosh-lb-tg # ALB uses target-groups
