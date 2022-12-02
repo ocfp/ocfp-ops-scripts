@@ -37,6 +37,10 @@ script::path() {
   )
 }
 
+scripts::path() {
+  dirname "$( script::path )"
+}
+
 args::parse() {
   debug "${FUNCNAME[0]}: $*"
 
@@ -230,7 +234,7 @@ declare config_type scripts_path
 
 args::parse "$@"
 
-scripts_path=$(script::path)
+scripts_path=$(scripts::path)
 
 mkdir -p "configs/${config_type}"
 
