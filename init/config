@@ -17,6 +17,26 @@ usage() {
   echo -e "Usage: ${0//*\/} type <cloud|cpi> env <name> region <name> iaas <name> [bosh <env>]  [scale <dev|prod>] [vault-prefix <secret/...>] [dep <name>]" >&2
 }
 
+script::pwd() { 
+  (
+		cd -P "$( dirname "${1}" )" &> /dev/null 
+		pwd
+  )
+}
+
+script::path() {
+  (
+    local dir src="${BASH_SOURCE[0]:-$0}"
+		while [[ -h "${src}" ]]
+		do
+			dir="$( script::pwd "${src}" )"
+			src="$( readlink "${src}" )"
+			[[ "${src%${src#?}}" == '/' ]] || && src="${dir}/${src}"
+		done
+		script::pwd "${src}"
+  )
+}
+
 args::parse() {
   debug "${FUNCNAME[0]}: $*"
 
@@ -206,9 +226,11 @@ init::config::cpi() {
 # Main
 ################################################################################
 
-declare config_type
+declare config_type scripts_path
 
 args::parse "$@"
+
+scripts_path=$(script::path)
 
 mkdir -p "configs/${config_type}"
 
