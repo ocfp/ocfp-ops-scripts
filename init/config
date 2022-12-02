@@ -31,7 +31,7 @@ script::path() {
 		do
 			dir="$( script::pwd "${src}" )"
 			src="$( readlink "${src}" )"
-			[[ "${src%${src#?}}" == '/' ]] || && src="${dir}/${src}"
+			[[ "${src%${src#?}}" == '/' ]] || src="${dir}/${src}"
 		done
 		script::pwd "${src}"
   )
