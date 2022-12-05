@@ -147,7 +147,7 @@ parse::args() {
         ;;
       (kit) 
         kit="$1" 
-        export OCFP_KIT_NAME="${kit}"
+        export OCFP_KIT="${kit}"
         shift || fail "${0//*/} ... kit <name>"
         case ${kit} in
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
@@ -181,7 +181,7 @@ parse::args() {
   esac
   
   [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' required"
-  [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' required"
+  [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' required"
   [[ -n ${OCFP_REGION} ]] || fail "'region <name>' required"
   [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
   [[ -n ${OCFP_VAULT_ENV_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
