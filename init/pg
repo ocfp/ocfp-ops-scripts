@@ -4,7 +4,26 @@
 #
 
 ################################################################################
-# Functions
+# Utility Functions
+################################################################################
+cmdinfo() { echo -e "\e[32m$*\e[0m" >&2; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+run() { cmdinfo "$*"; "$@"; }
+
+set::vault::paths() {
+  debug "${FUNCNAME[0]}: $*"
+  local env_path="${OCFP_ENV_NAME//-/\/}"
+
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${env_path}"
+}
+
+################################################################################
+# Main Functions
 ################################################################################
 usage() {
   cat <<USAGE
@@ -31,19 +50,6 @@ Requirements:
    * OCFP_VAULT_TF_PATH must be set and exported
 
 USAGE
-}
-
-cmdinfo() { echo -e "\e[32m$*\e[0m" >&2; }
-
-fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
-
-run() { cmdinfo "$*"; "$@"; }
-
-set::vault::paths() {
-  debug "${FUNCNAME[0]}: $*"
-  local _env_path="${OCFP_ENV_NAME//-/\/}"
-  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
-  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
 }
 
 pg::psql() {
