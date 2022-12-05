@@ -138,15 +138,16 @@ parse::args() {
     action=$1 ; shift
     case "${action}" in
       (region)
-        OCFP_REGION=$1
+        export OCFP_REGION=$1
         shift || fail "${0//*/} ... env <name>"
         ;;
       (env) 
-        env_name="$1" 
+        export OCFP_ENV_NAME="${1}"
         shift || fail "${0//*/} ... env <name>"
         ;;
       (kit) 
         kit="$1" 
+        export OCFP_KIT_NAME="${kit}"
         shift || fail "${0//*/} ... kit <name>"
         case ${kit} in
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
@@ -174,14 +175,13 @@ parse::args() {
     esac
   done
   
-  env_name="${env_name%.yml}"
-  case "${env_name}" in
+  case "${OCFP_ENV_NAME%.yml}" in
     (*-mgmt-*) env_type="mgmt" ;;
     (*)        env_type="ocf"  ;;
   esac
   
-  [[ -n ${env_name} ]] || fail "'env <name>' required"
-  [[ -n ${kit} ]]      || fail "'kit <name>' required"
+  [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' required"
+  [[ -n ${OCFP_KIT} ]]      || fail "'kit <name>' required"
   [[ -n ${OCFP_REGION} ]] || fail "'region <name>' required"
   [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
   [[ -n ${OCFP_VAULT_ENV_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
