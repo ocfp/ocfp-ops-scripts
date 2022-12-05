@@ -39,6 +39,13 @@ fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
 run() { cmdinfo "$*"; "$@"; }
 
+set::vault::paths() {
+  debug "${FUNCNAME[0]}: $*"
+  local _env_path="${OCFP_ENV_NAME//-/\/}"
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
+}
+
 pg::psql() {
   local _db="$1" ; shift
 
@@ -140,6 +147,23 @@ parse::args() {
           (*) fail "Unsupported kit: ${kit}" ;;
         esac
         ;;
+      (vault-prefix)
+        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        shift || fail "${0//*/} ... vault-prefix \"secret/...\""
+        ;;
+      (iaas) # Not needed but for arg consistentcy
+        export OCFP_IAAS="$1"
+        shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
+        case ${OCFP_IAAS} in
+          #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
+          (aws|azure|gcp|openstack|vsphere|warden) true ;;
+          (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
+        esac
+        ;;
+      (bosh) # Not needed but for arg consistentcy
+        export OCFP_BOSH_ENV="$1"
+        shift || fail "${0//*/} ... bosh <bosh-env-name>"
+        ;;
       (*) fail "$(usage)" ;;
     esac
   done
@@ -169,6 +193,8 @@ exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
 [[ $# > 1 ]] || fail "$(usage)"
 
 parse::args "$@"
+
+set::vault::paths
 
 case "${kit}" in
   (bosh)
