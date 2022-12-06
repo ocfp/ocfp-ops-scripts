@@ -4,15 +4,19 @@
 #
 
 ################################################################################
-# Functions
+# Utility Functions
 ################################################################################
-
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
-
-run()  { echo -e "\e[32m\$\e[0m $*"; "$@"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
+cmdinfo() { echo -e "\e[32m$*\e[0m" >&2; }
+
+run() { cmdinfo "$*"; "$@"; }
+
+################################################################################
+# Script Functions
+################################################################################
 usage() {
   echo -e "Usage: ${0//*\/} type <cloud|cpi> env <name> region <name> iaas <name> [bosh <env>]  [scale <dev|prod>] [vault-prefix <secret/...>] [dep <name>]" >&2
 }
@@ -55,7 +59,7 @@ args::parse() {
         shift || fail "${0//*/} ... kit <name>"
         ;;
       (type) 
-        config_type="${1}"
+        export OCFP_CONFIG_TYPE="${1}"
         shift || fail "${0//*/} ... config <type>"
         ;;
       (env)
@@ -97,10 +101,10 @@ args::parse() {
     esac
   done
 
-  [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' must be given"
-  [[ -n ${config_type} ]]   || fail "'type <cloud|cpi>' must be given"
-  [[ -n ${OCFP_REGION} ]]   || fail "'region <region>' must be given"
-  [[ -n ${OCFP_IAAS} ]]     || fail "'iaas <aws|gcp|azure>' must be given"
+  [[ -n ${OCFP_ENV_NAME} ]]    || fail "'env <name>' must be given"
+  [[ -n ${OCFP_CONFIG_TYPE} ]] || fail "'type <cloud|cpi>' must be given"
+  [[ -n ${OCFP_REGION} ]]      || fail "'region <region>' must be given"
+  [[ -n ${OCFP_IAAS} ]]        || fail "'iaas <aws|gcp|azure>' must be given"
 
   set::env::type
 
@@ -122,12 +126,12 @@ set::env::type() {
 init::config::cloud() {
   debug "${FUNCNAME[0]}: $*"
 
-  local _config_path="${scripts_path}/templates/configs/${config_type}/${OCFP_IAAS}"
-  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
+  local _config_path="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/${OCFP_IAAS}"
+  local _meta="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
   local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
-  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
+  local _target="configs/${OCFP_CONFIG_TYPE}/${OCFP_ENV_NAME}.yml"
 
-  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
+  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
 
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
@@ -183,13 +187,13 @@ init::config::cpi() {
   _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
   _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
 
-  local _target="configs/${config_type}/${OCFP_ENV_NAME}.yml"
-  local _config_path="${scripts_path}/templates/configs/${config_type}"
+  local _target="configs/${OCFP_CONFIG_TYPE}/${OCFP_ENV_NAME}.yml"
+  local _config_path="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}"
   local _template="${_config_path}/${env_type}.yml"
-  local _meta="${scripts_path}/templates/configs/${config_type}/meta.yml"
+  local _meta="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
   local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
 
-  echo -e "Generating ${config_type} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
+  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
 
   export OCFP_ENV_SCALE=${config_scale:-"dev"}
 
@@ -230,18 +234,18 @@ init::config::cpi() {
 # Main
 ################################################################################
 
-declare config_type scripts_path
+declare OCFP_CONFIG_TYPE scripts_path
 
 args::parse "$@"
 
 scripts_path=$(scripts::path)
 
-mkdir -p "configs/${config_type}"
+mkdir -p "configs/${OCFP_CONFIG_TYPE}"
 
-case ${config_type} in 
+case ${OCFP_CONFIG_TYPE} in 
   (cloud) init::config::cloud "$@" ;;
   (cpi)   init::config::cpi "$@" ;;
-  (*)     fail "config type must be cloud or cpi not '${config_type}'" ;;
+  (*)     fail "config type must be cloud or cpi not '${OCFP_CONFIG_TYPE}'" ;;
 esac
 
 exit $?

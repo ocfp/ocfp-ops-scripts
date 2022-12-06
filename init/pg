@@ -88,8 +88,8 @@ pg::set::contract::secrets() {
 }
 
 pg::prepare() {
-  local src_path="${OCFP_VAULT_TF_PATH}/dbs/${kit//cf-app-}" # TODO: Fix autoscaler...
-  local dst_path="${OCFP_VAULT_ENV_PATH}/${kit}"
+  local src_path="${OCFP_VAULT_TF_PATH}/dbs/${OCFP_KIT}/cf-app-}" # TODO: Fix autoscaler...
+  local dst_path="${OCFP_VAULT_ENV_PATH}/${OCFP_KIT}"
   local _db
 
   PG_HOSTNAME="$(safe get "${src_path}:hostname")"
@@ -132,7 +132,7 @@ pg::prepare() {
   done
 }
 
-parse::args() {
+args::parse() {
   while [[ $# > 0 ]]
   do
     action=$1 ; shift
@@ -146,12 +146,11 @@ parse::args() {
         shift || fail "${0//*/} ... env <name>"
         ;;
       (kit) 
-        kit="$1" 
-        export OCFP_KIT="${kit}"
+        export OCFP_KIT="${1}"
         shift || fail "${0//*/} ... kit <name>"
-        case ${kit} in
+        case ${OCFP_KIT} in
           (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
-          (*) fail "Unsupported kit: ${kit}" ;;
+          (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
         esac
         ;;
       (vault-prefix)
@@ -198,11 +197,11 @@ exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
 
 [[ $# > 1 ]] || fail "$(usage)"
 
-parse::args "$@"
+args::parse "$@"
 
 set::vault::paths
 
-case "${kit}" in
+case "${OCFP_KIT}" in
   (bosh)
     pg::prepare bosh uaa credhub
     ;;
@@ -210,7 +209,7 @@ case "${kit}" in
     pg::prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
     ;; 
   (autoscaler)
-    kit="cf-app-autoscaler" # :/ # Contract FAIL
+    OCFP_KIT="cf-app-autoscaler" # :/ # Contract FAIL
     pg::prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL
     ;;
   (scheduler)
