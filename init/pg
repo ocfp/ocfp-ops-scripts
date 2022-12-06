@@ -40,7 +40,7 @@ Requirements:
   * \`psql\` is in the path, version 14 or later
   * postgres database information is stored in vault by terraform outputs according
     to the ocfp contracts, eg:
-      \${OCFP_VAULT_PREFIX}/tf/\${OCFP_ENV_NAME//-/\/}/\${env_type//-/\/}/dbs/\${kit}/db:{key}
+      \${OCFP_VAULT_PREFIX}/tf/\${OCFP_ENV_NAME//-/\/}/\${OCFP_ENV_TYPE//-/\/}/dbs/\${kit}/db:{key}
       Where {key} is in hostname, postgres_username, postgres_password, port,
         scheme, {kit dbs}_{username,_password}
       Ex: bosh kit will have kit dbs: bosh, uaa, and credhub
@@ -175,8 +175,8 @@ args::parse() {
   done
   
   case "${OCFP_ENV_NAME%.yml}" in
-    (*-mgmt-*) env_type="mgmt" ;;
-    (*)        env_type="ocf"  ;;
+    (*-mgmt-*) OCFP_ENV_TYPE="mgmt" ;;
+    (*)        OCFP_ENV_TYPE="ocf"  ;;
   esac
   
   [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' required"

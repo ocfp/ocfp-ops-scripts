@@ -18,7 +18,7 @@ run() { cmdinfo "$*"; "$@"; }
 # Script Functions
 ################################################################################
 usage() {
-  echo -e "Usage: ${0//*\/} type <cloud|cpi> env <name> region <name> iaas <name> [bosh <env>]  [scale <dev|prod>] [vault-prefix <secret/...>] [dep <name>]" >&2
+  echo -e "Usage: ${0//*\/} type <cloud|cpi> env <name> region <name> iaas <name> [bosh <env>] [scale <dev|prod>] [vault-prefix <secret/...>] [dep <name>]" >&2
 }
 
 script::pwd() { 
@@ -55,7 +55,7 @@ args::parse() {
     _action="${1}" ; shift
     case ${_action} in
       (kit) # Unused, but we won't error if it's given
-        export OCFP_KIT=$1
+        true
         shift || fail "${0//*/} ... kit <name>"
         ;;
       (type) 
@@ -92,7 +92,7 @@ args::parse() {
         shift || fail "${0//*/} ... bosh <bosh-env-name>"
         ;;
       (scale) 
-        config_scale="${1}"
+        OCFP_ENV_SCALE="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
       (*)
@@ -101,6 +101,7 @@ args::parse() {
     esac
   done
 
+  export OCFP_ENV_SCALE=${OCFP_ENV_SCALE:-"dev"}
   [[ -n ${OCFP_ENV_NAME} ]]    || fail "'env <name>' must be given"
   [[ -n ${OCFP_CONFIG_TYPE} ]] || fail "'type <cloud|cpi>' must be given"
   [[ -n ${OCFP_REGION} ]]      || fail "'region <region>' must be given"
@@ -109,7 +110,7 @@ args::parse() {
   set::env::type
 
   # All envs need to know their deployer/bosh_env, mgmt bosh is the exception
-  [[ ${env_type} == "mgmt" ]] || [[ -n ${OCFP_BOSH_ENV} ]] ||
+  [[ ${OCFP_ENV_TYPE} == "mgmt" ]] || [[ -n ${OCFP_BOSH_ENV} ]] ||
     fail "'bosh <bosh-env-name>' must be given"
 }
 
@@ -117,34 +118,31 @@ set::env::type() {
   debug "${FUNCNAME[0]}: $*"
 
   case "${OCFP_ENV_NAME}" in
-    (*-mgmt-*) env_type="mgmt" ;;
-    (*)        env_type="ocf"  ;;
+    (*-mgmt-*) OCFP_ENV_TYPE="mgmt" ;;
+    (*)        OCFP_ENV_TYPE="ocf"  ;;
   esac
-  export OCFP_ENV_TYPE="${env_type}"
+  export OCFP_ENV_TYPE
 }
 
 init::config::cloud() {
   debug "${FUNCNAME[0]}: $*"
 
-  local _config_path="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/${OCFP_IAAS}"
-  local _meta="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
-  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
+  declare -a _merge
+  local _config_path="${OCFP_SCRIPTS_PATH}/templates/configs/${OCFP_CONFIG_TYPE}/${OCFP_IAAS}"
+  local _meta="${OCFP_SCRIPTS_PATH}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
+  local _meta_prune="${OCFP_SCRIPTS_PATH}/templates/configs/meta-prune.yml"
   local _target="configs/${OCFP_CONFIG_TYPE}/${OCFP_ENV_NAME}.yml"
 
-  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
+  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${OCFP_ENV_TYPE} env with scale ${OCFP_ENV_SCALE}...\n\t-> ${_target}"
 
-  export OCFP_ENV_SCALE=${config_scale:-"dev"}
-
-  declare -a _merge
+  _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   _merge=(
     "${_meta}"
-    "${scripts_path}/templates/configs/cloud/meta/${env_type}.yml"
-    "${_config_path}/scale/${env_type}.yml"
-    "${_config_path}/${env_type}.yml"
+    "${OCFP_SCRIPTS_PATH}/templates/configs/cloud/meta/${OCFP_ENV_TYPE}.yml"
+    "${_config_path}/scale/${OCFP_ENV_TYPE}.yml"
+    "${_config_path}/${OCFP_ENV_TYPE}.yml"
   )
-
-  _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   for dep in "${deps[@]}"
   do
@@ -164,7 +162,7 @@ init::config::cloud() {
 
       _m=(
       "${_meta}"
-      "${scripts_path}/templates/configs/cloud/meta/ocf.yml"
+      "${OCFP_SCRIPTS_PATH}/templates/configs/cloud/meta/ocf.yml"
       "${_config_path}/azs/ocf.yml"
       "${_config_path}/networks/ocf-bosh.yml"
       "${_meta_prune}"
@@ -182,28 +180,24 @@ init::config::cloud() {
 init::config::cpi() {
   debug "${FUNCNAME[0]}: $*"
 
-  local _src_path _dst_path
-
-  _src_path="${OCFP_VAULT_PREFIX}/iam/${env_type}"
-  _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
-
-  local _target="configs/${OCFP_CONFIG_TYPE}/${OCFP_ENV_NAME}.yml"
-  local _config_path="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}"
-  local _template="${_config_path}/${env_type}.yml"
-  local _meta="${scripts_path}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
-  local _meta_prune="${scripts_path}/templates/configs/meta-prune.yml"
-
-  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${env_type} env with scale ${config_scale:-"dev"}...\n\t-> ${_target}"
-
-  export OCFP_ENV_SCALE=${config_scale:-"dev"}
-
   declare -a _merge
+  local _src_path _dst_path _tmp_path
+  local _target="configs/${OCFP_CONFIG_TYPE}/${OCFP_ENV_NAME}.yml"
+  local _config_path="${OCFP_SCRIPTS_PATH}/templates/configs/${OCFP_CONFIG_TYPE}"
+  local _meta="${OCFP_SCRIPTS_PATH}/templates/configs/${OCFP_CONFIG_TYPE}/meta.yml"
+  local _template="${_config_path}/${OCFP_ENV_TYPE}.yml"
+  local _meta_prune="${OCFP_SCRIPTS_PATH}/templates/configs/meta-prune.yml"
+
+  _src_path="${OCFP_VAULT_PREFIX}/iam/${OCFP_ENV_TYPE}"
+  _dst_path="${OCFP_VAULT_ENV_PATH}/bosh"
+  _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
 
   _merge=( "${_meta}" "${_template}" )
 
-  local _tmp_path=$(mktemp -d 2>/dev/null || mktemp -d -t 'ocfp')
+  echo -e "Generating ${OCFP_CONFIG_TYPE} Config File for ${OCFP_ENV_TYPE} env with scale ${OCFP_ENV_SCALE}...\n\t-> ${_target}"
 
-  for dep in "${deps[@]}" ; do
+  for dep in "${deps[@]}"
+  do
     _dep_env="${dep%%@*}" # vault mount override via @<vault-mount>
     ( # Subshell so as to not clobber parents env vars
       case ${dep} in
@@ -230,15 +224,28 @@ init::config::cpi() {
   spruce merge -m "${_merge[@]}" > "${_target}"
 }
 
+set::vault::paths() {
+  debug "${FUNCNAME[0]}: $*"
+
+  local _env_path="${OCFP_ENV_NAME//-/\/}"
+
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${_env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${_env_path}"
+}
+
 ################################################################################
 # Main
 ################################################################################
 
-declare OCFP_CONFIG_TYPE scripts_path
+declare -x OCFP_CONFIG_TYPE OCFP_SCRIPTS_PATH OCFP_KIT OCFP_ENV_NAME OCFP_ENV_TYPE OCFP_ENV_SCALE OCFP_VAULT_PREFIX OCFP_VAULT_ENV_PATH OCFP_VAULT_TF_PATH
+
+OCFP_KIT="bosh"
 
 args::parse "$@"
 
-scripts_path=$(scripts::path)
+set::vault::paths
+
+OCFP_SCRIPTS_PATH=$(scripts::path)
 
 mkdir -p "configs/${OCFP_CONFIG_TYPE}"
 
