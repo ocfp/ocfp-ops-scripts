@@ -374,8 +374,8 @@ test::rabbitmq() {
   echo -e "Creating the queue..."
   run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
-  echo -e "Inserting 10 messages into the queue '${queue}'..."
-  for i in {1..10}
+  echo -e "Inserting 100 messages into the queue '${queue}'..."
+  for i in {1..100}
   do run curl -sk -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
   done
 
