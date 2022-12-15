@@ -127,7 +127,7 @@ apps::test() {
   debug "${FUNCNAME} $*"
   local service=$1 plan=$2
   local service_instance=test-${service}-${plan}
-  test::${service} ${service_instance}
+  test::${service} ${service_instance} ${plan}
 }
  
 apps::test::plans() {
@@ -269,6 +269,7 @@ test::rabbitmq() {
   debug "${FUNCNAME} $*"
   local \
     service_instance=$1 \
+    plan=$2 \
     app="https://$( apps::app::uri test-rabbitmq-app-a )" \
     queue=test_rabbit_queue
   
@@ -277,7 +278,7 @@ test::rabbitmq() {
 
   # TODO: verify the actual output of the following curl calls.
 
-  header "RabbiMQ - Testing Queues - Non TLS"
+  header "RabbiMQ - Testing Queues - Non TLS for plan ${plan}"
 
   echo -e "Pinging the rabbitmq app via the app url..."
   run curl -sk ${app}/ping
@@ -361,7 +362,9 @@ test::rabbitmq() {
 
   autoscaler::policy ${queue}
   
+  # Autoscaler Service to test against the current service_instance
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
+
   run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
     -c ${queue}-autoscaler-policy.json
 
@@ -390,23 +393,23 @@ test::rabbitmq() {
   done
 
   # Cleanup before next test.
-  run cf delete-service -f test-rabbitmq-autoscaler
-  
   rm ${queue}-autoscaler-policy.json
 
   run cf unbind-service test-rabbitmq-app-a ${service_instance}
   run cf unbind-service test-rabbitmq-app-b ${service_instance}
 
-  run cf delete-service-key ${service_instance} rabbitmq-user-a
-  run cf delete-service-key ${service_instance} rabbitmq-user-b
+  run cf delete-service-key -f ${service_instance} rabbitmq-user-a
+  run cf delete-service-key -f ${service_instance} rabbitmq-user-b
+
+  run cf delete-service -f test-rabbitmq-autoscaler
 }
 
 test::redis() {
   debug "${FUNCNAME} $*"
-  local service_instance=$1 cmd app_url app_guid
+  local service_instance=$1 plan=$2 cmd app_url app_guid
   declare -a cmds
 
-  header "Redis - Testing - TLS & Non-TLS"
+  header "Redis - Testing - TLS & Non-TLS for plan ${plan}"
   
   local app=test-redis-app-a
   
