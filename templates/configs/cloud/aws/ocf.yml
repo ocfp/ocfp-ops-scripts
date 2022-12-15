@@ -38,14 +38,10 @@ vm_types:
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: compilation-dev
   cloud_properties:
-    metadata_options:
-      http_tokens: required
     instance_type: (( grab meta.vm_types.compilation.dev ))
     ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
 - name: compilation-prod
   cloud_properties:
-    metadata_options:
-      http_tokens: required
     instance_type: (( grab meta.vm_types.compilation.prod ))
     ephemeral_disk: { size: 32768,  type: gp3, encrypted: true }
 - name: bosh-dev
