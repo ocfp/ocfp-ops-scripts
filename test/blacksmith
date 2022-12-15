@@ -16,20 +16,22 @@
 # Functions
 ################################################################################
  
-fail() { echo -e "\n\e[31mERROR:\e[0m $*\n" >&2 ; exit 1 ; }
+fail()  { echo -e "\n\e[31mERROR:\e[0m $*\n" >&2 ; exit 1 ; }
 
-run()   { echo -e "\e[32m\$\e[0m $*"; "$@"; }
+run()   { echo -e "\n\e[32m\$ $*\e[0m"; "$@"; }
+
+info()  { echo -e "\n\e[33m\$ $*\e[0m"; }
 
 debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
 
 usage() {
-  echo -e "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
+  info "Usage: ${0//*\/} <fetch|push|test|delete|setup|all> <space> [<space> ...]"
 }
 
 header() {
   local token="="
   local line=$(printf "${token}%.0s" {1..80})
-  echo -e "\n${line}\n${token} $*\n${line}"
+  info "\n${line}\n${token} $*\n${line}"
 }
 
 parse::args() {
@@ -41,6 +43,9 @@ parse::args() {
         action=${1}
         shift
         ;;
+      (space)
+        space=${2}
+        shift 2 || fail "Usage: ...env <name>"
       (e|env)
         env=$2
         shift 2 || fail "Usage: ...env <name>"
@@ -267,67 +272,70 @@ EOF
 
 test::rabbitmq() {
   debug "${FUNCNAME} $*"
+
   local \
     service_instance=$1 \
     plan=$2 \
-    app="https://$( apps::app::uri test-rabbitmq-app-a )" \
+    app="https://$( apps::app::uri ${rabbitmq_app_a} )" \
     queue=test_rabbit_queue
   
-  run cf bind-service test-rabbitmq-app-a ${service_instance}
-  run cf restage test-rabbitmq-app-a
+  run cf bind-service ${rabbitmq_app_a} ${service_instance}
+
+  run cf restage ${rabbitmq_app_a}
 
   # TODO: verify the actual output of the following curl calls.
 
   header "RabbiMQ - Testing Queues - Non TLS for plan ${plan}"
 
-  echo -e "Pinging the rabbitmq app via the app url..."
+  info "Pinging the rabbitmq app via the app url..."
   run curl -sk ${app}/ping
 
-  echo -e "\nCreating queue ${queue}..."
+  info "\nCreating queue ${queue}..."
   run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
-  echo -e "\nListing queues..."
+  info "\nListing queues..."
   run curl -sk ${app}/queues
 
-  echo -e "\nInserting a message into queue ${queue}..."
+  info "\nInserting a message into queue ${queue}..."
   run curl -sk -X PUT ${app}/queue/${queue} -d 'data=hello'
 
-  echo -e "\nGetting messages from queue ${queue}..."
+  info "\nGetting messages from queue ${queue}..."
   run curl -sk -X GET ${app}/queue/${queue}
 
   header "RabbitMQ - Testing Queues - Enabling TLS for the app"
 
-  run cf set-env test-rabbitmq-app-a RABBITMQ_USE_SSL true
-  run cf restage test-rabbitmq-app-a
+  run cf set-env ${rabbitmq_app_a} RABBITMQ_USE_SSL true
+
+  run cf restage ${rabbitmq_app_a}
 
   header "RabbitMQ - Testing Queues - TLS"
 
-  echo -e "Pinging the rabbitmq app via the app url..."
+  info "Pinging the rabbitmq app via the app url..."
   run curl -sk ${app}/ping
 
-  echo -e "\nCreating queue ${queue}..."
+  info "\nCreating queue ${queue}..."
   run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
-  echo -e "\nListing queues..."
+  info "\nListing queues..."
   run curl -sk ${app}/queues
 
-  echo -e "\nInserting a message into queue ${queue}..."
+  info "\nInserting a message into queue ${queue}..."
   run curl -sk -X PUT ${app}/queue/${queue} -d 'data=hello'
 
-  echo -e "\nGetting messages from queue ${queue}..."
+  info "\nGetting messages from queue ${queue}..."
   run curl -sk -X GET ${app}/queue/${queue}
 
   header "RabbitMQ - Testing Queues - Dynamic Credentials"
 
-  run cf bind-service test-rabbitmq-app-b ${service_instance}
-  run cf restage test-rabbitmq-app-b
+  run cf bind-service ${rabbitmq_app_b} ${service_instance}
+  run cf restage ${rabbitmq_app_b}
 
-  app_a_guid=$(cf app test-rabbitmq-app-a --guid)
+  app_a_guid=$(cf app ${rabbitmq_app_a} --guid)
   app_a_username=$( cf curl /v3/apps/${app_a_guid}/env |
     jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
   )
 
-  app_b_guid=$(cf app test-rabbitmq-app-b --guid)
+  app_b_guid=$(cf app ${rabbitmq_app_b} --guid)
   app_b_username=$( cf curl /v3/apps/${app_b_guid}/env |
     jq -r '.system_env_json.VCAP_SERVICES.rabbitmq[0].credentials.username'
   )
@@ -365,38 +373,46 @@ test::rabbitmq() {
   # Autoscaler Service to test against the current service_instance
   run cf create-service autoscaler autoscaler-free-plan test-rabbitmq-autoscaler
 
-  run cf bind-service test-rabbitmq-app-a test-rabbitmq-autoscaler \
+  run cf bind-service ${rabbitmq_app_a} test-rabbitmq-autoscaler \
     -c ${queue}-autoscaler-policy.json
 
-  echo -e "Restaging in preparation of testing autoscaling-history..."
-  run cf restage test-rabbitmq-app-a
+  info "Restaging in preparation of testing autoscaling-history..."
+  run cf restage ${rabbitmq_app_a}
 
-  echo -e "Starting app state..."
-  run cf app test-rabbitmq-app-a
+  info "Sleeping 20s to ensure app is ready..."
+  sleep 20
 
-  echo -e "Creating the queue..."
+  info "Starting app state..."
+  run cf app ${rabbitmq_app_a}
+
+  info "Creating the queue..."
   run curl -sk -X POST ${app}/queues -d "name=${queue}"
 
-  echo -e "Inserting 100 messages into the queue '${queue}'..."
-  for i in {1..100}
+  info "Inserting 10 messages into the queue '${queue}'..."
+  for i in {1..10}
   do run curl -sk -X PUT ${app}/queue/${queue} -d "data=ciao-$i"
   done
 
+  info "Restaging app to force messages to become ready... \n(messages reach rabbitmq in an unacknowledged state in this application, autoscaler is looking for messages_ready, we need to either wait for 30 minutes or force them to become ready by restaging the application)"
+  run cf restage ${rabbitmq_app_a}
+
+  info "Sleeping 20s to ensure app is ready..."
+  sleep 20
+
   # TODO: verify the actual output of the following autoscaling-history calls.
-  
-  echo -e "Monitoring autoscaling-history for 5 minutes..."
-  for i in {1..10}
+  info "Monitoring autoscaling-history for 3 minutes..."
+  for i in {1..6}
   do
-    run cf autoscaling-history test-rabbitmq-app-a
-    echo -e "Sleeping for 30 seconds..."
+    run cf autoscaling-history ${rabbitmq_app_a}
+    info "Sleeping for 30 seconds..."
     sleep 30
   done
 
   # Cleanup before next test.
   rm ${queue}-autoscaler-policy.json
 
-  run cf unbind-service test-rabbitmq-app-a ${service_instance}
-  run cf unbind-service test-rabbitmq-app-b ${service_instance}
+  run cf unbind-service ${rabbitmq_app_a} ${service_instance}
+  run cf unbind-service ${rabbitmq_app_b} ${service_instance}
 
   run cf delete-service-key -f ${service_instance} rabbitmq-user-a
   run cf delete-service-key -f ${service_instance} rabbitmq-user-b
@@ -411,39 +427,37 @@ test::redis() {
 
   header "Redis - Testing - TLS & Non-TLS for plan ${plan}"
   
-  local app=test-redis-app-a
-  
-  run cf bind-service ${app} ${service_instance}
-  run cf restage ${app}
+  run cf bind-service ${redis_app_a} ${service_instance}
+  run cf restage ${redis_app_a}
 
-  app_url="https://$( apps::app::uri ${app} )"
-  app_guid=$( cf app ${app} --guid )
+  app_url="https://$( apps::app::uri ${redis_app_a} )"
+  app_guid=$( cf app ${redis_app_a} --guid )
 
-  echo -e "\nInserting a Key/Value pair into Redis, key 'foo'..."
+  info "\nInserting a Key/Value pair into Redis, key 'foo'..."
   result=$(run curl -k -X PUT ${app_url}/foo -d "data=bar")
   if [[ ${result} =~ "success" ]]
-  then echo -e "PASS: Key/Value pair inserted successfully!"
-  else echo -e "FAIL: Key/Value pair not inserted successfully!"
+  then info "PASS: Key/Value pair inserted successfully!"
+  else info "FAIL: Key/Value pair not inserted successfully!"
   fi
 
-  echo -e "\nRetrieving the value for the key 'foo' non TLS..."
+  info "\nRetrieving the value for the key 'foo' non TLS..."
   result=$(run curl -k ${app_url}/foo)
   if [[ ${result} =~ "bar" ]]
-  then echo -e "PASS: Value fetched successfully!"
-  else echo -e "FAIL: Value not fetched successfully!"
+  then info "PASS: Value fetched successfully!"
+  else info "FAIL: Value not fetched successfully!"
   fi
 
-  echo -e "\nRetrieving the value for the key 'foo' via TLS..."
+  info "\nRetrieving the value for the key 'foo' via TLS..."
   result=$(run curl -k ${app_url}/tls/v1.2/foo)
   if [[ ${result} =~ "bar" ]]
-  then echo -e "PASS: Value fetched successfully via TLS!"
-  else echo -e "FAIL: Value not fetched successfully via TLS!"
+  then info "PASS: Value fetched successfully via TLS!"
+  else info "FAIL: Value not fetched successfully via TLS!"
   fi
 
   header "Redis - Testing Disabled Commands"
 
   # TODO: bypass the network limitations with direct SSH commands.
-  echo -e "SKIP: Test disabled due to network connectivity limitations."
+  info "SKIP: Test disabled due to network connectivity limitations."
 
   # redis_ip=$(
   # cf curl /v3/apps/${app_guid}/env |
@@ -460,13 +474,13 @@ test::redis() {
   # do
   #   response=$(redis-cli -h ${redis_ip} -p 6379 ${cmd} -a ${redis_password})
   #   if [[ ${response} =~ *ERR* ]]
-  #   then echo -e "\n- Redis ${cmd} command is disabled"
-  #   else echo -e "\n- Redis ${cmd} command is enabled"
+  #   then info "\n- Redis ${cmd} command is disabled"
+  #   else info "\n- Redis ${cmd} command is enabled"
   #   fi
   # done
 
   # Cleanup before next test.
-  run cf unbind-service ${app} ${service_instance}
+  run cf unbind-service ${redis_app_a} ${service_instance}
 }
 
 cf::space::create() {
@@ -478,12 +492,15 @@ cf::space::create() {
 ################################################################################
 # Variables & Init
 ################################################################################
-declare -a services apps spaces
+declare -a services apps plans
 
 declare \
   apps_path=${OCFP_PROJECT_PATH:-${HOME}/apps} \
   org=system \
   space=test-blacksmith-services \
+  rabbitmq_app_a=test-rabbitmq-app-a \
+  rabbitmq_app_b=test-rabbitmq-app-b \
+  redis_app_a=test-redis-app-a \
   action
 
 mkdir -p ${apps_path} && cd ${apps_path}
