@@ -116,6 +116,13 @@ args::parse() {
   fi
 }
 
+safe::auth::check() {
+  local status=$(safe auth status --json | jq -r '.valid')
+
+  [[ ${status} == "true" ]] ||
+    fail "safe auth status is not valid, please safe auth and try again."
+}
+
 set::vault::paths() {
   debug "${FUNCNAME[0]}: $*"
   local _env_path="${OCFP_ENV_NAME//-/\/}"
@@ -158,6 +165,8 @@ cmd=$1 ; shift || usage
 declare -a deps
 
 args::parse "$@"
+
+safe::auth::check
 
 set::vault::paths # Sets vault paths for the main script level
 

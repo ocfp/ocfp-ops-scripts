@@ -61,6 +61,13 @@ USAGE
 
 fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
 
+safe::auth::check() {
+  local status=$(safe auth status --json | jq -r '.valid')
+
+  [[ ${status} == "true" ]] ||
+    fail "safe auth status is not valid, please safe auth and try again."
+}
+
 bosh::vaildate::environment() {
   local _cmd
 
@@ -307,6 +314,8 @@ bosh::resurrection() {
 declare bosh_path
 
 cmd="${1}" ; shift || usage
+
+safe::auth::check
 
 bosh::vaildate::environment
   

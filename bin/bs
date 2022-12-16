@@ -79,6 +79,9 @@ boss::vaildate::environment() {
   done
 }
 
+################################################################################
+# Main
+################################################################################
 bd=${BOSH_DIRECTOR}
 
 [[ -n "${bd}" ]] || fail "ERROR: BOSH_DIRECTOR is not set, please set it and try again."
