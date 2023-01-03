@@ -95,6 +95,23 @@ Example: `bastions/a:ip` would contain an IPv4 string such as `10.0.0.253`
 
 Side note, `jumpbox` is deployed via BOSH whereas `bastion` is via terraform.
 
+#### CA Certificates
+
+There are two default CA certificates that are used.
+```
+/certs/org
+```
+Is for the trusted CA certificate chain for the organization itself.
+
+```
+/certs/dbs
+```
+Is for the external databases provided by the IaaS service, for example the RDS
+trusted CA chain.
+
+Both of these are included by default as trusted certs within the ocfp feature
+set. Both for BOSH VM level as well as CF containers and isolation segments.
+
 #### Blobstores
 
 ```
