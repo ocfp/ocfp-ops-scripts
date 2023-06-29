@@ -65,8 +65,8 @@ meta:
       dev:  (( grab params.vm_types.log-api.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.log-api.prod || "c6i.xlarge" ))
     log-cache:
-      dev:  (( grab params.vm_types.diego-cell.dev  || "t3.large" ))
-      prod: (( grab params.vm_types.diego-cell.prod || "r6i.2xlarge" ))
+      dev:  (( grab params.vm_types.log-cache.dev  || "t3.large" ))
+      prod: (( grab params.vm_types.log-cache.prod || "r6i.2xlarge" ))
     loggregator:
       dev:  (( grab params.vm_types.loggregator.dev  || "t3.medium" ))
       prod: (( grab params.vm_types.loggregator.prod || "m6i.xlarge" ))

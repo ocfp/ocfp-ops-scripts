@@ -9,15 +9,15 @@
 azs:
 - name: (( concat $OCFP_ENV_NAME "-z1" ))
   cpi: (( grab $OCFP_ENV_NAME ))
-  cloud_properties: 
+  cloud_properties:
     availability_zone: (( grab meta.ocfp.iaas.subnets[0].availability_zone ))
 - name: (( concat $OCFP_ENV_NAME "-z2" ))
   cpi: (( grab $OCFP_ENV_NAME ))
-  cloud_properties: 
+  cloud_properties:
     availability_zone: (( grab meta.ocfp.iaas.subnets[1].availability_zone ))
 - name: (( concat $OCFP_ENV_NAME "-z3" ))
   cpi: (( grab $OCFP_ENV_NAME ))
-  cloud_properties: 
+  cloud_properties:
     availability_zone: (( grab meta.ocfp.iaas.subnets[2].availability_zone ))
 
 ################################################################################
@@ -247,6 +247,18 @@ vm_types:
     metadata_options:
       http_tokens: required
     instance_type: (( grab meta.vm_types.log-api.prod ))
+    ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
+- name: log-cache-dev
+  cloud_properties:
+    metadata_options:
+      http_tokens: required
+    instance_type: (( grab meta.vm_types.log-cache.dev ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: log-cache-prod
+  cloud_properties:
+    metadata_options:
+      http_tokens: required
+    instance_type: (( grab meta.vm_types.log-cache.prod ))
     ephemeral_disk: { size: 16384,  type: gp3, encrypted: true }
 - name: loggregator-dev
   cloud_properties:
@@ -652,7 +664,7 @@ networks:
   ##############################################################################
   - name: (( concat $OCFP_ENV_NAME "-compilation" ))
     type: manual
-    subnets: 
+    subnets:
       - range: (( grab meta.ocfp.iaas.subnets[0].cidr.block ))
         az: (( concat $OCFP_ENV_NAME "-z1" ))
         gateway: (( grab meta.ocfp.iaas.subnets[0].cidr.gateway ))
