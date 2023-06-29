@@ -21,23 +21,23 @@ usage() {
   echo -e "Usage: ${0//*\/} type <cloud|cpi> env <name> region <name> iaas <name> [bosh <env>] [scale <dev|prod>] [vault-prefix <secret/...>] [dep <name>]" >&2
 }
 
-script::pwd() { 
+script::pwd() {
   (
-		cd -P "$( dirname "${1}" )" &> /dev/null 
-		pwd
+    cd -P "$( dirname "${1}" )" &> /dev/null
+    pwd
   )
 }
 
 script::path() {
   (
     local dir src="${BASH_SOURCE[0]:-$0}"
-		while [[ -h "${src}" ]]
-		do
-			dir="$( script::pwd "${src}" )"
-			src="$( readlink "${src}" )"
-			[[ "${src%${src#?}}" == '/' ]] || src="${dir}/${src}"
-		done
-		script::pwd "${src}"
+    while [[ -h "${src}" ]]
+    do
+      dir="$( script::pwd "${src}" )"
+      src="$( readlink "${src}" )"
+      [[ "${src%${src#?}}" == '/' ]] || src="${dir}/${src}"
+    done
+    script::pwd "${src}"
   )
 }
 
@@ -58,7 +58,7 @@ args::parse() {
         true
         shift || fail "${0//*/} ... kit <name>"
         ;;
-      (type) 
+      (type)
         export OCFP_CONFIG_TYPE="${1}"
         shift || fail "${0//*/} ... config <type>"
         ;;
@@ -91,7 +91,7 @@ args::parse() {
         export OCFP_BOSH_ENV="$1"
         shift || fail "${0//*/} ... bosh <bosh-env-name>"
         ;;
-      (scale) 
+      (scale)
         OCFP_ENV_SCALE="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
@@ -169,7 +169,7 @@ init::config::cloud() {
       )
       spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
     )
-    _merge+=( "${_tmp_path}/${_dep_env}.yml" ) 
+    _merge+=( "${_tmp_path}/${_dep_env}.yml" )
   done
 
   _merge+=( "${_meta_prune}")
@@ -216,7 +216,7 @@ init::config::cpi() {
       )
       spruce merge -m "${_m[@]}" > "${_tmp_path}/${_dep_env}.yml"
     )
-    _merge+=( "${_tmp_path}/${_dep_env}.yml" ) 
+    _merge+=( "${_tmp_path}/${_dep_env}.yml" )
   done
 
   _merge+=( "${_meta_prune}")
@@ -249,7 +249,7 @@ OCFP_SCRIPTS_PATH=$(scripts::path)
 
 mkdir -p "configs/${OCFP_CONFIG_TYPE}"
 
-case ${OCFP_CONFIG_TYPE} in 
+case ${OCFP_CONFIG_TYPE} in
   (cloud) init::config::cloud "$@" ;;
   (cpi)   init::config::cpi "$@" ;;
   (*)     fail "config type must be cloud or cpi not '${OCFP_CONFIG_TYPE}'" ;;

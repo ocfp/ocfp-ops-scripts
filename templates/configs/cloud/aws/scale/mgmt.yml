@@ -54,4 +54,3 @@ meta:
     prometheus:
       dev:  (( grab params.disk_types.prometheus.size || 32768 ))
       prod: (( grab params.disk_types.prometheus.size || 1280000 ))
-
