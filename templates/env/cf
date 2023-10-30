@@ -24,7 +24,7 @@ cat <<-YAML
 ---
 kit:
   name: cf
-  version: 2.2.1-rc.5
+  version: 2.3.6
   features:
   - (( append ))
   - ocfp
