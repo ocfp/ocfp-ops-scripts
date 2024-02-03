@@ -128,6 +128,12 @@ vm_types:
       http_tokens: required
     instance_type: (( grab meta.vm_types.app-scheduler.prod ))
     ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
+- name: app-scheduler-prod-xlarge
+  cloud_properties:
+    metadata_options:
+      http_tokens: required
+    instance_type: (( grab meta.vm_types.app-scheduler.prod-xlarge ))
+    ephemeral_disk: { size: 8192,  type: gp3, encrypted: true }
 - name: bbs-dev
   cloud_properties:
     metadata_options:
