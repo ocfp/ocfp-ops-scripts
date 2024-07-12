@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+#
+# Author: Wayne E. Seguin
+#
+
+################################################################################
+# Utility Functions
+################################################################################
+cmdinfo() { echo -e "\e[32m$*\e[0m" >&2; }
+
+debug() { [[ -z ${DEBUG:-} ]] || echo -e "\e[93mDEBUG\e[0m: $*" >&2 ; }
+
+fail() { echo -e "\e[31mERROR:\e[0m $*" >&2 ; exit 1 ; }
+
+run() { cmdinfo "$*"; "$@"; }
+
+set::vault::paths() {
+  debug "${FUNCNAME[0]}: $*"
+  local env_path="${OCFP_ENV_NAME//-/\/}"
+
+  export OCFP_VAULT_ENV_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/${env_path}"
+  export OCFP_VAULT_TF_PATH="${OCFP_VAULT_PREFIX:-"/secret"}/tf/${env_path}"
+}
+
+################################################################################
+# Main Functions
+################################################################################
+usage() {
+  cat <<USAGE
+
+Usage: $0 <env-file-name> <deployments-kit-name>
+
+Where:
+  <env-file-name> is an env name (declared intent, does not need to exist yet)
+  <deployments-kit-name> is one of bosh, cf, autoscaler, scheduler, stratos, concourse
+
+Requirements:
+
+  * \`safe\` is in the path, targeting, and authenticated via token
+  * Database certs are expected in vault path at the environment vault root according
+    to the ocfp contracts, eg: \${OCFP_VAULT_PREFIX}/certs/dbs:ca
+   * VAULT_NAMESPACE may be set and exported, if required, it will be exported
+   * OCFP_VAULT_PREFIX may be set and exported, if required, defaults to 'secret/'
+   * OCFP_VAULT_ENV_PATH must be set and exported
+   * OCFP_VAULT_TF_PATH must be set and exported
+
+USAGE
+}
+
+certs::prepare() {
+  local src_path="${OCFP_VAULT_PREFIX}/certs/dbs:ca"
+  local dst_path="${OCFP_VAULT_ENV_PATH}/${OCFP_KIT}"
+  local _db
+
+  echo -e "\nCopying Database CA Certificates in Vault:\n\t${src_path} -> ${dst_path}/db/${_d}"
+  for _db in ${@}; do
+    echo -e "\n\t${src_path} -> ${dst_path}/db/${_d}"
+    safe cp "${src_path}" "${dst_path}/db/${_d}:ca"
+  done
+}
+
+args::parse() {
+  while [[ $# > 0 ]]
+  do
+    action=$1 ; shift
+    case "${action}" in
+      (region)
+        export OCFP_REGION=$1
+        shift || fail "${0//*/} ... env <name>"
+        ;;
+      (env)
+        export OCFP_ENV_NAME="${1}"
+        shift || fail "${0//*/} ... env <name>"
+        ;;
+      (kit)
+        export OCFP_KIT="${1}"
+        shift || fail "${0//*/} ... kit <name>"
+        case ${OCFP_KIT} in
+          (bosh|cf|blacksmith|shield|concourse|autoscaler|scheduler|vault|jumpbox|stratos) true ;;
+          (*) fail "Unsupported kit: ${OCFP_KIT}" ;;
+        esac
+        ;;
+      (vault-prefix)
+        export OCFP_VAULT_PREFIX="${1}" # override default of secret/
+        shift || fail "${0//*/} ... vault-prefix \"secret/...\""
+        ;;
+      (iaas) # Not needed but for arg consistentcy
+        export OCFP_IAAS="$1"
+        shift || fail "${0//*/} ... iaas <aws|azure|gcp|openstack|vsphere|warden>"
+        case ${OCFP_IAAS} in
+          #NOTE: Upstream are alicloud aws azure cloudstack docker gcp openstack softlayer vcloud virtualbox vsphere warden
+          (aws|azure|gcp|openstack|vsphere|warden) true ;;
+          (*) fail "Unsupported IAAS type: ${OCFP_IAAS}" ;;
+        esac
+        ;;
+      (bosh) # Not needed but for arg consistentcy
+        export OCFP_BOSH_ENV="$1"
+        shift || fail "${0//*/} ... bosh <bosh-env-name>"
+        ;;
+      (*) fail "$(usage)" ;;
+    esac
+  done
+
+  case "${OCFP_ENV_NAME%.yml}" in
+    (*-mgmt-*) OCFP_ENV_TYPE="mgmt" ;;
+    (*)        OCFP_ENV_TYPE="ocf"  ;;
+  esac
+
+  [[ -n ${OCFP_ENV_NAME} ]] || fail "'env <name>' required"
+  [[ -n ${OCFP_KIT} ]] || fail "'kit <name>' required"
+  [[ -n ${OCFP_REGION} ]] || fail "'region <name>' required"
+  [[ -n ${VAULT_NAMESPACE} ]] && export VAULT_NAMESPACE
+  [[ -n ${OCFP_VAULT_ENV_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
+  [[ -n ${OCFP_VAULT_TF_PATH:-} ]] || fail "OCFP_VAULT_ENV_PATH must be set and exported."
+}
+
+################################################################################
+# Main
+################################################################################
+timestamp="$(date +%Y-%m-%dT%H:%M:%S)"
+logs_path="$HOME/.ocfp/logs"
+mkdir -p ${logs_path}
+exec &> >(tee -a "${logs_path}/ocfp-init-pg.${timestamp}.log")
+
+[[ $# > 1 ]] || fail "$(usage)"
+
+args::parse "$@"
+
+set::vault::paths
+
+case "${OCFP_KIT}" in
+  (bosh)
+    certs::prepare bosh uaa credhub
+    ;;
+  (cf) # Question, is it routing_api or routing-api?
+    certs::prepare cloud_controller credhub diego locket network_connectivity network_policy routing_api uaa
+    ;;
+  (autoscaler)
+    OCFP_KIT="cf-app-autoscaler" # :/ # Contract FAIL
+    certs::prepare autoscaler # NOTE: BUG: safe set ${safe_path}/cf-app-autoscaler/db password="" # Contract FAIL
+    ;;
+  (scheduler)
+    certs::prepare scheduler
+    ;;
+  (stratos)
+    certs::prepare stratos # console_db <- default, Can we make this stratos to align with the contract?
+    ;;
+  (concourse)
+    certs::prepare concourse # ats <- default, Can we make this concourse to align with the contract?
+    ;;
+  (*)
+    fail "$(usage)"
+    ;;
+esac
+
+exit 0
