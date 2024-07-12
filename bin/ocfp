@@ -11,7 +11,8 @@ USAGE
 
 WHERE <cmd> IN
 
-  init pg     - Initializes pg database servers from vault data, updates env vault
+  init pg     - Initializes pg database servers from vault data, updates env vault paths
+  init certs  - Initializes certs (CAs) for database servers from vault data, updates env vault paths
   init env    - Generates a kit env file from template via vault data
   init config - Generates bosh config files for an env from templates via vault data
 
