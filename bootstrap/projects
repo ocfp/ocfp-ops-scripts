@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+# Author: Wayne E. Seguin
+
+fail() { echo "${1}" >&2 ;  exit 1;  }
+
+usage() {
+  echo "$*"
+  fail "
+USAGE
+
+  ${0} <prefix> [<remote-prefix>]
+
+WHERE
+  - <prefix> is a short organization name prefix.
+    (ex: 520, c, abc, acme, etc...)
+
+  - <remote-prefix> is the url prefix path for the remote repository
+    (ex: git@github.com:\${org_name})
+
+  " >&2
+  exit 1
+}
+
+[[ -z "${1}" ]] && usage
+
+while [[ $# > 0 ]]
+do
+  _action="${1}" &&  shift 1
+  case "${_action}" in
+    (*remote-prefix)
+      remote_prefix="${1}"
+      shift 1 || usage "Missing remote prefix."
+      ;;
+    (*prefix)
+      prefix="${1}"
+      shift 1 || usage "Missing prefix."
+      ;;
+    (--help|*)
+      usage "Unknown option: '${1}'."
+      ;;
+  esac
+done
+
+ocfp_components=(
+  docs
+  scripts
+  terraform
+  bosh
+  vault
+  jumpbox
+  doomsday
+  shield
+  cf
+  blacksmith
+  scheduler
+  autoscaler
+)
+
+project_path="${PWD}"
+
+for component in "${ocfp_components[@]}"
+do
+  echo -e "Creating ${component} project:\n"
+  mkdir -p "${component}"
+  cd "${component}"
+  git init
+  git branch -M main
+  case "${component}" in
+    (scripts)
+      echo "${prefix}-ocfp-ops-${component}" > .project-name
+      echo "# ${prefix}-ocfp-ops-${component}" > README.md
+      if [[ -n "${remote_prefix}" ]]
+      then
+        git remote add origin "${remote_prefix}/${prefix}-ocfp-ops-${component}.git"
+      fi
+    ;;
+
+    (terraform|docs)
+      echo "${prefix}-ocfp-${component}" > .project-name
+      echo "# ${prefix}-ocfp-${component}" > README.md
+      if [[ -n "${remote_prefix}" ]]
+      then
+        git remote add origin "${remote_prefix}/${prefix}-ocfp-${component}.git"
+      fi
+    ;;
+
+    (*)
+      echo "${prefix}-ocfp-${component}-deployments" > .project-name
+      echo "# ${prefix}-ocfp-${component}-deployments" > README.md
+      if [[ -n "${remote_prefix}" ]]
+      then
+        git remote add origin "${remote_prefix}/${prefix}-ocfp-${component}-deployments.git"
+      fi
+      ;;
+  esac
+
+  if [[ -n "${remote_prefix}" ]]
+  then echo -e "remote: \t$(git remote -v)\n\n"
+  fi
+  git add .project-name
+  git add README.md
+  git commit -a -m "Initial commit for ${component} project."
+
+  cd "${project_path}"
+done
+
+echo -e "Don't forget to: git push -u origin main for each component repo.\n"
+
+exit 0

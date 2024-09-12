@@ -2,7 +2,7 @@
 
 # Author: Wayne E. Seguin
 
-usage() {
+_usage() {
   echo -e "$(cat <<EOT
 
 USAGE
@@ -97,11 +97,14 @@ args::parse() {
         config_scale="${1}"
         shift || fail "${0//*/} ... scale <type>"
         ;;
-      (config|cloud|cpi|runtime|certs|pg|env|asgs|bastion|domains|isosegs|tcp) # Short circuit for init
-        return 0
+      (bootstrap)
+        return 0 # Short circuit for bootstrap, remaining args are passed to bootstrap.
         ;;
-      (c2c|blacksmith|nfs|smb|tcp) # Short circuit for tests.
-        return 0
+      (config|cloud|cpi|runtime|certs|pg|env|asgs|bastion|domains|isosegs|tcp)
+        return 0 # Short circuit for init, remaining args are passed to init.
+        ;;
+      (c2c|blacksmith|nfs|smb|tcp)
+        return 0 # Short circuit for tests, remaining args are passed to test.
         ;;
       (*)
         usage
@@ -139,12 +142,12 @@ _test() {
       bash "${scripts_path}/test/${1}" "${@:2}"
       ;;
     (*)
-      fail "Usage: ${0//*\/} test {c2c}"
+      fail "Usage: ${0//*\/} test <c2c|blacksmith|nfs|smb|tcp> [args]"
       ;;
   esac
 }
 
-init() {
+_init() {
   debug "${FUNCNAME[0]}: $*"
 
   case "$1" in
@@ -152,7 +155,20 @@ init() {
       bash "${scripts_path}/init/${1}" "${@:2}"
       ;;
     (*)
-      fail "Usage: ${0//*\/} init asgs|bastion|domains|isosegs|tcp"
+      fail "Usage: ${0//*\/} init <asgs|bastion|domains|isosegs|tcp> [args]"
+      ;;
+  esac
+}
+
+_bootstrap() {
+  debug "${FUNCNAME[0]}: $*"
+
+  case "$1" in
+    (projects)
+      bash "${scripts_path}/bootstrap/${1}" "${@:2}"
+      ;;
+    (*)
+      fail "Usage: ${0//*\/} bootstrap <projects> [args]"
       ;;
   esac
 }
@@ -176,7 +192,7 @@ if [[ -n ${VAULT_VERSION} ]]   ; then export VAULT_VERSION ; fi
 
 case ${cmd} in
   (test) _test "$@" ;;
-  (init) init  "$@" ;;
-  (*)    usage      ;;
+  (init) _init  "$@" ;;
+  (bootstrap) _bootstrap "$@" ;;
+  (*)    _usage      ;;
 esac
-
